@@ -20,7 +20,7 @@ This plugin allows you to link your OctoPrint-enabled 3D Printer to your AstroPr
 
 ## How to Install
 
-Simply download this [zip file]() and install it using your OctoPrint Plugin Manager.
+Simply download the ***zip file*** from the [latest release](https://github.com/AstroPrint/OctoPrint-AstroPrint/releases/latest) and install it using your OctoPrint Plugin Manager.
 
 ## How to Use
 
