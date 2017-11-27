@@ -1,0 +1,5 @@
+include README.md
+recursive-include octoprint_astroprint/templates *
+recursive-include octoprint_astroprint/translations *
+recursive-include octoprint_astroprint/static *
+recursive-include octoprint_astroprint/util *

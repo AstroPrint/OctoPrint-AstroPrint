@@ -1,0 +1,346 @@
+/*
+ * Author: AstroPrint Product Team
+ * License: AGPLv3
+ * Copyright: 2017 3DaGoGo Inc.
+ */
+
+#tab_plugin_astroprint {
+    width: 100%;
+
+    .astroPrintView {
+        width: 100%;
+
+        .auth_astro{
+            width: 562px;
+            margin-top: 10px;
+            font-size: 12px;
+            letter-spacing: 0.6px;
+        }
+
+        .access_key{
+            width: 573px;
+        }
+
+        .warn-box{
+            color: grey;
+            border-radius: 5px;
+            font-size: 12px;
+            padding: 15px;
+            line-height: 140%;
+            background: rgba(255, 161, 21, 0.12);
+            letter-spacing: 0.6px;
+        }
+
+        .cloud-title{
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #515151;
+        margin-left: 25px;
+        font-size: 14px;
+        margin-top: 10px;
+        padding: 0 5px;
+        box-shadow: 0 3px #5e88de;
+        }
+
+        .downloadDialog{
+            background: rgba(10, 140, 204, 0.15);
+            padding: 2px 10px;
+            border-radius: 5px;
+            color: #4d4d4d;
+        }
+    }
+
+    .astroPrintImageContainer{
+        width: 150px;
+        height: 150px;
+        background-color: grey;
+
+
+        .astroPrintImage{
+            width: 100%;
+            height: 100%;
+            background-image: url(../img/Astroprint_square_logo.png);
+            background-size: 150px;
+            background-repeat: no-repeat;
+        }
+    }
+    .astroprint-nav-title{
+        font-size: 20px;
+    }
+
+    .favicon-rocketImageContainer{
+        width: 20px;
+        height: 20px;
+        display: inline-block;
+
+        .favicon-rocket{
+            width: 100%;
+            height: 100%;
+            background-image: url(../img/favicon_rocket.ico);
+            background-size: 20px;
+            background-repeat: no-repeat;
+        }
+    }
+
+    .row-fluid{
+        width: 100%;
+        padding: 3px;
+    }
+
+    #navbar-astroprint{
+        .camera-options{
+            display: inline-block;
+            padding-top: 11px;
+            position: relative;
+
+            .remove-opt{
+                position: absolute;
+                color: #ffffff;
+                cursor: pointer;
+                left: 2px;
+            }
+
+            .camera-opt i{
+                color: #f15252;
+                cursor: pointer;
+                font-size: 20px;
+            }
+        }
+        .mobile-options{
+            display: inline-block;
+            padding-top: 11px;
+            position: relative;
+
+            .remove-opt{
+                position: absolute;
+                color: #ffffff;
+                cursor: pointer;
+                left: 2px;
+            }
+
+            .mobile-opt i{
+                color: #f15252;
+                cursor: pointer;
+                font-size: 20px;
+            }
+        }
+    }
+
+    .designs-view{
+        width: 100%;
+        padding : 10px;
+        .design-row{
+            width: 100%;
+            padding : 5px 5px;
+            margin: 0;
+            border-top: 1px solid #DDD;
+            .design-info{
+                padding : 0;
+                .sections-design-row{
+                    margin-left: 0;
+                    .center-button{
+                        width: 50%;
+                        height: 100%;
+                        margin: auto;
+                        margin-top: 15px;
+                        display: block;
+                        font-size: 20px;
+                        i.icon-chevron-down, i.icon-chevron-up {
+                            //color : #08c;
+                            font-weight: normal;
+                        }
+                    }
+                    .design-name{
+                        font-weight: bold;
+                        height: 40px;
+                        font-size: 14px;
+                        line-height: 40px;
+
+                    }
+                    .printFilesCount{
+                        height: 20px;
+                        line-height: 20px;
+                        font-size: 80%;
+                        color: #999;
+                    }
+                }
+                .designImageContainer{
+                    margin : auto;
+                    width: 60px;
+                    height: 60px;
+                    background-color: #DDD;
+                    .designImage{
+                        width: 100%;
+                        height: 100%;
+                        opacity: 0.85;
+                    }
+                }
+            }
+            .design-printfiles{
+                margin : 10px 5%;
+                width: 77%;
+                float: right;
+                .print-file-row  {
+                    width: 100%;
+                    border-bottom: 1px solid #DDD;
+                    margin : 0;
+                    clear: both;
+                    .main-info{
+                        clear : both;
+                        width: 100%;
+                        height: 50px;
+                        .half-printFile-row{
+                            height: 25px;
+                        }
+                        .all-printFile-row{
+                            height: 50px;
+                        }
+                        .center-button{
+                            width: 30px;
+                            height: 30px;
+                            margin: auto;
+                            margin-top: 5px;
+                            display: block
+                        }
+                        .printFileName{
+                            font-weight: bold;
+                            font-size: 12px;
+                            white-space: nowrap;
+                            text-overflow: ellipsis;
+                            overflow: hidden;
+                        }
+                        .slicerSettings{
+                            font-weight: bold;
+                            font-size: 10px;
+                            .infoSlicerSettings{
+                                font-size: 10px;
+                                color: #999;
+                            }
+                        }
+                        .printFileCreated{
+                            font-size: 10px;
+                            color: #999;
+                        }
+                    }
+                    .more-printfile-info{
+                        font-size: 10px;
+                        clear : both;
+                        width: 83%;
+                        margin: 0px 13% 20px;
+                        .info-row:nth-child(odd) {
+                            background: #f5f5f5;
+                        }
+                        .info-row {
+                            height: 30px;
+                            margin: 2px 0;
+                            clear : both;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    .designs-loading {
+        height: 300px;
+        padding: 20px;
+        div{
+            width: 100%;
+            display:inline-block;
+            margin: auto;
+            p{
+                text-align: center
+            }
+            div{
+                display:block;
+                width: 100px;
+                margin-top: 75px;
+                margin: auto;
+                i{
+                    font-size: 75px;
+                }
+            }
+            .error-retrieving{
+                color: red;
+            }
+        }
+    }
+
+    .bold {
+        font-weight: bold;
+    }
+
+}
+
+#settings_dialog{
+    .control-group{
+        margin-bottom: 0;
+        .blink {
+            animation: blink-animation 0.5s steps(5, start) infinite;
+            -webkit-animation: blink-animation 0.5s steps(5, start) infinite;
+          }
+          @keyframes blink-animation {
+            to {
+              visibility: hidden;
+            }
+          }
+          @-webkit-keyframes blink-animation {
+            to {
+              visibility: hidden;
+            }
+          }
+
+        .icon-circle{
+            color: #66ca66;
+        }
+
+        .scan-camera-button{
+            margin-top: 10px;
+            background: #0088cb;
+            padding: 5px 10px;
+            max-width: 130px;
+            border-radius: 2px;
+            color: white;
+            text-align: center;
+            margin-top: 5px;
+
+            i.icon-facetime-video{margin-right: 5px;}
+        }
+
+        .no-camera{
+            .icon-circle {
+                color: #f15252;
+            }
+        }
+
+        .warn-box{
+            margin-top: 10px;
+            color: grey;
+            border-radius: 5px;
+            font-size: 12px;
+            padding: 15px;
+            line-height: 140%;
+            background: rgba(255, 161, 21, 0.12);
+            letter-spacing: 0.6px;
+        }
+    }
+}
+
+.cloud-title{
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #515151;
+    margin-left: 25px;
+    font-size: 14px;
+    margin-top: 10px;
+    padding: 0 5px;
+    box-shadow: 0 3px #5e88de;
+}
+
+#astroPrintModal{
+    fieldset{
+        label,input,textarea{
+            width: 97%;
+        }
+    }
+}

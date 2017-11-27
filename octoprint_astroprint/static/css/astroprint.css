@@ -1,0 +1,309 @@
+/*
+ * Author: AstroPrint Product Team
+ * License: AGPLv3
+ * Copyright: 2017 3DaGoGo Inc.
+ */
+ #tab_plugin_astroprint {
+  width: 100%;
+}
+#tab_plugin_astroprint .astroPrintView {
+  width: 100%;
+}
+#tab_plugin_astroprint .astroPrintView .auth_astro {
+  width: 562px;
+  margin-top: 10px;
+  font-size: 12px;
+  letter-spacing: 0.6px;
+}
+#tab_plugin_astroprint .astroPrintView .access_key {
+  width: 573px;
+}
+#tab_plugin_astroprint .astroPrintView .warn-box {
+  color: grey;
+  border-radius: 5px;
+  font-size: 12px;
+  padding: 15px;
+  line-height: 140%;
+  background: rgba(255, 161, 21, 0.12);
+  letter-spacing: 0.6px;
+}
+#tab_plugin_astroprint .astroPrintView .cloud-title {
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #515151;
+  margin-left: 25px;
+  font-size: 14px;
+  margin-top: 10px;
+  padding: 0 5px;
+  box-shadow: 0 3px #5e88de;
+}
+#tab_plugin_astroprint .astroPrintView .downloadDialog {
+  background: rgba(10, 140, 204, 0.15);
+  padding: 2px 10px;
+  border-radius: 5px;
+  color: #4d4d4d;
+}
+#tab_plugin_astroprint .astroPrintImageContainer {
+  width: 150px;
+  height: 150px;
+  background-color: grey;
+}
+#tab_plugin_astroprint .astroPrintImageContainer .astroPrintImage {
+  width: 100%;
+  height: 100%;
+  background-image: url(../img/Astroprint_square_logo.png);
+  background-size: 150px;
+  background-repeat: no-repeat;
+}
+#tab_plugin_astroprint .astroprint-nav-title {
+  font-size: 20px;
+}
+#tab_plugin_astroprint .favicon-rocketImageContainer {
+  width: 20px;
+  height: 20px;
+  display: inline-block;
+}
+#tab_plugin_astroprint .favicon-rocketImageContainer .favicon-rocket {
+  width: 100%;
+  height: 100%;
+  background-image: url(../img/favicon_rocket.ico);
+  background-size: 20px;
+  background-repeat: no-repeat;
+}
+#tab_plugin_astroprint .row-fluid {
+  width: 100%;
+  padding: 3px;
+}
+#tab_plugin_astroprint #navbar-astroprint .camera-options {
+  display: inline-block;
+  padding-top: 11px;
+  position: relative;
+}
+#tab_plugin_astroprint #navbar-astroprint .camera-options .remove-opt {
+  position: absolute;
+  color: #ffffff;
+  cursor: pointer;
+  left: 2px;
+}
+#tab_plugin_astroprint #navbar-astroprint .camera-options .camera-opt i {
+  color: #f15252;
+  cursor: pointer;
+  font-size: 20px;
+}
+#tab_plugin_astroprint #navbar-astroprint .mobile-options {
+  display: inline-block;
+  padding-top: 11px;
+  position: relative;
+}
+#tab_plugin_astroprint #navbar-astroprint .mobile-options .remove-opt {
+  position: absolute;
+  color: #ffffff;
+  cursor: pointer;
+  left: 2px;
+}
+#tab_plugin_astroprint #navbar-astroprint .mobile-options .mobile-opt i {
+  color: #f15252;
+  cursor: pointer;
+  font-size: 20px;
+}
+#tab_plugin_astroprint .designs-view {
+  width: 100%;
+  padding: 10px;
+}
+#tab_plugin_astroprint .designs-view .design-row {
+  width: 100%;
+  padding: 5px 5px;
+  margin: 0;
+  border-top: 1px solid #DDD;
+}
+#tab_plugin_astroprint .designs-view .design-row .design-info {
+  padding: 0;
+}
+#tab_plugin_astroprint .designs-view .design-row .design-info .sections-design-row {
+  margin-left: 0;
+}
+#tab_plugin_astroprint .designs-view .design-row .design-info .sections-design-row .center-button {
+  width: 50%;
+  height: 100%;
+  margin: auto;
+  margin-top: 15px;
+  display: block;
+  font-size: 20px;
+}
+#tab_plugin_astroprint .designs-view .design-row .design-info .sections-design-row .center-button i.icon-chevron-down,
+#tab_plugin_astroprint .designs-view .design-row .design-info .sections-design-row .center-button i.icon-chevron-up {
+  font-weight: normal;
+}
+#tab_plugin_astroprint .designs-view .design-row .design-info .sections-design-row .design-name {
+  font-weight: bold;
+  height: 40px;
+  font-size: 14px;
+  line-height: 40px;
+}
+#tab_plugin_astroprint .designs-view .design-row .design-info .sections-design-row .printFilesCount {
+  height: 20px;
+  line-height: 20px;
+  font-size: 80%;
+  color: #999;
+}
+#tab_plugin_astroprint .designs-view .design-row .design-info .designImageContainer {
+  margin: auto;
+  width: 60px;
+  height: 60px;
+  background-color: #DDD;
+}
+#tab_plugin_astroprint .designs-view .design-row .design-info .designImageContainer .designImage {
+  width: 100%;
+  height: 100%;
+  opacity: 0.85;
+}
+#tab_plugin_astroprint .designs-view .design-row .design-printfiles {
+  margin: 10px 5%;
+  width: 77%;
+  float: right;
+}
+#tab_plugin_astroprint .designs-view .design-row .design-printfiles .print-file-row {
+  width: 100%;
+  border-bottom: 1px solid #DDD;
+  margin: 0;
+  clear: both;
+}
+#tab_plugin_astroprint .designs-view .design-row .design-printfiles .print-file-row .main-info {
+  clear: both;
+  width: 100%;
+  height: 50px;
+}
+#tab_plugin_astroprint .designs-view .design-row .design-printfiles .print-file-row .main-info .half-printFile-row {
+  height: 25px;
+}
+#tab_plugin_astroprint .designs-view .design-row .design-printfiles .print-file-row .main-info .all-printFile-row {
+  height: 50px;
+}
+#tab_plugin_astroprint .designs-view .design-row .design-printfiles .print-file-row .main-info .center-button {
+  width: 30px;
+  height: 30px;
+  margin: auto;
+  margin-top: 5px;
+  display: block;
+}
+#tab_plugin_astroprint .designs-view .design-row .design-printfiles .print-file-row .main-info .printFileName {
+  font-weight: bold;
+  font-size: 12px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+#tab_plugin_astroprint .designs-view .design-row .design-printfiles .print-file-row .main-info .slicerSettings {
+  font-weight: bold;
+  font-size: 10px;
+}
+#tab_plugin_astroprint .designs-view .design-row .design-printfiles .print-file-row .main-info .slicerSettings .infoSlicerSettings {
+  font-size: 10px;
+  color: #999;
+}
+#tab_plugin_astroprint .designs-view .design-row .design-printfiles .print-file-row .main-info .printFileCreated {
+  font-size: 10px;
+  color: #999;
+}
+#tab_plugin_astroprint .designs-view .design-row .design-printfiles .print-file-row .more-printfile-info {
+  font-size: 10px;
+  clear: both;
+  width: 83%;
+  margin: 0px 13% 20px;
+}
+#tab_plugin_astroprint .designs-view .design-row .design-printfiles .print-file-row .more-printfile-info .info-row:nth-child(odd) {
+  background: #f5f5f5;
+}
+#tab_plugin_astroprint .designs-view .design-row .design-printfiles .print-file-row .more-printfile-info .info-row {
+  height: 30px;
+  margin: 2px 0;
+  clear: both;
+}
+#tab_plugin_astroprint .designs-loading {
+  height: 300px;
+  padding: 20px;
+}
+#tab_plugin_astroprint .designs-loading div {
+  width: 100%;
+  display: inline-block;
+  margin: auto;
+}
+#tab_plugin_astroprint .designs-loading div p {
+  text-align: center;
+}
+#tab_plugin_astroprint .designs-loading div div {
+  display: block;
+  width: 100px;
+  margin-top: 75px;
+  margin: auto;
+}
+#tab_plugin_astroprint .designs-loading div div i {
+  font-size: 75px;
+}
+#tab_plugin_astroprint .designs-loading div .error-retrieving {
+  color: red;
+}
+#tab_plugin_astroprint .bold {
+  font-weight: bold;
+}
+#settings_dialog .control-group {
+  margin-bottom: 0;
+}
+#settings_dialog .control-group .blink {
+  animation: blink-animation 0.5s steps(5, start) infinite;
+  -webkit-animation: blink-animation 0.5s steps(5, start) infinite;
+}
+@keyframes blink-animation {
+  to {
+    visibility: hidden;
+  }
+}
+@-webkit-keyframes blink-animation {
+  to {
+    visibility: hidden;
+  }
+}
+#settings_dialog .control-group .icon-circle {
+  color: #66ca66;
+}
+#settings_dialog .control-group .scan-camera-button {
+  margin-top: 10px;
+  background: #0088cb;
+  padding: 5px 10px;
+  max-width: 130px;
+  border-radius: 2px;
+  color: white;
+  text-align: center;
+  margin-top: 5px;
+}
+#settings_dialog .control-group .scan-camera-button i.icon-facetime-video {
+  margin-right: 5px;
+}
+#settings_dialog .control-group .no-camera .icon-circle {
+  color: #f15252;
+}
+#settings_dialog .control-group .warn-box {
+  margin-top: 10px;
+  color: grey;
+  border-radius: 5px;
+  font-size: 12px;
+  padding: 15px;
+  line-height: 140%;
+  background: rgba(255, 161, 21, 0.12);
+  letter-spacing: 0.6px;
+}
+.cloud-title {
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #515151;
+  margin-left: 25px;
+  font-size: 14px;
+  margin-top: 10px;
+  padding: 0 5px;
+  box-shadow: 0 3px #5e88de;
+}
+#astroPrintModal fieldset label,
+#astroPrintModal fieldset input,
+#astroPrintModal fieldset textarea {
+  width: 97%;
+}
