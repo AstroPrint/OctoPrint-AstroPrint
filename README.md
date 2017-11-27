@@ -8,7 +8,7 @@ AstroPrint is a 3D Printing Software Platform that makes 3D Printing easy and en
 
 You can access your 3D Printer via our mobile apps, desktop app or the AstroPrint Cloud at astroprint.com.
 
-More info at [astroprint.com](https://www.astroprint.com)
+More info or create an account at [astroprint.com](https://www.astroprint.com)
 
 ## What is this Plugin?
 
