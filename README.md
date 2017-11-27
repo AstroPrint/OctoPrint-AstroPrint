@@ -1,7 +1,6 @@
 # OctoPrint Plugin: AstroPrint Cloud
 
-<img src="https://d360wfgz11cs0l.cloudfront.net
-/astroprint-hero.jpg"/>
+<img src="https://d360wfgz11cs0l.cloudfront.net/astroprint-hero.jpg"/>
 
 ## What is AstroPrint?
 
