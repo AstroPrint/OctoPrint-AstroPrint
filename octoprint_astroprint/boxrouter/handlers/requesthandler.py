@@ -165,8 +165,9 @@ class PrinterCommandHandler(object):
 		done(None)
 
 	def cancel(self, data, clientId, done):
+		data = {'print_job_id': self.plugin.astroprintCloud.currentlyPrinting}
 		self._printer.cancel_print()
-		done(None)
+		done(data)
 
 	def photo(self, data, clientId, done):
 		pic = self.cameraManager.getPic()
