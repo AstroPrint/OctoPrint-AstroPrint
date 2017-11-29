@@ -18,7 +18,7 @@ $(function () {
         self.astroprintUser = ko.observable(null) //null while views are being rendered
         self.designList = ko.observable([])
         self.filter = ko.observable("");
-        self.isLoggedOctoprint = ko.observable(self.loginState.loggedIn());
+        self.isOctoprintAdmin = ko.observable(self.loginState.isAdmin());
         self.subject = ko.observable("");
         self.description = ko.observable("");
         self.access_key = ko.observable("");
@@ -256,13 +256,13 @@ $(function () {
                         }
                         break;
                     case "userLogged":
-                        if (!self.isLoggedOctoprint()) {
+                        if (!self.isOctoprintAdmin()) {
                             logTries = 5; //handle asyncronous loggin state from octoprint
                             self.userLogged();
                         }
                         break;
                     case "userLoggedOut":
-                        if (self.isLoggedOctoprint()) {
+                        if (self.isOctoprintAdmin()) {
                             logOutTries = 5;
                             self.userLoggedOut();
                         }
@@ -280,14 +280,14 @@ $(function () {
         self.userLogged = function () {
             setTimeout(function () {
                 logTries--;
-                if (self.loginState.loggedIn() && !self.isLoggedOctoprint()) {
+                if (self.loginState.isAdmin() && !self.isOctoprintAdmin()) {
                     astroPrintPluginStarted = false
                     $("#startingUpPlugin").show();
                     $("#noAstroprintLogged").hide();
                     $("#astroPrintLogged").hide();
-                    self.isLoggedOctoprint(self.loginState.loggedIn());
+                    self.isOctoprintAdmin(self.loginState.isAdmin());
                     self.initialice_variables();
-                } else if (logTries > 0 && !self.isLoggedOctoprint()) {
+                } else if (logTries > 0 && !self.isOctoprintAdmin()) {
                     self.userLogged();
                 }
             }, 500)
@@ -296,11 +296,11 @@ $(function () {
         self.userLoggedOut = function () {
             logOutTries--;
             setTimeout(function () {
-                if (!self.loginState.loggedIn() && self.isLoggedOctoprint()) {
-                    self.isLoggedOctoprint(self.loginState.loggedIn());
+                if (!self.loginState.isAdmin() && self.isOctoprintAdmin()) {
+                    self.isOctoprintAdmin(self.loginState.isAdmin());
                     self.astroprintUser(null);
                     self.designList([]);
-                } else if (logOutTries > 0 && self.isLoggedOctoprint()) {
+                } else if (logOutTries > 0 && self.isOctoprintAdmin()) {
                     self.userLoggedOut();
                 }
             }, 500)
@@ -572,7 +572,7 @@ $(function () {
         }
 
         self.downloadDesign = function (design) {
-            if (self.isLoggedOctoprint()) {
+            if (self.isOctoprintAdmin()) {
                 if (!self.downloadDialog().downloading() || self.downloadDialog().progress() == 100) {
                     name = design.name
                     if (name.toLowerCase().substr(name.lastIndexOf('.') + 1, 3) != 'stl') {
@@ -618,7 +618,7 @@ $(function () {
         }
 
         self.downloadPrintFile = function (printFile) {
-            if (self.isLoggedOctoprint()) {
+            if (self.isOctoprintAdmin()) {
                 if (!self.downloadDialog().downloading() || self.downloadDialog().progress() == 100) {
                     printFile.downloading(true);
                     $.ajax({
@@ -695,8 +695,8 @@ $(function () {
         //handle asyncronous loggin state from octoprint
         self.checkIsLoggedOnConnect = function () {
             setTimeout(function () {
-                self.isLoggedOctoprint(self.loginState.loggedIn())
-                if (self.isLoggedOctoprint()) {
+                self.isOctoprintAdmin(self.loginState.isAdmin())
+                if (self.isOctoprintAdmin()) {
                     self.initialice_variables();
                 } else {
                     self.showAstroPrintPages();

@@ -17,7 +17,7 @@
 </div>
 
 <!-- View when no octoprint user logged -->
-<div id="noOctoprintLogged" style="display:none" class="row-fluid astroPrintView" data-bind="if: !isLoggedOctoprint()">
+<div id="noOctoprintLogged" style="display:none" class="row-fluid astroPrintView" data-bind="if: !isOctoprintAdmin()">
     <div class="span4">
         <div class="astroPrintImageContainer">
             <div class="astroPrintImage"></div>
@@ -27,7 +27,7 @@
         <h3>AstroPrint Plugin</h3>
         <h4>Hello AstroUser!</h4>
         <p class="astDescrip">
-            For security reasons, somebody must to be logged into your OctoPrint device to interact with the AstroPrint Plugin.
+            For security reasons, only accounts with administrator access can interact with the AstroPrint Plugin.
         </p>
     </div>
     <div class="span4 offset6">
@@ -35,7 +35,7 @@
 </div>
 
 <!-- View when no astroprint user logged -->
-<div id="noAstroprintLogged"  style="display:none" data-bind="if: (!astroprintUser() && isLoggedOctoprint())">
+<div id="noAstroprintLogged"  style="display:none" data-bind="if: (!astroprintUser() && isOctoprintAdmin())">
     <div class="astroPrintView">
         <div class="row-fluid">
             <div class="span4">
@@ -64,14 +64,14 @@
             </div>
             <p class="warn-box">
                 <i class="icon-warning-sign" aria-hidden="true"></i>
-                Your Astroprint account will be linked to this OctoPrint device. Any of its users could download, print your designs, and unlink/logout your account.
+                Your Astroprint account will be linked to this OctoPrint device. Any of its administrators could download, print your designs, and unlink/logout your account.
             </p>
         </div>
     </div>
 </div>
 
 <!-- View when astroprint user logged -->
-<div id="astroPrintLogged"  style="display:none" class="row-fluid astroPrintView" data-bind="if: (astroprintUser() && isLoggedOctoprint())">
+<div id="astroPrintLogged"  style="display:none" class="row-fluid astroPrintView" data-bind="if: (astroprintUser() && isOctoprintAdmin())">
     <div id="navbar-astroprint" class="navbar navbar-static">
         <div class="navbar-inner">
             <div class="container" style="width: auto;">

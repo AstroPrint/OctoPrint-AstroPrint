@@ -14,6 +14,7 @@ import json
 import sys
 import socket
 from octoprint.server.util.flask import restricted_access
+from octoprint.server import admin_permission
 from octoprint.settings import valid_boolean_trues
 from octoprint.users import SessionUser
 from watchdog.observers import Observer
@@ -316,6 +317,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 
 	@octoprint.plugin.BlueprintPlugin.route("/loggin", methods=["POST"])
 	@restricted_access
+	@admin_permission.require(403)
 	def loggin(self):
 		code = request.json['code']
 		url = request.json['url']
@@ -323,23 +325,27 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 
 	@octoprint.plugin.BlueprintPlugin.route("/logout", methods=["POST"])
 	@restricted_access
+	@admin_permission.require(403)
 	def logout(self):
 		return self.astroprintCloud.logoutAstroPrint()
 
 
 	@octoprint.plugin.BlueprintPlugin.route("/designs", methods=["GET"])
 	@restricted_access
+	@admin_permission.require(403)
 	def getDesigns(self):
 		return self.astroprintCloud.getDesigns()
 
 	@octoprint.plugin.BlueprintPlugin.route("/printfiles", methods=["GET"])
 	@restricted_access
+	@admin_permission.require(403)
 	def getPrintFiles(self):
 		designId = request.args.get('designId', None)
 		return self.astroprintCloud.getPrintFiles(designId)
 
 	@octoprint.plugin.BlueprintPlugin.route("/downloadDesign", methods=["POST"])
 	@restricted_access
+	@admin_permission.require(403)
 	def downloadDesign(self):
 		designId = request.json['designId']
 		name = request.json['name']
@@ -347,6 +353,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 
 	@octoprint.plugin.BlueprintPlugin.route("/downloadPrintFile", methods=["POST"])
 	@restricted_access
+	@admin_permission.require(403)
 	def downloadPrintFile(self):
 		printFileId = request.json['printFileId']
 		if self.astroprintCloud.printFile(printFileId) == "print":
@@ -357,6 +364,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 
 	@octoprint.plugin.BlueprintPlugin.route("/canceldownload", methods=["POST"])
 	@restricted_access
+	@admin_permission.require(403)
 	def canceldownload(self):
 		id = request.json['id']
 		self.astroprintCloud.downloadmanager.cancelDownload(id)
@@ -364,12 +372,14 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 
 	@octoprint.plugin.BlueprintPlugin.route("/checkcamerastatus", methods=["GET"])
 	@restricted_access
+	@admin_permission.require(403)
 	def checkcamerastatus(self):
 		self.cameraManager.checkCameraStatus()
 		return jsonify({"connected" : True if self.cameraManager.cameraActive else False }), 200, {'ContentType':'application/json'}
 
 	@octoprint.plugin.BlueprintPlugin.route("/isloggeduser", methods=["GET"])
 	@restricted_access
+	@admin_permission.require(403)
 	def isloggeduser(self):
 		if self.user:
 			return jsonify({"user" : {"name" : self.user.name, "email" : self.user.email}}), 200, {'ContentType':'application/json'}
@@ -378,11 +388,13 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 
 	@octoprint.plugin.BlueprintPlugin.route("/iscameraconnected", methods=["GET"])
 	@restricted_access
+	@admin_permission.require(403)
 	def iscameraconnected(self):
 		return jsonify({"connected" : True if self.cameraManager.cameraActive else False }), 200, {'ContentType':'application/json'}
 
 	@octoprint.plugin.BlueprintPlugin.route("/initialstate", methods=["GET"])
 	@restricted_access
+	@admin_permission.require(403)
 	def initialstate(self):
 		return jsonify({
 					"user" : {"name" : self.user.name, "email" : self.user.email} if self.user else False,
