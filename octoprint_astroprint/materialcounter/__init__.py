@@ -25,7 +25,6 @@ class MaterialCounter(object):
 		# regexes
 		floatPattern = "[-+]?[0-9]*\.?[0-9]+"
 		intPattern = "\d+"
-		self._regex_command = re.compile("^\s*([GM]\d+|T)")
 		self._regex_paramEFloat = re.compile("E(%s)" % floatPattern)
 		self._regex_paramTInt = re.compile("T(%s)" % intPattern)
 
@@ -63,18 +62,6 @@ class MaterialCounter(object):
 		self._lastExtrusion = {tool: 0}
 
 
-
-	def sendCommand(self, cmd):
-		gcode = self._regex_command.search(cmd)
-		if gcode:
-			gcode = gcode.group(1)
-
-			gcodeHandler = "_gcode_" + gcode
-			if hasattr(self, gcodeHandler):
-				cmd = getattr(self, gcodeHandler)(cmd)
-
-
-
 	def _gcode_T(self, cmd): #changeActiveTool
 		toolMatch = self._regex_paramTInt.search(cmd)
 		if toolMatch:
@@ -95,7 +82,6 @@ class MaterialCounter(object):
 					else:
 						self._logger.error('Unkonwn previous tool %s when trying to change to new tool %s' % (oldTool, newTool))
 				self._activeTool = newTool
-		return cmd
 
 	def _gcode_G92(self, cmd):
 		# At the moment this command is only relevant in Absolute Extrusion Mode
@@ -124,7 +110,6 @@ class MaterialCounter(object):
 				self._lastExtruderLengthReset[tool] = eValue
 				self._lastExtrusion[tool] = eValue
 
-		return cmd
 
 	def _gcode_G0(self, cmd):
 		if 'E' in cmd:
@@ -146,14 +131,12 @@ class MaterialCounter(object):
 				except ValueError:
 					pass
 
-		return cmd
 
 	_gcode_G1 = _gcode_G0
 
 	def _gcode_M82(self, cmd): #Set to absolute extrusion mode
 		self._extrusionMode = self.EXTRUSION_MODE_ABSOLUTE
 
-		return cmd
 
 	def _gcode_M83(self, cmd): #Set to relative extrusion mode
 		self._extrusionMode = self.EXTRUSION_MODE_RELATIVE
@@ -161,7 +144,6 @@ class MaterialCounter(object):
 		#it was absolute before so we add what we had to the active head counter
 		self._consumedFilament[tool] += ( self._lastExtrusion[tool] - self._lastExtruderLengthReset[tool] )
 
-		return cmd
 
 	# In Marlin G91 and G90 also change the relative nature of extrusion
 	_gcode_G90 = _gcode_M82 #Set Absolute

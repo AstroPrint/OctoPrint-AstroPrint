@@ -300,7 +300,10 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 
 	def count_material(self, comm_instance, phase, cmd, cmd_type, gcode, *args, **kwargs):
 		if self.materialCounter:
-			self.materialCounter.sendCommand(cmd)
+			gcodeHandler = "_gcode_" + gcode
+			if hasattr(self.materialCounter, gcodeHandler):
+				materialCounter = getattr(self.materialCounter, gcodeHandler,None)
+				materialCounter(cmd)
 
 
 	def is_blueprint_protected(self):
