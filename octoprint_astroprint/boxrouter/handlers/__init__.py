@@ -14,6 +14,7 @@ class BoxRouterMessageHandler(object):
 		self._weakWs = weakref.ref(wsClient)
 		self._logger = wsClient.plugin.get_logger()
 		self._printer = wsClient.plugin.get_printer()
+		self._handler = None
 		self._subscribers = 0
 
 	def auth(self, msg):
@@ -58,7 +59,8 @@ class BoxRouterMessageHandler(object):
 		wsClient = self._weakWs()
 
 		if wsClient:
-			handler = RequestHandler(wsClient)
+			if not self._handler:
+				self._handler = RequestHandler(wsClient)
 			response = None
 
 			try:
@@ -67,7 +69,7 @@ class BoxRouterMessageHandler(object):
 				clientId = msg['clientId']
 				data = msg['data']['payload']
 
-				method  = getattr(handler, request, None)
+				method  = getattr(self._handler, request, None)
 				if method:
 					def sendResponse(result):
 						if result is None:
