@@ -11,6 +11,8 @@ class EventSender(object):
 	def __init__(self, socket):
 		self._socket = socket
 		self._logger = socket.plugin.get_logger()
+
+	def connect(self):
 		self._lastSent = {
 			'temp_update': None,
 			'status_update': None,
