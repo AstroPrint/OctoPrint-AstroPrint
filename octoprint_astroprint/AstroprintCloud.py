@@ -104,13 +104,13 @@ class AstroprintCloud():
 		except requests.exceptions.RequestException as e:
 			print e
 
-	def logAstroPrint(self, code, url):
+	def loginAstroPrint(self, code, url, apAccessKey):
 		try:
 			r = requests.post(
 				"%s/token" % (self.apiHost),
 				data = {
 					"client_id": self.appId,
-					"access_key" : self.plugin.access_key,
+					"access_key" : apAccessKey,
 					"grant_type": "astroprint_access_key",
 					"code": code,
 					"redirect_uri": url
@@ -124,9 +124,10 @@ class AstroprintCloud():
 			self.user.refresh_token = data['refresh_token']
 			self.refresh_token = self.user.refresh_token
 			self.user.last_request = round(time.time())
+			self.user.accessKey = apAccessKey
 			self.user.expires = round(self.user.last_request + data['expires_in'])
 			self.expires = self.user.expires
-			return self.getUserName()
+			return self.getUserInfo()
 
 		except requests.exceptions.HTTPError as err:
 			self._logger.error(err.response.text)
@@ -135,7 +136,7 @@ class AstroprintCloud():
 			self._logger.error(e)
 			return jsonify({'error': "Internal server error"}), 500, {'ContentType':'application/json'}
 
-	def getUserName(self):
+	def getUserInfo(self):
 		try:
 			r = requests.get(
 				"%s/accounts/me" % (self.apiHost),
@@ -147,7 +148,6 @@ class AstroprintCloud():
 			self.user.userId = data['id']
 			self.user.email = data['email']
 			self.user.name = data['name']
-			self.user.accessKey = self.plugin.access_key
 			self.plugin.user = self.user
 			self.db.saveUser(self.plugin.user)
 			self.plugin.sendSocketInfo()

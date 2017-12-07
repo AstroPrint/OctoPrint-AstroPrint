@@ -71,7 +71,6 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 	cameraManager = None
 	materialCounter= None
 	_printerListener = None
-	access_key = None
 
 	def __init__(self):
 		def logOutHandler(sender, **kwargs):
@@ -310,13 +309,15 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 	def is_blueprint_protected(self):
 		return False
 
-	@octoprint.plugin.BlueprintPlugin.route("/loggin", methods=["POST"])
+	@octoprint.plugin.BlueprintPlugin.route("/login", methods=["POST"])
 	@restricted_access
 	@admin_permission.require(403)
-	def loggin(self):
-		code = request.json['code']
-		url = request.json['url']
-		return self.astroprintCloud.logAstroPrint(code, url)
+	def login(self):
+		return self.astroprintCloud.loginAstroPrint(
+            request.json['code'], 
+            request.json['url'], 
+            request.json['ap_access_key']
+        )
 
 	@octoprint.plugin.BlueprintPlugin.route("/logout", methods=["POST"])
 	@restricted_access
