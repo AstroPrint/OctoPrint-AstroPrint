@@ -310,14 +310,6 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 	def is_blueprint_protected(self):
 		return False
 
-	@octoprint.plugin.BlueprintPlugin.route("/saveAccessKey", methods=["POST"])
-	@restricted_access
-	def saveAccessKey(self):
-		access_key = request.json['access_key']
-		print access_key
-		self.access_key = access_key
-		return jsonify({"success" : True }), 200, {'ContentType':'application/json'}
-
 	@octoprint.plugin.BlueprintPlugin.route("/loggin", methods=["POST"])
 	@restricted_access
 	@admin_permission.require(403)
