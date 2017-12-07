@@ -102,7 +102,7 @@ class AstroprintCloud():
 					self.timer.daemon = True
 					self.timer.start()
 		except requests.exceptions.RequestException as e:
-			print e
+			self._logger.error(e)
 
 	def loginAstroPrint(self, code, url, apAccessKey):
 		try:
@@ -539,8 +539,3 @@ class AstroprintCloud():
 				return data
 			else:
 				return None
-
-
-
-
-
