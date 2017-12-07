@@ -215,9 +215,9 @@ $(function () {
             self.sizeX = Math.round(Number(sizeX) * 100) / 100;
             self.sizeY = Math.round(Number(sizeY) * 100) / 100;
             self.sizeZ = Math.round(Number(sizeZ) * 100) / 100;
-            let seconds = Number(print_time);
-            let hours = Math.floor(seconds / 3600);
-            let minutes = Math.floor(seconds % 3600 / 60);
+            var seconds = Number(print_time);
+            var hours = Math.floor(seconds / 3600);
+            var minutes = Math.floor(seconds % 3600 / 60);
             seconds = Math.floor(seconds % 3600 % 60);
             self.print_time = ((hours > 0 ? hours + ":" + (minutes < 10 ? "0" : "") : "") + minutes + ":" + (seconds < 10 ? "0" : "") + seconds);
             self.layer_height = layer_height;
@@ -350,29 +350,29 @@ $(function () {
 
         self.authorizeAstroprint = function () {
             if (self.access_key()){
-            $.ajax({
-                type: "POST",
-                contentType: "application/json; charset=utf-8",
-                url: PLUGIN_BASEURL + "astroprint/saveAccessKey",
-                data: JSON.stringify({ access_key : self.access_key()}),
-                dataType: "json",
-                success: function (success) {
-                    let currentUrl = window.location.href.split('?')[0];
-                    let url = astroprint_variables.appSite + "/authorize" +
-                        "?client_id=" + astroprint_variables.appId +
-                        "&redirect_uri=" + currentUrl +
-                        "&scope=profile:read project:read design:read design:download print-file:read print-file:download print-job:read device:connect"+
-                        "&response_type=code"
-                    location.href = url;
-                },
-                error: function (error) {
-                    new PNotify({
-                        title: gettext("Login error"),
-                        text: gettext("There was an error trying to log in, please try again"),
-                        type: "error"
-                    });
-                }
-            });
+              $.ajax({
+                  type: "POST",
+                  contentType: "application/json; charset=utf-8",
+                  url: PLUGIN_BASEURL + "astroprint/saveAccessKey",
+                  data: JSON.stringify({ access_key : self.access_key()}),
+                  dataType: "json",
+                  success: function (success) {
+                      var currentUrl = window.location.href.split('?')[0];
+                      var url = astroprint_variables.appSite + "/authorize" +
+                          "?client_id=" + astroprint_variables.appId +
+                          "&redirect_uri=" + currentUrl +
+                          "&scope=profile:read project:read design:read design:download print-file:read print-file:download print-job:read device:connect"+
+                          "&response_type=code"
+                      location.href = url;
+                  },
+                  error: function (error) {
+                      new PNotify({
+                          title: gettext("Login error"),
+                          text: gettext("There was an error trying to log in, please try again"),
+                          type: "error"
+                      });
+                  }
+              });
             } else {
                 new PNotify({
                     title: gettext("Missing Access Key"),
@@ -383,7 +383,7 @@ $(function () {
         }
 
         self.logAstroprint = function (accessCode) {
-            let currentUrl = window.location.href.split('?')[0];
+            var currentUrl = window.location.href.split('?')[0];
             $.ajax({
                 type: "POST",
                 contentType: "application/json; charset=utf-8",
@@ -476,7 +476,7 @@ $(function () {
                         );
                     }
                     self.designList(designs);
-                    let notify = function () {
+                    var notify = function () {
                         new PNotify({
                             title: gettext("AstroPrint Designs Retrieved"),
                             text: gettext("Your designs and print files from AstroPrint have been refreshed"),
@@ -593,8 +593,8 @@ $(function () {
                                 self.error401handeler();
                             } else {
                                 design.downloading(false);
-                                let text = "There was an error retrieving design, please try again later.";
-                                let title = "Error retrieving Design";
+                                var text = "There was an error retrieving design, please try again later.";
+                                var title = "Error retrieving Design";
                                 if (error.status == 400) {
                                     title = ("Error adding Design");
                                     text = error.responseText;
@@ -641,8 +641,8 @@ $(function () {
                                 self.error401handeler();
                             } else {
                                 printFile.downloading(false);
-                                let text = "There was an error retrieving design, please try again later.";
-                                let title = "Error retrieving Design";
+                                var text = "There was an error retrieving design, please try again later.";
+                                var title = "Error retrieving Design";
                                 if (error.status == 400) {
                                     title = ("Error adding Design");
                                     text = error.responseText;
@@ -736,7 +736,7 @@ $(function () {
         };
 
         //Log in before startupComplete saves some time
-        let code = self._getUrlParameter("code");
+        var code = self._getUrlParameter("code");
         if (code) {
             self.logAstroprint(code);
             window.history.replaceState({}, document.title, "/");
