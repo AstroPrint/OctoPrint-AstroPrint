@@ -8,7 +8,7 @@ import sqlite3
 class AstroprintDB():
 
 	def __init__(self, plugin):
-		self.DB_NAME = plugin.get_settings().global_get_basefolder("logs") + "/octoprint_astroprint.db"
+		self.DB_NAME = plugin.get_plugin_data_folder() + "/octoprint_astroprint.db"
 		conn = sqlite3.connect(self.DB_NAME)
 		db = conn.cursor()
 
