@@ -412,43 +412,21 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 		)
 
 	@octoprint.plugin.BlueprintPlugin.route("/accessKeys", methods=["POST"])
-	def getAccessKeys(self):
-		publicKey = None
-		email = request.values.get('email', None)
-		accessKey = request.values.get('accessKey', None)
+    def getAccessKeys(self):
+        email = request.values.get('email', None)
+        accessKey = request.values.get('accessKey', None)
 
-		userLogged = self.user.email if self.user else None
-		userAccessKey = self.user.accessKey if self.user else None
+        if not email or not accessKey:
+            abort(401) # wouldn't a 400 make more sense here?
 
-		####
-		# - nobody logged: None
-		# - any log: email
+        if self.user and self.user.email == email and self.user.accessKey == accessKey and self.user.userId:
+            # only respond positively if we have an AstroPrint user and their mail AND accessKey match AND
+            # they also have a valid userId
+            return jsonify(api_key=self._settings.global_get(["api", "key"], 
+                           ws_token=create_ws_token(self.user.userId)))
 
-		if email and accessKey:#somebody is logged in the remote client
-			if userLogged and userAccessKey:#Somebody logged in AstroPrint plugin
-				if userLogged == email and userAccessKey == accessKey:#I am the user logged
-
-					publicKey = self.user.userId
-
-					if not publicKey:
-						abort(403)
-
-				else:#I am NOT the logged user
-					abort(403)
-			elif  (self._settings.global_get_boolean(['accessControl', 'enabled']) and self._settings.get_boolean(["access_control_enabled"])):
-				abort(403)
-
-		else:#nodody is logged in the remote client
-			if userLogged or (self._settings.global_get_boolean(['accessControl', 'enabled']) and self._settings.get_boolean(["access_control_enabled"])):
-				abort(401)
-
-		return Response(
-			json.dumps({
-				'api_key': self._settings.global_get(["api", "key"]),
-				'ws_token': create_ws_token(publicKey)
-			}),
-			mimetype= 'application/json'
-		)
+        # everyone else gets the cold shoulder
+        abort(403)
 
 	@octoprint.plugin.BlueprintPlugin.route("/status", methods=["GET"])
 	@restricted_access
