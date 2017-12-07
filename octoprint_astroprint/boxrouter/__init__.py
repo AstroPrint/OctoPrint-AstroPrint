@@ -204,7 +204,6 @@ class AstroprintBoxRouter(object):
 				self._boxId = uuid.uuid5(uuid.UUID(self.ASTROBOX_NAMESPACE_UUID), str(uuid.getnode())).hex
 				with open(boxIdFile, 'w') as f:
 					f.write(self._boxId)
-		print self._boxId
 		return self._boxId
 
 	def boxrouter_connect(self):
