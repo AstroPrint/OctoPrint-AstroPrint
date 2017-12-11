@@ -314,8 +314,8 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 	@admin_permission.require(403)
 	def login(self):
 		return self.astroprintCloud.loginAstroPrint(
-            request.json['code'], 
-            request.json['url'], 
+            request.json['code'],
+            request.json['url'],
             request.json['ap_access_key']
         )
 
@@ -413,21 +413,21 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 		)
 
 	@octoprint.plugin.BlueprintPlugin.route("/accessKeys", methods=["POST"])
-    def getAccessKeys(self):
-        email = request.values.get('email', None)
-        accessKey = request.values.get('accessKey', None)
+	def getAccessKeys(self):
+		email = request.values.get('email', None)
+		accessKey = request.values.get('accessKey', None)
 
-        if not email or not accessKey:
-            abort(401) # wouldn't a 400 make more sense here?
+		if not email or not accessKey:
+			abort(401) # wouldn't a 400 make more sense here?
 
-        if self.user and self.user.email == email and self.user.accessKey == accessKey and self.user.userId:
-            # only respond positively if we have an AstroPrint user and their mail AND accessKey match AND
-            # they also have a valid userId
-            return jsonify(api_key=self._settings.global_get(["api", "key"], 
-                           ws_token=create_ws_token(self.user.userId)))
+		if self.user and self.user.email == email and self.user.accessKey == accessKey and self.user.userId:
+			# only respond positively if we have an AstroPrint user and their mail AND accessKey match AND
+			# they also have a valid userId
+			return jsonify(api_key=self._settings.global_get(["api", "key"],
+								ws_token=create_ws_token(self.user.userId)))
 
-        # everyone else gets the cold shoulder
-        abort(403)
+		# everyone else gets the cold shoulder
+		abort(403)
 
 	@octoprint.plugin.BlueprintPlugin.route("/status", methods=["GET"])
 	@restricted_access
