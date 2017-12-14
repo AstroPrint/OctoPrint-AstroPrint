@@ -310,7 +310,6 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 		return False
 
 	@octoprint.plugin.BlueprintPlugin.route("/login", methods=["POST"])
-	@restricted_access
 	@admin_permission.require(403)
 	def login(self):
 		return self.astroprintCloud.loginAstroPrint(
@@ -320,27 +319,23 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
         )
 
 	@octoprint.plugin.BlueprintPlugin.route("/logout", methods=["POST"])
-	@restricted_access
 	@admin_permission.require(403)
 	def logout(self):
 		return self.astroprintCloud.logoutAstroPrint()
 
 
 	@octoprint.plugin.BlueprintPlugin.route("/designs", methods=["GET"])
-	@restricted_access
 	@admin_permission.require(403)
 	def getDesigns(self):
 		return self.astroprintCloud.getDesigns()
 
 	@octoprint.plugin.BlueprintPlugin.route("/printfiles", methods=["GET"])
-	@restricted_access
 	@admin_permission.require(403)
 	def getPrintFiles(self):
 		designId = request.args.get('designId', None)
 		return self.astroprintCloud.getPrintFiles(designId)
 
 	@octoprint.plugin.BlueprintPlugin.route("/downloadDesign", methods=["POST"])
-	@restricted_access
 	@admin_permission.require(403)
 	def downloadDesign(self):
 		designId = request.json['designId']
@@ -348,7 +343,6 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 		return self.astroprintCloud.getDesignDownloadUrl(designId, name)
 
 	@octoprint.plugin.BlueprintPlugin.route("/downloadPrintFile", methods=["POST"])
-	@restricted_access
 	@admin_permission.require(403)
 	def downloadPrintFile(self):
 		printFileId = request.json['printFileId']
@@ -359,7 +353,6 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 		return jsonify({'error': "Internal server error"}), 500, {'ContentType':'application/json'}
 
 	@octoprint.plugin.BlueprintPlugin.route("/canceldownload", methods=["POST"])
-	@restricted_access
 	@admin_permission.require(403)
 	def canceldownload(self):
 		id = request.json['id']
@@ -367,14 +360,12 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 		return jsonify({"success" : True }), 200, {'ContentType':'application/json'}
 
 	@octoprint.plugin.BlueprintPlugin.route("/checkcamerastatus", methods=["GET"])
-	@restricted_access
 	@admin_permission.require(403)
 	def checkcamerastatus(self):
 		self.cameraManager.checkCameraStatus()
 		return jsonify({"connected" : True if self.cameraManager.cameraActive else False }), 200, {'ContentType':'application/json'}
 
 	@octoprint.plugin.BlueprintPlugin.route("/isloggeduser", methods=["GET"])
-	@restricted_access
 	@admin_permission.require(403)
 	def isloggeduser(self):
 		if self.user:
@@ -383,13 +374,11 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 			return jsonify({"user" : False }), 200, {'ContentType':'application/json'}
 
 	@octoprint.plugin.BlueprintPlugin.route("/iscameraconnected", methods=["GET"])
-	@restricted_access
 	@admin_permission.require(403)
 	def iscameraconnected(self):
 		return jsonify({"connected" : True if self.cameraManager.cameraActive else False }), 200, {'ContentType':'application/json'}
 
 	@octoprint.plugin.BlueprintPlugin.route("/initialstate", methods=["GET"])
-	@restricted_access
 	@admin_permission.require(403)
 	def initialstate(self):
 		return jsonify({
@@ -430,7 +419,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 		abort(403)
 
 	@octoprint.plugin.BlueprintPlugin.route("/status", methods=["GET"])
-	@restricted_access
+	@admin_permission.require(403)
 	def getStatus(self):
 
 		fileName = None
@@ -457,7 +446,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 		)
 
 	@octoprint.plugin.BlueprintPlugin.route("/api/printer-profile", methods=["GET"])
-	@restricted_access
+	@admin_permission.require(403)
 	def printer_profile_patch(self):
 		printerProfile = self._printer.get_current_connection()[3]
 		profile = {
@@ -471,87 +460,13 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 		}
 		return jsonify(profile)
 
-
-
-	@octoprint.plugin.BlueprintPlugin.route("/api/printer/fan", methods=["POST"])
-	def printerFanCommand(self):
-
-		if not self._printer.is_operational():
-			return make_response("Printer is not operational", 409)
-
-		valid_commands = {
-			"set": ["tool", "speed"]
-		}
-
-		command, data, response = getJsonCommandFromRequest(request, valid_commands)
-		if response is not None:
-			return response
-
-		self._printer.command("M106 S%d" % max(data["speed"], data["speed"]))
-
-		return NO_CONTENT
-
-	@octoprint.plugin.BlueprintPlugin.route('/camera/snapshot', methods=["GET"])
-	@restricted_access
-	def camera_snapshot(self):
-		pic_buf = self.cameraManager.getPic()
-		if pic_buf:
-			return Response(pic_buf, mimetype='image/jpeg')
-		else:
-			return 'Camera not ready', 404
-
-
 	@octoprint.plugin.BlueprintPlugin.route('/api/astroprint', methods=['DELETE'])
-	@restricted_access
+	@admin_permission.require(403)
 	def astroPrint_logout(self):
 		return self.astroprintCloud.logoutAstroPrint()
 
-	@octoprint.plugin.BlueprintPlugin.route('/api/job', methods=['POST'])
-	@restricted_access
-	def controlJob(self):
-
-		if not self._printer.is_operational():
-			return make_response("Printer is not operational", 409)
-
-		valid_commands = {
-			"start": [],
-			"restart": [],
-			"pause": [],
-			"cancel": []
-		}
-
-		command, data, response = getJsonCommandFromRequest(request, valid_commands)
-		if response is not None:
-			return response
-
-		activePrintjob = self._printer.is_printing() or self._printer.is_paused()
-
-		if command == "start":
-			if activePrintjob:
-				return make_response("Printer already has an active print job, did you mean 'restart'?", 409)
-			self._printer.start_print()
-		elif command == "restart":
-			if not self._printer.is_paused():
-				return make_response("Printer does not have an active print job or is not paused", 409)
-			self._printer.start_print()
-		elif command == "pause":
-			if not activePrintjob:
-				return make_response("Printer is neither printing nor paused, 'pause' command cannot be performed", 409)
-			self._printer.toggle_pause_print()
-		elif command == "cancel":
-			if not activePrintjob:
-				response = make_response(json.dumps({
-					'id': 'no_active_print',
-					'msg': "Printer is neither printing nor paused, 'cancel' command cannot be performed"
-				}), 409)
-				response.headers['Content-Type'] = 'application/json'
-				return response
-			self._printer.cancel_print()
-
-
-		return NO_CONTENT
-
 	@octoprint.plugin.BlueprintPlugin.route('/api/job', methods=['GET'])
+	@admin_permission.require(403)
 	def jobState():
 		currentData = self._printer.get_current_data()
 		return jsonify({
