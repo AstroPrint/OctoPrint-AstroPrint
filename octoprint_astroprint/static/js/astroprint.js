@@ -215,9 +215,9 @@ $(function () {
             self.sizeX = Math.round(Number(sizeX) * 100) / 100;
             self.sizeY = Math.round(Number(sizeY) * 100) / 100;
             self.sizeZ = Math.round(Number(sizeZ) * 100) / 100;
-            let seconds = Number(print_time);
-            let hours = Math.floor(seconds / 3600);
-            let minutes = Math.floor(seconds % 3600 / 60);
+            var seconds = Number(print_time);
+            var hours = Math.floor(seconds / 3600);
+            var minutes = Math.floor(seconds % 3600 / 60);
             seconds = Math.floor(seconds % 3600 % 60);
             self.print_time = ((hours > 0 ? hours + ":" + (minutes < 10 ? "0" : "") : "") + minutes + ":" + (seconds < 10 ? "0" : "") + seconds);
             self.layer_height = layer_height;
@@ -257,7 +257,7 @@ $(function () {
                         break;
                     case "userLogged":
                         if (!self.isOctoprintAdmin()) {
-                            logTries = 5; //handle asyncronous loggin state from octoprint
+                            logTries = 5; //handle asyncronous login state from octoprint
                             self.userLogged();
                         }
                         break;
@@ -349,30 +349,16 @@ $(function () {
         }
 
         self.authorizeAstroprint = function () {
-            if (self.access_key()){
-            $.ajax({
-                type: "POST",
-                contentType: "application/json; charset=utf-8",
-                url: PLUGIN_BASEURL + "astroprint/saveAccessKey",
-                data: JSON.stringify({ access_key : self.access_key()}),
-                dataType: "json",
-                success: function (success) {
-                    let currentUrl = window.location.href.split('?')[0];
-                    let url = astroprint_variables.appSite + "/authorize" +
-                        "?client_id=" + astroprint_variables.appId +
-                        "&redirect_uri=" + currentUrl +
-                        "&scope=profile:read project:read design:read design:download print-file:read print-file:download print-job:read device:connect"+
-                        "&response_type=code"
-                    location.href = url;
-                },
-                error: function (error) {
-                    new PNotify({
-                        title: gettext("Login error"),
-                        text: gettext("There was an error trying to log in, please try again"),
-                        type: "error"
-                    });
-                }
-            });
+            var ap_access_key = self.access_key()
+            if (ap_access_key){
+              var currentUrl = window.location.href.split('?')[0];
+              var url = astroprint_variables.appSite + "/authorize" +
+                  "?client_id=" + astroprint_variables.appId +
+                  "&redirect_uri=" + currentUrl +
+                  "&scope=profile:read project:read design:read design:download print-file:read print-file:download print-job:read device:connect"+
+                  "&state="+ap_access_key+
+                  "&response_type=code"
+              location.href = url;              
             } else {
                 new PNotify({
                     title: gettext("Missing Access Key"),
@@ -382,13 +368,17 @@ $(function () {
             }
         }
 
-        self.logAstroprint = function (accessCode) {
-            let currentUrl = window.location.href.split('?')[0];
+        self.loginAstroprint = function (accessCode, apAccessKey) {
+            var currentUrl = window.location.href.split('?')[0];
             $.ajax({
                 type: "POST",
                 contentType: "application/json; charset=utf-8",
-                url: PLUGIN_BASEURL + "astroprint/loggin",
-                data: JSON.stringify({ code: accessCode, url: currentUrl }),
+                url: PLUGIN_BASEURL + "astroprint/login",
+                data: JSON.stringify({ 
+                  code: accessCode, 
+                  url: currentUrl,
+                  ap_access_key: apAccessKey
+                }),
                 dataType: "json",
                 success: function (success) {
                     self.astroprintUser(success);
@@ -476,7 +466,7 @@ $(function () {
                         );
                     }
                     self.designList(designs);
-                    let notify = function () {
+                    var notify = function () {
                         new PNotify({
                             title: gettext("AstroPrint Designs Retrieved"),
                             text: gettext("Your designs and print files from AstroPrint have been refreshed"),
@@ -593,8 +583,8 @@ $(function () {
                                 self.error401handeler();
                             } else {
                                 design.downloading(false);
-                                let text = "There was an error retrieving design, please try again later.";
-                                let title = "Error retrieving Design";
+                                var text = "There was an error retrieving design, please try again later.";
+                                var title = "Error retrieving Design";
                                 if (error.status == 400) {
                                     title = ("Error adding Design");
                                     text = error.responseText;
@@ -641,8 +631,8 @@ $(function () {
                                 self.error401handeler();
                             } else {
                                 printFile.downloading(false);
-                                let text = "There was an error retrieving design, please try again later.";
-                                let title = "Error retrieving Design";
+                                var text = "There was an error retrieving design, please try again later.";
+                                var title = "Error retrieving Design";
                                 if (error.status == 400) {
                                     title = ("Error adding Design");
                                     text = error.responseText;
@@ -692,7 +682,7 @@ $(function () {
             });
         };
 
-        //handle asyncronous loggin state from octoprint
+        //handle asyncronous login state from octoprint
         self.checkIsLoggedOnConnect = function () {
             setTimeout(function () {
                 self.isOctoprintAdmin(self.loginState.isAdmin())
@@ -736,9 +726,10 @@ $(function () {
         };
 
         //Log in before startupComplete saves some time
-        let code = self._getUrlParameter("code");
-        if (code) {
-            self.logAstroprint(code);
+        var code = self._getUrlParameter("code");
+        var state = self._getUrlParameter("state");
+        if (code && state) {
+            self.loginAstroprint(code, state);
             window.history.replaceState({}, document.title, "/");
         }
 

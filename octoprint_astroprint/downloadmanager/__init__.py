@@ -94,7 +94,7 @@ class DownloadWorker(threading.Thread):
 						self.astroprintCloud.wrapAndSave("design", name, False)
 
 			except requests.exceptions.HTTPError as err:
-				print err
+				self._logger.error(err)
 				if printFile:
 					payload = {
 						"type" : "error",
@@ -106,7 +106,7 @@ class DownloadWorker(threading.Thread):
 				self.clearFile(destination)
 				return None
 			except requests.exceptions.RequestException as e:
-				print e
+				self._logger.error(e)
 				if printFile:
 					payload = {
 						"type" : "error",
