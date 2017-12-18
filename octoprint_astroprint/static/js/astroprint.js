@@ -358,7 +358,7 @@ $(function () {
                   "&scope=profile:read project:read design:read design:download print-file:read print-file:download print-job:read device:connect"+
                   "&state="+ap_access_key+
                   "&response_type=code"
-              location.href = url;              
+              location.href = url;
             } else {
                 new PNotify({
                     title: gettext("Missing Access Key"),
@@ -374,8 +374,8 @@ $(function () {
                 type: "POST",
                 contentType: "application/json; charset=utf-8",
                 url: PLUGIN_BASEURL + "astroprint/login",
-                data: JSON.stringify({ 
-                  code: accessCode, 
+                data: JSON.stringify({
+                  code: accessCode,
                   url: currentUrl,
                   ap_access_key: apAccessKey
                 }),
@@ -444,11 +444,6 @@ $(function () {
             });
         }
 
-
-        $('#astroPrintModal').on('hidden', function () {
-            self.description("");
-            self.subject("");
-        })
 
 
         self.getDesigns = function (refresh = true) {
