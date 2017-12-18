@@ -30,27 +30,14 @@
             </div>
         </div>
     </div>
-    <div>
+    <div data-bind="ifnot: settings.settings.api.allowCrossOrigin">
         <h3>Remote Control Options</h3>
         <div class="control-group">
-            <div data-bind="ifnot: settings.settings.api.allowCrossOrigin">
+            <div>
                 <a id="goToastrocors" href="#astrocors"></a>
                 <h4 id="astrocors">Cross Origin Resource Sharing</h4>
                 <p class="warn-box"><i class="icon-warning-sign" aria-hidden="true"></i>Allowing Cross Origin Resource Sharing is not enabled and it's necesary to control this box via the iOS App, it can be activated in API settings</p>
                 <a class="btn btn-primary" data-bind="click: moveToApi">Go to API settings</a>
-            </div>
-            <div data-bind="ifnot: settings.settings.accessControl_enabled">
-                <h4>Access Control</h4>
-                <input type="checkbox" data-bind="checked: settings.settings.plugins.astroprint.access_control_enabled">
-                Access Control Enabled
-                <p class="warn-box">
-                    <i class="icon-warning-sign" aria-hidden="true"></i>
-                    When access control is disabled you OctoPrint device can be accessed and controlled by any AstroPrint Mobile app
-                    in your local network without being logged into your AstroPrint Account.
-                    <br><br>
-                    Note enabling this settings when your OctoPrint installation is accessible over the internet,
-                    makes your printer accessible by everyone when no AstroPrint Account is linked.
-                </p>
             </div>
         </div>
     </div>

@@ -156,10 +156,6 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 			apiHost = apiHost,
 			webSocket = webSocket,
 			product_variant_id = product_variant_id,
-			#Remote Control settings
-			access_control_enabled = True, #Only availible when octoprint access control is enabled
-			allow_cross_origin = True,
-			#
 			camera = False,
 			#Adittional printer settings
 			max_nozzle_temp = 280, #only for being set by AstroPrintCloud, it wont affect octoprint settings
