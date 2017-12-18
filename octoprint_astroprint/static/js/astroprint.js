@@ -705,6 +705,11 @@ $(function () {
             astroPrintPluginStarted = true;
         }
 
+        self.goToAstroPrintTab = function () {
+            location.hash='tab_plugin_astroprint';
+            location.reload()
+        }
+
         //log with the code
         self._getUrlParameter = function (sParam) {
             var sPageURL = decodeURIComponent(window.location.search.substring(1)),

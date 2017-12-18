@@ -5,9 +5,11 @@
         <div class="control-group">
             <div class="control-group">
                 <p>You need to be logged to your Astroprint account to use and configure AstroPrint plugin.</p>
-                <p>Please go to our AstroPrint tab and follow the instructions</p>
-                <div class="scan-camera-button"><a href="#tab_plugin_astroprint" onclick="location.reload()">Log in</a></div>
+                <p>Please go to AstroPrint tab and follow the instructions.</p>
             </div>
+        </div>
+        <div class="control-group">
+            <div class="scan-camera-button" data-bind="click: goToAstroPrintTab">Log in</div>
         </div>
     </div>
     <div data-bind="if: astroprintUser()">
