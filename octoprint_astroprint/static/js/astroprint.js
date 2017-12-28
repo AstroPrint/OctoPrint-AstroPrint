@@ -455,7 +455,7 @@ $(function () {
                 start_time: new Date().getTime(),
                 success: function (data) {
                     var designs = [];
-                    for (let design of data.data) {
+                    for (var design of data.data) {
                         designs.push(
                             new Design(design.id, design.name, design.images.square, design.print_file_count, design.allow_download)
                         );
@@ -516,7 +516,7 @@ $(function () {
                                 start_time: new Date().getTime(),
                                 success: function (data) {
                                     var printFiles = [];
-                                    for (let p of data.data) {
+                                    for (var p of data.data) {
                                         printFiles.push(
                                             new PrintFile(p.id, p.created, p.filename, design.image, p.info.size.x, p.info.size.y, p.info.size.z, p.info.print_time, p.info.layer_height, p.info.layer_count, p.info.filament_length, p.info.filament_volume, p.info.filament_weight, p.info.total_filament, p.format, p.printer.name, p.material.name, p.quality)
                                         );
@@ -717,7 +717,7 @@ $(function () {
                 sParameterName,
                 i;
 
-            for (let i = 0; i < sURLVariables.length; i++) {
+            for (var i = 0; i < sURLVariables.length; i++) {
                 sParameterName = sURLVariables[i].split('=');
                 if (sParameterName[0] === sParam) {
                     return sParameterName[1] === undefined ? true : sParameterName[1];
