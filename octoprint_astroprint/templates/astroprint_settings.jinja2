@@ -1,15 +1,15 @@
 
 <form class="form-horizontal">
     <div data-bind="ifnot: astroprintUser()">
-      <h3>AstroPrint Account is not connected!</h3>
+      <h3>Connect to your AstroPrint Account</h3>
         <div class="control-group">
             <div class="control-group">
-                <p>You need to be logged to your Astroprint account to use and configure AstroPrint plugin.</p>
-                <p>Please go to AstroPrint tab and follow the instructions.</p>
+                <p>To use and configure this plugin you need to connect it to your AstroPrint Account.</p>
+                <p>You can see more instructions in the AstroPrint Tab.</p>
             </div>
         </div>
         <div class="control-group">
-            <div class="scan-camera-button" data-bind="click: goToAstroPrintTab">Log in</div>
+            <div class="scan-camera-button" data-bind="click: goToAstroPrintTab">Open AstroPrint Tab</div>
         </div>
     </div>
     <div data-bind="if: astroprintUser()">

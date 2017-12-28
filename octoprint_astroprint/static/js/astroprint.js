@@ -706,8 +706,8 @@ $(function () {
         }
 
         self.goToAstroPrintTab = function () {
-            location.hash='tab_plugin_astroprint';
-            location.reload()
+            $('#tab_plugin_astroprint_link a').trigger( "click" );
+            $('.close','#settings_dialog').trigger( "click" );
         }
 
         //log with the code
