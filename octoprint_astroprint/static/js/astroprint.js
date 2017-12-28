@@ -713,7 +713,7 @@ $(function () {
         //log with the code
         self._getUrlParameter = function (sParam) {
             var sPageURL = decodeURIComponent(window.location.search.substring(1)),
-             sURLVariables = sPageURL.split('&'),
+                sURLVariables = sPageURL.split('&'),
                 sParameterName,
                 i;
 
