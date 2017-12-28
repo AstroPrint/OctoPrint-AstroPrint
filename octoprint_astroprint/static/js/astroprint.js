@@ -57,11 +57,11 @@ $(function () {
         });
 
         self.indexPagesToShow = ko.computed(function () {
-            limitPageNumber = 5
-            start = Math.max((self.filteredCurrentPage() - Math.floor(limitPageNumber / 2)), 1);
-            minDesviation = (self.filteredCurrentPage() - Math.floor(limitPageNumber / 2)) > 0 ? 0 : Math.ceil(limitPageNumber / 2) - self.filteredCurrentPage()
-            end = Math.min((self.filteredCurrentPage() + (Math.floor(limitPageNumber / 2) + minDesviation)), self.totalPages())
-            maxDesviation = self.totalPages() - (self.filteredCurrentPage() + Math.floor(limitPageNumber / 2) + minDesviation) >= 0 ? 0 : (Math.floor(limitPageNumber / 2) - (self.totalPages() - self.filteredCurrentPage()))
+            var limitPageNumber = 5
+            var start = Math.max((self.filteredCurrentPage() - Math.floor(limitPageNumber / 2)), 1);
+            var minDesviation = (self.filteredCurrentPage() - Math.floor(limitPageNumber / 2)) > 0 ? 0 : Math.ceil(limitPageNumber / 2) - self.filteredCurrentPage()
+            var end = Math.min((self.filteredCurrentPage() + (Math.floor(limitPageNumber / 2) + minDesviation)), self.totalPages())
+            var maxDesviation = self.totalPages() - (self.filteredCurrentPage() + Math.floor(limitPageNumber / 2) + minDesviation) >= 0 ? 0 : (Math.floor(limitPageNumber / 2) - (self.totalPages() - self.filteredCurrentPage()))
             start = Math.max((self.filteredCurrentPage() - (Math.floor(limitPageNumber / 2) + maxDesviation)), 1);
             if (end < 1) {
                 return ko.observable(Array(1 - start + 1).fill(start).map((a, b) => { return a + b }).filter(i => i >= start))
@@ -257,13 +257,13 @@ $(function () {
                         break;
                     case "userLogged":
                         if (!self.isOctoprintAdmin()) {
-                            logTries = 5; //handle asyncronous login state from octoprint
+                            var logTries = 5; //handle asyncronous login state from octoprint
                             self.userLogged();
                         }
                         break;
                     case "userLoggedOut":
                         if (self.isOctoprintAdmin()) {
-                            logOutTries = 5;
+                            var logOutTries = 5;
                             self.userLoggedOut();
                         }
                         break;
@@ -416,7 +416,7 @@ $(function () {
         };
 
         //Send from event (user allready has benn deleted from database)
-        self.error401handeler = function () {
+        self.error401handling = function () {
             self.astroprintUser(false);
             new PNotify({
                 title: gettext("AstroPrint session expired"),
@@ -454,8 +454,8 @@ $(function () {
                 url: PLUGIN_BASEURL + "astroprint/designs",
                 start_time: new Date().getTime(),
                 success: function (data) {
-                    designs = [];
-                    for (design of data.data) {
+                    var designs = [];
+                    for (let design of data.data) {
                         designs.push(
                             new Design(design.id, design.name, design.images.square, design.print_file_count, design.allow_download)
                         );
@@ -484,7 +484,7 @@ $(function () {
                 },
                 error: function (data) {
                     if (data.status == 401) {
-                        self.error401handeler();
+                        self.error401handling();
                     } else {
                         self.designsRetrieved("error");
                         new PNotify({
@@ -515,8 +515,8 @@ $(function () {
                                 },
                                 start_time: new Date().getTime(),
                                 success: function (data) {
-                                    printFiles = [];
-                                    for (p of data.data) {
+                                    var printFiles = [];
+                                    for (let p of data.data) {
                                         printFiles.push(
                                             new PrintFile(p.id, p.created, p.filename, design.image, p.info.size.x, p.info.size.y, p.info.size.z, p.info.print_time, p.info.layer_height, p.info.layer_count, p.info.filament_length, p.info.filament_volume, p.info.filament_weight, p.info.total_filament, p.format, p.printer.name, p.material.name, p.quality)
                                         );
@@ -528,7 +528,7 @@ $(function () {
                                 },
                                 error: function (data) {
                                     if (data.status == 401) {
-                                        self.error401handeler();
+                                        self.error401handling();
                                     } else {
                                         design.charginPrintfiles(false);
                                         new PNotify({
@@ -559,7 +559,7 @@ $(function () {
         self.downloadDesign = function (design) {
             if (self.isOctoprintAdmin()) {
                 if (!self.downloadDialog().downloading() || self.downloadDialog().progress() == 100) {
-                    name = design.name
+                    var name = design.name
                     if (name.toLowerCase().substr(name.lastIndexOf('.') + 1, 3) != 'stl') {
                         name += '.stl';
                     }
@@ -575,7 +575,7 @@ $(function () {
                         },
                         error: function (error) {
                             if (error.status == 401) {
-                                self.error401handeler();
+                                self.error401handling();
                             } else {
                                 design.downloading(false);
                                 var text = "There was an error retrieving design, please try again later.";
@@ -623,7 +623,7 @@ $(function () {
                         },
                         error: function (error) {
                             if (error.status == 401) {
-                                self.error401handeler();
+                                self.error401handling();
                             } else {
                                 printFile.downloading(false);
                                 var text = "There was an error retrieving design, please try again later.";
@@ -713,11 +713,11 @@ $(function () {
         //log with the code
         self._getUrlParameter = function (sParam) {
             var sPageURL = decodeURIComponent(window.location.search.substring(1)),
-                sURLVariables = sPageURL.split('&'),
+             sURLVariables = sPageURL.split('&'),
                 sParameterName,
                 i;
 
-            for (i = 0; i < sURLVariables.length; i++) {
+            for (let i = 0; i < sURLVariables.length; i++) {
                 sParameterName = sURLVariables[i].split('=');
                 if (sParameterName[0] === sParam) {
                     return sParameterName[1] === undefined ? true : sParameterName[1];
