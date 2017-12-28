@@ -1,59 +1,58 @@
 
 <form class="form-horizontal">
-    <h3>Camera</h3>
-    <div class="control-group">
-        <div class="control-group" data-bind="if: (cam_status() && cam_status()!= 'charging')">
-            <i class="blink icon-circle"></i> Camera connected
-        </div>
-        <div class="control-group" data-bind="ifnot: cam_status">
-            <div class="no-camera"><i class="icon-circle"></i> Camera not connected</div>
-            <div class="scan-camera-button" data-bind="click : scanForCamera"><i class="icon-facetime-video"></i>Scan for Camera</div>
-        </div>
-        <div class="control-group" data-bind="if: (cam_status() == 'charging')">
-            <span><i class="icon-spinner icon-spin"></i></span>
-        </div>
-    </div>
-    <h3>Printer Settings</h3>
-    <div class="control-group">
+    <div data-bind="ifnot: astroprintUser()">
+      <h3>Connect to your AstroPrint Account</h3>
         <div class="control-group">
-            <label class="control-label">Max extruder temperature:</label>
-            <div class="controls">
-                <input type="number" class="input-mini text-right" data-bind="value: settings.settings.plugins.astroprint.max_nozzle_temp">
-                <span>°C</span>
+            <div class="control-group">
+                <p>To use and configure this plugin you need to connect it to your AstroPrint Account.</p>
+                <p>You can see more instructions in the AstroPrint Tab.</p>
             </div>
         </div>
         <div class="control-group">
-           <label class="control-label">Max bed temperature:</label>
-            <div class="controls">
-                <input type="number" class="input-mini text-right" data-bind="value: settings.settings.plugins.astroprint.max_bed_temp">
-                <span class="add-on">°C</span>
-            </div>
+            <div class="scan-camera-button" data-bind="click: goToAstroPrintTab">Open AstroPrint Tab</div>
         </div>
     </div>
-    <div>
-        <h3>Remote Control Options</h3>
+    <div data-bind="if: astroprintUser()">
+        <h3>Camera</h3>
         <div class="control-group">
-            <div data-bind="ifnot: settings.settings.api.allowCrossOrigin">
-                <a id="goToastrocors" href="#astrocors"></a>
-                <h4 id="astrocors">Cross Origin Resource Sharing</h4>
-                <p class="warn-box"><i class="icon-warning-sign" aria-hidden="true"></i>Allowing Cross Origin Resource Sharing is not enabled and it's necesary to control this box via the iOS App, it can be activated in API settings</p>
-                <a class="btn btn-primary" data-bind="click: moveToApi">Go to API settings</a>
+            <div class="control-group" data-bind="if: (cam_status() && cam_status()!= 'charging')">
+                <i class="blink icon-circle"></i> Camera connected
             </div>
-            <div data-bind="ifnot: settings.settings.accessControl_enabled">
-                <h4>Access Control</h4>
-                <input type="checkbox" data-bind="checked: settings.settings.plugins.astroprint.access_control_enabled">
-                Access Control Enabled
-                <p class="warn-box">
-                    <i class="icon-warning-sign" aria-hidden="true"></i>
-                    When access control is disabled you OctoPrint device can be accessed and controlled by any AstroPrint Mobile app
-                    in your local network without being logged into your AstroPrint Account.
-                    <br><br>
-                    Note enabling this settings when your OctoPrint installation is accessible over the internet,
-                    makes your printer accessible by everyone when no AstroPrint Account is linked.
-                </p>
+            <div class="control-group" data-bind="ifnot: cam_status">
+                <div class="no-camera"><i class="icon-circle"></i> Camera not connected</div>
+                <div class="scan-camera-button" data-bind="click : scanForCamera"><i class="icon-facetime-video"></i>Scan for Camera</div>
+            </div>
+            <div class="control-group" data-bind="if: (cam_status() == 'charging')">
+                <span><i class="icon-spinner icon-spin"></i></span>
+            </div>
+        </div>
+        <h3>Printer Settings</h3>
+        <div class="control-group">
+            <div class="control-group">
+                <label class="control-label">Max extruder temperature:</label>
+                <div class="controls">
+                    <input type="number" class="input-mini text-right" data-bind="value: settings.settings.plugins.astroprint.max_nozzle_temp">
+                    <span>°C</span>
+                </div>
+            </div>
+            <div class="control-group">
+            <label class="control-label">Max bed temperature:</label>
+                <div class="controls">
+                    <input type="number" class="input-mini text-right" data-bind="value: settings.settings.plugins.astroprint.max_bed_temp">
+                    <span class="add-on">°C</span>
+                </div>
+            </div>
+        </div>
+        <div data-bind="ifnot: settings.settings.api.allowCrossOrigin">
+            <h3>Remote Control Options</h3>
+            <div class="control-group">
+                <div>
+                    <a id="goToastrocors" href="#astrocors"></a>
+                    <h4 id="astrocors">Cross Origin Resource Sharing</h4>
+                    <p class="warn-box"><i class="icon-warning-sign" aria-hidden="true"></i>Allowing Cross Origin Resource Sharing is not enabled and it's necesary to control this box via the iOS App, it can be activated in API settings</p>
+                    <a class="btn btn-primary" data-bind="click: moveToApi">Go to API settings</a>
+                </div>
             </div>
         </div>
     </div>
-
-
 </form>
