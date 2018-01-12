@@ -258,13 +258,13 @@ $(function () {
                     case "userLogged":
                         if (!self.isOctoprintAdmin()) {
                             var logTries = 5; //handle asyncronous login state from octoprint
-                            self.userLogged();
+                            self.userLogged(logTries);
                         }
                         break;
                     case "userLoggedOut":
                         if (self.isOctoprintAdmin()) {
                             var logOutTries = 5;
-                            self.userLoggedOut();
+                            self.userLoggedOut(logOutTries);
                         }
                         break;
                     case "astroPrintUserLoggedOut":
@@ -277,7 +277,7 @@ $(function () {
             }
         }
 
-        self.userLogged = function () {
+        self.userLogged = function (logTries) {
             setTimeout(function () {
                 logTries--;
                 if (self.loginState.isAdmin() && !self.isOctoprintAdmin()) {
@@ -288,12 +288,12 @@ $(function () {
                     self.isOctoprintAdmin(self.loginState.isAdmin());
                     self.initialice_variables();
                 } else if (logTries > 0 && !self.isOctoprintAdmin()) {
-                    self.userLogged();
+                    self.userLogged(logTries);
                 }
             }, 500)
         }
 
-        self.userLoggedOut = function () {
+        self.userLoggedOut = function (logOutTries) {
             logOutTries--;
             setTimeout(function () {
                 if (!self.loginState.isAdmin() && self.isOctoprintAdmin()) {
@@ -301,7 +301,7 @@ $(function () {
                     self.astroprintUser(null);
                     self.designList([]);
                 } else if (logOutTries > 0 && self.isOctoprintAdmin()) {
-                    self.userLoggedOut();
+                    self.userLoggedOut(logOutTries);
                 }
             }, 500)
         }
