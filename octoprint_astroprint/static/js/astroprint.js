@@ -390,9 +390,21 @@ $(function () {
                     });
                 },
                 error: function (error) {
+                    var title;
+                    var text;
+                    if (error.status && error.status == 403){
+                        title = gettext("Login falied: Forbidden")
+                        text = gettext("Octoprint admin user must be logged to link Astroprint account.")
+                    } else if ( error.responseJSON.error ) {
+                        title =  gettext("Login falied: " + error.responseJSON.error)
+                        text = gettext(error.responseJSON.error_description)
+                    } else {
+                        title =  gettext("Login falied")
+                        text = gettext("There was an error linking your Astroprint account, please try again later.")
+                    }
                     new PNotify({
-                        title: gettext("Login falied: " + error.responseJSON.error),
-                        text: gettext(error.responseJSON.error_description),
+                        title: title,
+                        text: text,
                         type: "error"
                     });
                 }
