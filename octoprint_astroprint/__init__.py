@@ -282,7 +282,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 			self._printerListener.startPrint(payload['file'])
 		if  event in printEvents:
 			self.sendSocketInfo()
-			if self.user:
+			if self.user and self.astroprintCloud:
 				self.astroprintCloud.sendCurrentData()
 
 		return
