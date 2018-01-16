@@ -351,13 +351,13 @@ $(function () {
         self.authorizeAstroprint = function () {
             var ap_access_key = self.access_key()
             if (ap_access_key){
-              var currentUrl = window.location.href.split('?')[0];
+              var currentUrl = encodeURI(window.location.href.split('?')[0]);
               var url = astroprint_variables.appSite + "/authorize" +
                   "?client_id=" + astroprint_variables.appId +
                   "&redirect_uri=" + currentUrl +
-                  "&scope=profile:read project:read design:read design:download print-file:read print-file:download print-job:read device:connect"+
+                  "&scope=" + "profile:read project:read design:read design:download print-file:read print-file:download print-job:read device:connect"+
                   "&state="+ap_access_key+
-                  "&response_type=code"
+                  "&response_type=code";
               location.href = url;
             } else {
                 new PNotify({
