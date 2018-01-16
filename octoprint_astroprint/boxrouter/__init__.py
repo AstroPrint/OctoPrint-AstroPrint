@@ -50,11 +50,6 @@ class AstroprintBoxRouterClient(WebSocketClient):
 		self.unregisterEvents()
 
 	def send(self, data):
-		try:
-			info = json.loads(data)
-		except socket.error as e:
-			self._logger.error('Error on client boxrouter send: %s' % e)
-			info = None
 		with self._condition:
 			if not self.terminated:
 				try:
@@ -410,8 +405,6 @@ class AstroprintBoxRouter(object):
 			platform = sys.platform
 			localIpAddress = octoprint.util.address_for_client("google.com", 80)
 			mayor, minor, pacth = self.plugin.get_plugin_version().split(".")
-			print("this is the version sent:")
-			print "v%s.%s(%s)" % (mayor, minor, pacth)
 			return {
 			 	'type': 'auth',
 			 	'data': {
@@ -419,7 +412,7 @@ class AstroprintBoxRouter(object):
 			 		'boxId': self.boxId,
 			 		'variantId': self.plugin.get_settings().get(["product_variant_id"]),
 			 		'boxName': nmhostname,
-			 		'swVersion': "v%s.%s(%s)" % (mayor, minor, pacth),
+			 		'swVersion': "OctoPrint Plugin - v%s.%s(%s)" % (mayor, minor, pacth),
 			 		'platform': platform,
 			 		'localIpAddress': localIpAddress,
 			 		'publicKey': self._publicKey,
