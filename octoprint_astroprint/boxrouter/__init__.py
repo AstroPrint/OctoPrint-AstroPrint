@@ -360,7 +360,7 @@ class AstroprintBoxRouter(object):
 			self._printerListener = self.plugin.get_printer_listener()
 		if not self._eventSender:
 			self._eventSender = EventSender(self)
-		self._eventSender.connect()
+			self._eventSender.connect()
 		self.watcherRegistered = True
 
 	def unregisterEvents(self):
