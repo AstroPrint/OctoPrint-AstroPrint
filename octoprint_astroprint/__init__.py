@@ -282,7 +282,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 			self._printerListener.startPrint(payload['file'])
 		if  event in printEvents:
 			self.sendSocketInfo()
-			if self.user:
+			if self.user and self.astroprintCloud:
 				self.astroprintCloud.sendCurrentData()
 
 		return
@@ -296,10 +296,11 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 
 	def count_material(self, comm_instance, phase, cmd, cmd_type, gcode, *args, **kwargs):
 		if self.materialCounter:
-			gcodeHandler = "_gcode_" + gcode
-			if hasattr(self.materialCounter, gcodeHandler):
-				materialCounter = getattr(self.materialCounter, gcodeHandler,None)
-				materialCounter(cmd)
+			if (gcode):
+				gcodeHandler = "_gcode_" + gcode
+				if hasattr(self.materialCounter, gcodeHandler):
+					materialCounter = getattr(self.materialCounter, gcodeHandler,None)
+					materialCounter(cmd)
 
 
 	def is_blueprint_protected(self):

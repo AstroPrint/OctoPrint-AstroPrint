@@ -41,68 +41,53 @@ class AstroprintCloud():
 		self._logger = self.plugin.get_logger()
 		self._printer = plugin.get_printer()
 		self._file_manager = plugin.get_file_manager()
-		user = self.db.getUser()
 		self.plugin.cameraManager.astroprintCloud = self
 		self.plugin.get_printer_listener().astroprintCloud = self
 		self.statePayload = None
-
+		user = self.db.getUser()
 		if user:
-			self.token = user.token
-			self.refresh_token = user.refresh_token
-			self.last_request = user.last_request
-			self.expires = user.expires
-			self.tokenManagment(user)
+			self.plugin.user = user
+			self.getUserInfo()
+
+	def tokenIsExpired(self):
+		return self.plugin.user.expires - round(time.time()) < 60
+
+	def getToken(self):
+		if not self.tokenIsExpired():
+			return self.plugin.user.token
+
 		else:
-			self.connectBoxrouter()
+			return self.refresh()
 
 
 
-	def tokenManagment(self, user):
-		self.plugin.user = user
-		if ( (self.expires - 300) >  round(time.time())):
-			self.timer = Timer((self.expires - 300) -  round(time.time()), self.refresh)
-			self.timer.daemon = True
-			self.timer.start()
-			self.connectBoxrouter()
-		else:
-			self.refresh(True)
-
-	def refresh(self, login_refresh=False):
+	def refresh(self):
 		try:
 			r = requests.post(
 				"%s/token" % (self.apiHost),
 				data = {
 					"client_id": self.appId,
 					"grant_type": "refresh_token",
-					"refresh_token": self.refresh_token
+					"refresh_token": self.plugin.user.refresh_token
 					},
 			)
 			r.raise_for_status()
 			data = r.json()
 			self.plugin.user.token = data['access_token']
-			self.token = self.plugin.user.token
 			self.plugin.user.refresh_token = data['refresh_token']
-			self.refresh_token = self.plugin.user.refresh_token
 			self.plugin.user.last_request = round(time.time())
 			self.plugin.user.expires = round(self.plugin.user.last_request + data['expires_in'])
-			self.expires = self.plugin.user.expires
 			self.db.updateUser(self.plugin.user)
-			self.timer = Timer(( data['expires_in'] - 300), self.refresh)
-			self.timer.daemon = True
-			self.timer.start()
-			if (login_refresh):
-				self.connectBoxrouter()
+			return self.plugin.user.token
 		except requests.exceptions.HTTPError as err:
-				if err.response.status_code == 400 or err.response.status_code == 401:
-					self._logger.warning("refresh token expired, AstroPrint user logged out.")
-					self.plugin.send_event("logOut")
-					self.unautorizedHandeler()
-				else:
-					self.timer = Timer(10, self.refresh)
-					self.timer.daemon = True
-					self.timer.start()
+			if err.response.status_code == 400 or err.response.status_code == 401:
+				self._logger.warning("refresh token expired, AstroPrint user logged out.")
+				self.plugin.send_event("logOut")
+				self.unautorizedHandeler()
+			pass
 		except requests.exceptions.RequestException as e:
 			self._logger.error(e)
+			pass
 
 	def loginAstroPrint(self, code, url, apAccessKey):
 		try:
@@ -118,16 +103,13 @@ class AstroprintCloud():
 			)
 			r.raise_for_status()
 			data = r.json()
-			self.user = AstroprintUser()
-			self.user.token = data['access_token']
-			self.token = self.user.token
-			self.user.refresh_token = data['refresh_token']
-			self.refresh_token = self.user.refresh_token
-			self.user.last_request = round(time.time())
-			self.user.accessKey = apAccessKey
-			self.user.expires = round(self.user.last_request + data['expires_in'])
-			self.expires = self.user.expires
-			return self.getUserInfo()
+			self.plugin.user = AstroprintUser()
+			self.plugin.user.token = data['access_token']
+			self.plugin.user.refresh_token = data['refresh_token']
+			self.plugin.user.last_request = round(time.time())
+			self.plugin.user.accessKey = apAccessKey
+			self.plugin.user.expires = round(self.plugin.user.last_request + data['expires_in'])
+			return self.getUserInfo(True)
 
 		except requests.exceptions.HTTPError as err:
 			self._logger.error(err.response.text)
@@ -136,35 +118,35 @@ class AstroprintCloud():
 			self._logger.error(e)
 			return jsonify({'error': "Internal server error"}), 500, {'ContentType':'application/json'}
 
-	def getUserInfo(self):
+	def getUserInfo(self, saveUser = False):
 		try:
+			token = self.getToken()
 			r = requests.get(
 				"%s/accounts/me" % (self.apiHost),
 				headers={'Content-Type': 'application/x-www-form-urlencoded',
-						'authorization': ("bearer %s" %self.user.token) }
+						'authorization': ("bearer %s" %token) }
 			)
 			r.raise_for_status()
 			data = r.json()
-			self.user.userId = data['id']
-			self.user.email = data['email']
-			self.user.name = data['name']
-			self.plugin.user = self.user
-			self.db.saveUser(self.plugin.user)
+			self.plugin.user.userId = data['id']
+			self.plugin.user.email = data['email']
+			self.plugin.user.name = data['name']
 			self.plugin.sendSocketInfo()
-			self.timer = Timer((self.expires - 300) -  round(time.time()), self.refresh)
-			self.timer.daemon = True
-			self.timer.start()
 			self.connectBoxrouter()
-			self._logger.info("%s logged to AstroPrint" % self.user.name)
-			user = {'name': self.user.name, 'email': self.user.email}
-			return jsonify(user), 200, {'ContentType':'application/json'}
+			if saveUser:
+				self.db.saveUser(self.plugin.user)
+				user = {'name': self.plugin.user.name, 'email': self.plugin.user.email}
+				self._logger.info("%s logged to AstroPrint" % self.plugin.user.name)
+				return jsonify(user), 200, {'ContentType':'application/json'}
 
 		except requests.exceptions.HTTPError as err:
 			if (err.response.status_code == 401):
 				self.unautorizedHandeler()
-			return jsonify(json.loads(err.response.text)), err.response.status_code, {'ContentType':'application/json'}
+			if saveUser:
+				return jsonify(json.loads(err.response.text)), err.response.status_code, {'ContentType':'application/json'}
 		except requests.exceptions.RequestException as e:
-			return jsonify({'error': "Internal server error"}), 500, {'ContentType':'application/json'}
+			if saveUser:
+				return jsonify({'error': "Internal server error"}), 500, {'ContentType':'application/json'}
 
 	def logoutAstroPrint(self):
 		self.unautorizedHandeler()
@@ -189,6 +171,7 @@ class AstroprintCloud():
 
 	def startPrintJob(self, print_file_id= None, print_file_name= None):
 		try:
+			token = self.getToken()
 			data = {
 					"box_id": self.bm.boxId,
 					"product_variant_id": self.plugin.get_settings().get(["product_variant_id"]),
@@ -203,7 +186,7 @@ class AstroprintCloud():
 				"%s/print-jobs" % (self.apiHost),
 				json = data,
 				headers={'Content-Type': 'application/x-www-form-urlencoded',
-						'authorization': ("bearer %s" %self.plugin.user.token)},
+						'authorization': ("bearer %s" %token)},
 				stream=True
 			)
 
@@ -219,7 +202,7 @@ class AstroprintCloud():
 
 	def updatePrintJob(self, status, totalConsumedFilament):
 		try:
-
+			token = self.getToken()
 			data = {'status': status}
 
 			if totalConsumedFilament:
@@ -229,7 +212,7 @@ class AstroprintCloud():
 				"%s/print-jobs/%s" % (self.apiHost, self.currentlyPrinting),
 				json = data,
 				headers={'Content-Type': 'application/x-www-form-urlencoded',
-						'authorization': ("bearer %s" %self.plugin.user.token)},
+						'authorization': ("bearer %s" %token)},
 				stream=True
 			)
 
@@ -286,10 +269,11 @@ class AstroprintCloud():
 		self._currentDownlading = printFileId
 		self._downloading= True
 		try:
+			token = self.getToken()
 			r = requests.get(
 				"%s/printfiles/%s" % (self.apiHost, printFileId),
 				headers={'Content-Type': 'application/x-www-form-urlencoded',
-						'authorization': ("bearer %s" %self.plugin.user.token) },
+						'authorization': ("bearer %s" %token) },
 						stream=True
 			)
 			printFile = r.json()
@@ -326,10 +310,11 @@ class AstroprintCloud():
 		if not printFile:
 			return None
 		try:
+			token = self.getToken()
 			r = requests.get(
 				"%s/printfiles/%s/download?download_info=true" % (self.apiHost, printFile['id']),
 				headers={'Content-Type': 'application/x-www-form-urlencoded',
-						'authorization': ("bearer %s" %self.plugin.user.token) },
+						'authorization': ("bearer %s" %token) },
 						stream=True
 			)
 			downloadInfo = r.json()
@@ -416,10 +401,11 @@ class AstroprintCloud():
 
 	def getDesigns(self):
 		try:
+			token = self.getToken()
 			r = requests.get(
 				"%s/designs" % (self.apiHost),
 				headers={'Content-Type': 'application/x-www-form-urlencoded',
-						'authorization': ("bearer %s" %self.plugin.user.token) }
+						'authorization': ("bearer %s" %token) }
 			)
 			r.raise_for_status()
 			data = r.json()
@@ -434,10 +420,11 @@ class AstroprintCloud():
 
 	def getDesignDownloadUrl(self, designId, name):
 		try:
+			token = self.getToken()
 			r = requests.get(
 				"%s/designs/%s/download" % (self.apiHost, designId),
 				headers={'Content-Type': 'application/x-www-form-urlencoded',
-						'authorization': ("bearer %s" %self.plugin.user.token) }
+						'authorization': ("bearer %s" %token) }
 			)
 			r.raise_for_status()
 			data = r.json()
@@ -454,10 +441,11 @@ class AstroprintCloud():
 	def getPrintFiles(self, designId):
 
 		try:
+			token = self.getToken()
 			r = requests.get(
 				"%s/designs/%s/printfiles" % (self.apiHost, designId),
 				headers={'Content-Type': 'application/x-www-form-urlencoded',
-						'authorization': ("bearer %s" %self.plugin.user.token) }
+						'authorization': ("bearer %s" %token) }
 			)
 			r.raise_for_status()
 			data = r.json()
@@ -486,11 +474,11 @@ class AstroprintCloud():
 			data['print_job_id'] = self.currentlyPrinting
 
 		try:
-
+			token = self.getToken()
 			r = requests.post(
 				"%s/timelapse" % self.apiHost,
 				headers={'Content-Type': 'application/x-www-form-urlencoded',
-						'authorization': ("bearer %s" %self.plugin.user.token) },
+						'authorization': ("bearer %s" %token) },
 				stream=True, timeout= (10.0, 60.0),
 				data = data
 			)
@@ -519,12 +507,13 @@ class AstroprintCloud():
 
 	def uploadImageFile(self, print_id, imageBuf):
 			try:
+				token = self.getToken()
 				m = MultipartEncoder(fields=[('file',('snapshot.jpg', imageBuf))])
 				r = requests.post(
 					"%s/timelapse/%s/image" % (self.apiHost, print_id),
 					data= m,
 					headers= {'Content-Type': m.content_type,
-					'authorization': ("bearer %s" %self.plugin.user.token) }
+					'authorization': ("bearer %s" %token) }
 				)
 				m = None #Free the memory?
 				status_code = r.status_code

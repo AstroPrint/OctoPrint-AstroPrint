@@ -258,13 +258,13 @@ $(function () {
                     case "userLogged":
                         if (!self.isOctoprintAdmin()) {
                             var logTries = 5; //handle asyncronous login state from octoprint
-                            self.userLogged();
+                            self.userLogged(logTries);
                         }
                         break;
                     case "userLoggedOut":
                         if (self.isOctoprintAdmin()) {
                             var logOutTries = 5;
-                            self.userLoggedOut();
+                            self.userLoggedOut(logOutTries);
                         }
                         break;
                     case "astroPrintUserLoggedOut":
@@ -277,7 +277,7 @@ $(function () {
             }
         }
 
-        self.userLogged = function () {
+        self.userLogged = function (logTries) {
             setTimeout(function () {
                 logTries--;
                 if (self.loginState.isAdmin() && !self.isOctoprintAdmin()) {
@@ -288,12 +288,12 @@ $(function () {
                     self.isOctoprintAdmin(self.loginState.isAdmin());
                     self.initialice_variables();
                 } else if (logTries > 0 && !self.isOctoprintAdmin()) {
-                    self.userLogged();
+                    self.userLogged(logTries);
                 }
             }, 500)
         }
 
-        self.userLoggedOut = function () {
+        self.userLoggedOut = function (logOutTries) {
             logOutTries--;
             setTimeout(function () {
                 if (!self.loginState.isAdmin() && self.isOctoprintAdmin()) {
@@ -301,7 +301,7 @@ $(function () {
                     self.astroprintUser(null);
                     self.designList([]);
                 } else if (logOutTries > 0 && self.isOctoprintAdmin()) {
-                    self.userLoggedOut();
+                    self.userLoggedOut(logOutTries);
                 }
             }, 500)
         }
@@ -352,12 +352,14 @@ $(function () {
             var ap_access_key = self.access_key()
             if (ap_access_key){
               var currentUrl = window.location.href.split('?')[0];
+              currentUrl = window.location.href.split('#')[0];
+              currentUrl = encodeURI(currentUrl);
               var url = astroprint_variables.appSite + "/authorize" +
                   "?client_id=" + astroprint_variables.appId +
                   "&redirect_uri=" + currentUrl +
-                  "&scope=profile:read project:read design:read design:download print-file:read print-file:download print-job:read device:connect"+
+                  "&scope=" + encodeURI("profile:read project:read design:read design:download print-file:read print-file:download print-job:read device:connect")+
                   "&state="+ap_access_key+
-                  "&response_type=code"
+                  "&response_type=code";
               location.href = url;
             } else {
                 new PNotify({
@@ -390,9 +392,21 @@ $(function () {
                     });
                 },
                 error: function (error) {
+                    var title;
+                    var text;
+                    if (error.status && error.status == 403){
+                        title = gettext("Login falied: Forbidden")
+                        text = gettext("Octoprint admin user must be logged to link Astroprint account.")
+                    } else if ( error.responseJSON.error ) {
+                        title =  gettext("Login falied: " + error.responseJSON.error)
+                        text = gettext(error.responseJSON.error_description)
+                    } else {
+                        title =  gettext("Login falied")
+                        text = gettext("There was an error linking your Astroprint account, please try again later.")
+                    }
                     new PNotify({
-                        title: gettext("Login falied: " + error.responseJSON.error),
-                        text: gettext(error.responseJSON.error_description),
+                        title: title,
+                        text: text,
                         type: "error"
                     });
                 }
