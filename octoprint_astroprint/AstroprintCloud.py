@@ -135,6 +135,7 @@ class AstroprintCloud():
 			self.connectBoxrouter()
 			if saveUser:
 				self.db.saveUser(self.plugin.user)
+				user = {'name': self.plugin.user.name, 'email': self.plugin.user.email}
 				self._logger.info("%s logged to AstroPrint" % self.plugin.user.name)
 				return jsonify(user), 200, {'ContentType':'application/json'}
 

@@ -98,7 +98,7 @@ class PrinterListener(PrinterCallback):
 			'operational': flags['operational'],
 			'printing': flags['printing'] or flags['paused'],
 			'paused': flags['paused'],
-			'camera': self.cameraManager.cameraActive,
+			'camera': self.cameraManager.cameraActive if self.cameraManager else None,
 			'heatingUp': self._plugin.printerIsHeating(),
 			'state': data['state']['text'].lower()
 		}
