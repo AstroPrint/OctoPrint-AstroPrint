@@ -72,7 +72,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 	materialCounter= None
 	_printerListener = None
 
-	def __init__(self):
+	def initialize(self):
 		def logOutHandler(sender, **kwargs):
 			self.onLogout()
 
