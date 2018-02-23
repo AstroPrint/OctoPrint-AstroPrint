@@ -409,9 +409,11 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 		if self.user and self.user.email == email and self.user.accessKey == accessKey and self.user.userId:
 			# only respond positively if we have an AstroPrint user and their mail AND accessKey match AND
 			# they also have a valid userId
-			return jsonify(api_key=self._settings.global_get(["api", "key"],
-								ws_token=create_ws_token(self.user.userId)))
+			return jsonify(api_key=self._settings.global_get(["api", "key"]),
+								ws_token=create_ws_token(self.user.userId))
 
+		if not self.user:
+			abort (401)
 		# everyone else gets the cold shoulder
 		abort(403)
 
@@ -445,7 +447,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 	@octoprint.plugin.BlueprintPlugin.route("/api/printer-profile", methods=["GET"])
 	@admin_permission.require(403)
 	def printer_profile_patch(self):
-		printerProfile = self._printer.get_current_connection()[3]
+		printerProfile = self._printer_profile_manager.get_current_or_default()
 		profile = {
 			'driver': "marlin", #At the moment octopi only supports marlin
 			'extruder_count': printerProfile['extruder']['count'],
@@ -464,7 +466,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 
 	@octoprint.plugin.BlueprintPlugin.route('/api/job', methods=['GET'])
 	@admin_permission.require(403)
-	def jobState():
+	def jobState(self):
 		currentData = self._printer.get_current_data()
 		return jsonify({
 			"job": currentData["job"],
