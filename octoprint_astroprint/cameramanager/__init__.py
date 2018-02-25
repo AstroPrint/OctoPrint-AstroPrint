@@ -1,4 +1,5 @@
 # coding=utf-8
+
 __author__ = "AstroPrint Product Team <product@astroprint.com>"
 __license__ = "GNU Affero General Public License http://www.gnu.org/licenses/agpl.html"
 __copyright__ = "Copyright (C) 2017 3DaGoGo, Inc - Released under terms of the AGPLv3 License"
@@ -6,8 +7,18 @@ __copyright__ = "Copyright (C) 2017 3DaGoGo, Inc - Released under terms of the A
 import time
 import requests
 from StringIO import StringIO
-from PIL import Image
 from threading import Event
+import traceback
+import warnings
+
+try:
+	from PIL import Image
+except ImportError:
+	Image = None
+	import subprocess
+	traceback.print_exc()
+	warnings.warn("PIL/Pillow is not available. Will fallback to "
+				  + "ImageMagick, make sure it is installed.")
 
 # singleton
 _instance = None
@@ -119,20 +130,33 @@ class CameraManager(object):
 				pic = r.content
 				if pic is not None:
 					if self._settings.global_get(["webcam", "flipH"]) or self._settings.global_get(["webcam", "flipV"]) or self._settings.global_get(["webcam", "rotate90"]):
-						buf = StringIO()
-						buf.write(pic)
-						image = Image.open(buf)
-						if self._settings.global_get(["webcam", "flipH"]):
-							image = image.transpose(Image.FLIP_LEFT_RIGHT)
-						if self._settings.global_get(["webcam", "flipV"]):
-							image = image.transpose(Image.FLIP_TOP_BOTTOM)
-						if self._settings.global_get(["webcam", "rotate90"]):
-							image = image.transpose(Image.ROTATE_90)
-						transformedImage = StringIO()
-						image.save(transformedImage, format="jpeg")
-						transformedImage.seek(0, 2)
-						transformedImage.seek(0)
-						pic = transformedImage.read()
+						if Image:
+							buf = StringIO()
+							buf.write(pic)
+							image = Image.open(buf)
+							if self._settings.global_get(["webcam", "flipH"]):
+								image = image.transpose(Image.FLIP_LEFT_RIGHT)
+							if self._settings.global_get(["webcam", "flipV"]):
+								image = image.transpose(Image.FLIP_TOP_BOTTOM)
+							if self._settings.global_get(["webcam", "rotate90"]):
+								image = image.transpose(Image.ROTATE_90)
+							transformedImage = StringIO()
+							image.save(transformedImage, format="jpeg")
+							transformedImage.seek(0, 2)
+							transformedImage.seek(0)
+							pic = transformedImage.read()
+						else:
+							args = ["convert", "-"]
+							if self._settings.global_get(["webcam", "flipV"]):
+								args += ["-flip"]
+							if self._settings.global_get(["webcam", "flipH"]):
+								args += ["-flop"]
+							if self._settings.global_get(["webcam", "rotate90"]):
+								args += ["-rotate", "90"]
+							args += "jpeg:-"
+							p = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+							pic, _ = p.communicate(pic)
+
 				if not self.cameraActive:
 					self.cameraConnected()
 				return pic
