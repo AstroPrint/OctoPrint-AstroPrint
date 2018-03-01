@@ -102,6 +102,22 @@
             </div>
         </div>
     </div>
+    <div data-bind="if: ((!cam_status() && cam_status() != 'charging') || !settings.settings.api.allowCrossOrigin())">
+        <div class="warn-box" >
+            <div data-bind="if: !cam_status(), click:scanForCamera" class="camera-options">
+                <a href="#" title="Scan for camera">
+                    <span ><i class="fa icon-black fa-info-circle"></i></span>
+                    <span>No camera detected</span>
+                </a>
+            </div>
+            <div class="mobile-options" data-bind="ifnot: settings.settings.api.allowCrossOrigin, click:checkApiOption">
+                <a href="#" title="Cross Origin Resource Access is disabled. The AstroPrint iOS mobile app won't find your printer in the local network. Click to fix.">
+                    <i  class="fa icon-black fa-info-circle"></i>
+                    <span> Cross Origin Resource Access is disabled</span>
+                </a>
+            </div>
+        </div>
+    </div>
     <div data-bind="if: (designsRetrieved() == 'done')" >
         <div class="downloadDialog" data-bind="if: (downloadDialog().downloading() || downloadDialog().failed())">
             <h4>Download Dialog</h4>
@@ -144,16 +160,23 @@
                             <a data-bind="attr:{href: 'https://cloud.astroprint.com/design/info/' + id}"><div class="designImageContainer"><img class="designImage" width="200" height="200" data-bind="attr:{src: image}"/></div></a>
                         </div>
                         <div class="span2 sections-design-row">
-                            <span data-bind="if: downloading">
-                                <span class="center-button">
+                            <span class="center-button">
+                                <span>
+                                    <a title="Cloud Slice" data-bind="attr:{href: 'https://cloud.astroprint.com/design/info/' + id}">
+                                        <span class="btn">
+                                            <i class="fa fa-magic"></i>
+                                        </span>
+                                    </a>
+                                </span>
+                                <span data-bind="if: downloading">
                                     <i class="icon-refresh icon-spin"></i>
                                 </span>
-                            </span>
-                            <span data-bind="if: (allow_download() && !downloading())">
-                                <span class="center-button" >
-                                    <span class="btn" data-bind="css :{disabled : ($root.downloadDialog().downloading() && $root.downloadDialog().progress() < 100)}">
-                                        <span data-bind="click: $root.downloadDesign"><i class="icon icon-cloud-download" data-bind="css :{disabled : $root.downloading}" aria-hidden="true"></i></span>
-                                    </span>
+                                <span data-bind="if: (allow_download() && !downloading())">
+                                    <a title="Download Design">
+                                        <span class="btn" data-bind="css :{disabled : ($root.downloadDialog().downloading() && $root.downloadDialog().progress() < 100)}">
+                                            <span data-bind="click: $root.downloadDesign"><i class="icon icon-cloud-download" data-bind="css :{disabled : $root.downloading}" aria-hidden="true"></i></span>
+                                        </span>
+                                    </a>
                                 </span>
                             </span>
                         </div>

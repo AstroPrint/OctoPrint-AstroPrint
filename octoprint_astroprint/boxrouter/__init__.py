@@ -374,7 +374,7 @@ class AstroprintBoxRouter(object):
 		if self._eventSender:
 			method  = getattr(self._eventSender, event, None)
 			if method:
-				response = method(data)
+				 method(data)
 			else:
 				self._logger.warn('Unknown event type [%s] received' % event)
 

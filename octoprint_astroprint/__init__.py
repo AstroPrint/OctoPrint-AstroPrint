@@ -389,7 +389,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 
 	@octoprint.plugin.BlueprintPlugin.route("/astrobox/identify", methods=["GET"])
 	def identify(self):
-		if not self.astroprintCloud.bm:
+		if not self.astroprintCloud or not self.astroprintCloud.bm:
 			abort(503)
 		return Response(json.dumps({
 			'id': self.astroprintCloud.bm.boxId,
