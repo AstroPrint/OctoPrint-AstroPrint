@@ -144,12 +144,14 @@ class CameraManager(object):
 
 	def addPhotoToTimelapse(self, timelapseId, waitForPhoto = False):
 		#Build text
+		'''
 		printerData = self.plugin.get_printer_listener().get_progress()
-		'''text = "%d%% - Layer %s%s" % (
+		text = "%d%% - Layer %s%s" % (
 			printerData['progress']['completion'],
 			str(printerData['progress']['currentLayer']) if printerData['progress']['currentLayer'] else '--',
 			"/%s" % str(printerData['job']['layerCount'] if printerData['job']['layerCount'] else '')
-		)'''
+		)
+		'''
 		picBuf = self.getPic()
 
 		if picBuf:

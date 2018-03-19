@@ -490,4 +490,3 @@ def __plugin_load__():
 		"octoprint.plugin.softwareupdate.check_config": __plugin_implementation__.get_update_information,
 		"octoprint.comm.protocol.gcode.sent": __plugin_implementation__.count_material
 	}
-

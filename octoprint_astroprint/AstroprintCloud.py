@@ -144,7 +144,7 @@ class AstroprintCloud():
 				self.unautorizedHandeler()
 			if saveUser:
 				return jsonify(json.loads(err.response.text)), err.response.status_code, {'ContentType':'application/json'}
-		except requests.exceptions.RequestException as e:
+		except requests.exceptions.RequestException:
 			if saveUser:
 				return jsonify({'error': "Internal server error"}), 500, {'ContentType':'application/json'}
 
@@ -208,7 +208,7 @@ class AstroprintCloud():
 			if totalConsumedFilament:
 				data['material_used'] = totalConsumedFilament
 
-			r = requests.post(
+			requests.post(
 				"%s/print-jobs/%s" % (self.apiHost, self.currentlyPrinting),
 				json = data,
 				headers={'Content-Type': 'application/x-www-form-urlencoded',
@@ -298,7 +298,7 @@ class AstroprintCloud():
 			if (err.response.status_code == 401):
 				self.unautorizedHandeler()
 			return None
-		except requests.exceptions.RequestException as e:
+		except requests.exceptions.RequestException:
 			payload = {
 				"id" : printFile['id'],
 				"type" : "error",
@@ -334,7 +334,7 @@ class AstroprintCloud():
 			if (err.response.status_code == 401):
 				self.unautorizedHandeler()
 			return None
-		except requests.exceptions.RequestException as e:
+		except requests.exceptions.RequestException:
 
 			payload = {
 				"id" : printFile['id'],
@@ -364,7 +364,7 @@ class AstroprintCloud():
 				os.remove(filepath)
 				if e.code == octoprint.filemanager.storage.StorageError.INVALID_FILE:
 					payload = {
-						"id" : printFile.printFileId,
+						"id" : file.printFileId,
 						"type" : "error",
 						"reason" : e.code
 					}
@@ -372,7 +372,7 @@ class AstroprintCloud():
 					return None
 				elif e.code == octoprint.filemanager.storage.StorageError.ALREADY_EXISTS:
 					payload = {
-						"id" : printFile.printFileId,
+						"id" : file.printFileId,
 						"type" : "error",
 						"reason" : e.code
 					}
@@ -380,7 +380,7 @@ class AstroprintCloud():
 					return None
 				else:
 					payload = {
-						"id" : printFile.printFileId,
+						"id" : file.printFileId,
 						"type" : "error",
 					}
 					self.bm.triggerEvent('onDownload', payload)
@@ -415,7 +415,7 @@ class AstroprintCloud():
 			if (err.response.status_code == 401):
 				self.unautorizedHandeler()
 			return jsonify(json.loads(err.response.text)), err.response.status_code, {'ContentType':'application/json'}
-		except requests.exceptions.RequestException as e:
+		except requests.exceptions.RequestException:
 			return jsonify({'error': "Internal server error"}), 500, {'ContentType':'application/json'}
 
 	def getDesignDownloadUrl(self, designId, name):
@@ -435,7 +435,7 @@ class AstroprintCloud():
 			if (err.response.status_code == 401):
 				self.unautorizedHandeler()
 			return jsonify(json.loads(err.response.text)), err.response.status_code, {'ContentType':'application/json'}
-		except requests.exceptions.RequestException as e:
+		except requests.exceptions.RequestException:
 			return jsonify({'error': "Internal server error"}), 500, {'ContentType':'application/json'}
 
 	def getPrintFiles(self, designId):
@@ -455,7 +455,7 @@ class AstroprintCloud():
 			if (err.response.status_code == 401):
 				self.unautorizedHandeler()
 			return jsonify(json.loads(err.response.text)), err.response.status_code, {'ContentType':'application/json'}
-		except requests.exceptions.RequestException as e:
+		except requests.exceptions.RequestException:
 			return jsonify({'error': "Internal server error"}), 500, {'ContentType':'application/json'}
 
 	def cancelDownload(self, printFileId):
@@ -518,9 +518,9 @@ class AstroprintCloud():
 				m = None #Free the memory?
 				status_code = r.status_code
 
-			except requests.exceptions.HTTPError as err:
+			except requests.exceptions.HTTPError:
 				status_code = 500
-			except requests.exceptions.RequestException as e:
+			except requests.exceptions.RequestException:
 				status_code = 500
 
 			if status_code == 201:

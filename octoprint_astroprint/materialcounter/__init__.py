@@ -23,8 +23,8 @@ class MaterialCounter(object):
 
 
 		# regexes
-		floatPattern = "[-+]?[0-9]*\.?[0-9]+"
-		intPattern = "\d+"
+		floatPattern = r"[-+]?[0-9]*\.?[0-9]+"
+		intPattern = r"\d+"
 		self._regex_paramEFloat = re.compile("E(%s)" % floatPattern)
 		self._regex_paramTInt = re.compile("T(%s)" % intPattern)
 

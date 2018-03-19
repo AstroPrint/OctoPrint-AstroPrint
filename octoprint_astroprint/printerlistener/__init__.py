@@ -57,7 +57,7 @@ class PrinterListener(PrinterCallback):
 		self._logger.error("Fail to analyze Gcode: %s" % parameters['filename'])
 
 	def updateAnalyzedJobInformation(self, progress):
-		analyzedInformation = {"current_layer" : 0, "time_percent_previuos_layers" : 0}
+		#analyzedInformation = {"current_layer" : 0, "time_percent_previuos_layers" : 0}
 		layerChanged = False
 		if not self._currentLayer:
 			self._currentLayer = 1
@@ -166,8 +166,6 @@ class PrinterListener(PrinterCallback):
 			return data
 		else:
 			self.updateAnalyzedJobInformation(data['completion']/100)
-			#timePercentPreviuosLayers = self._timePercentPreviuosLayers - self.last_layer_time_percent
-			timePercentPreviuosLayers = self._timePercentPreviuosLayers
 			data['currentLayer'] = self._currentLayer
 
 			try:
@@ -208,20 +206,5 @@ class PrinterListener(PrinterCallback):
 				data['printTimeLeft'] = estimatedTimeLeft
 
 				return data
-			except Exception, e:
+			except Exception:
 				return data
-
-	def getTimePercenCurrentLayer(currentLayer):
-		try:
-			timePercentPreviousLayers = 0
-			if not currentLayer == 1:
-				currentLayer -= 2
-				for layer in self._analyzed_job_layers["timePerLayers"]:
-					timePercentPreviousLayers += self._comm.timePerLayers[layer-2]['time']
-				return timePercentPreviousLayers
-			else:
-				return 0
-		except:
-			return 0
-
-
