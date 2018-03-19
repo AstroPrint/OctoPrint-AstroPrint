@@ -143,7 +143,6 @@ class AstroprintBoxRouter(object):
 	STATUS_CONNECTING = 'connecting'
 	STATUS_CONNECTED = 'connected'
 	STATUS_ERROR = 'error'
-	ASTROBOX_NAMESPACE_UUID = 'ec35c0da-e6e2-4a50-9c85-3e102fffac48'
 
 	def __init__(self, plugin):
 		self._pendingClientRequests = {}
@@ -193,12 +192,14 @@ class AstroprintBoxRouter(object):
 
 			if os.path.exists(boxIdFile):
 				with open(boxIdFile, 'r') as f:
-					self._boxId = f.read()
+					self._boxId = f.read().strip()
 
 			if not self._boxId:
-				self._boxId = uuid.uuid5(uuid.UUID(self.ASTROBOX_NAMESPACE_UUID), str(uuid.getnode())).hex
+				self._boxId = uuid.uuid4().hex
+
 				with open(boxIdFile, 'w') as f:
 					f.write(self._boxId)
+
 		return self._boxId
 
 	def boxrouter_connect(self):
