@@ -402,7 +402,7 @@ class AstroprintBoxRouter(object):
 		else:
 			from octoprint.server import VERSION
 			import sys
-			nmhostname = socket.gethostname()
+			nmhostname = self.plugin.get_settings().get(["boxName"]),
 			platform = sys.platform
 			localIpAddress = octoprint.util.address_for_client("google.com", 80)
 			mayor, minor, pacth = self.plugin.get_plugin_version().split(".")

@@ -147,6 +147,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 		apiHost="https://api.astroprint.com/v2"
 		webSocket="wss://boxrouter.astroprint.com"
 		product_variant_id = "9e33c7a4303348e0b08714066bcc2750"
+		boxName = socket.gethostname()
 
 
 		return dict(
@@ -156,6 +157,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 			apiHost = apiHost,
 			webSocket = webSocket,
 			product_variant_id = product_variant_id,
+			boxName = boxName,
 			camera = False,
 			#Adittional printer settings
 			max_nozzle_temp = 280, #only for being set by AstroPrintCloud, it wont affect octoprint settings
@@ -393,7 +395,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 			abort(503)
 		return Response(json.dumps({
 			'id': self.astroprintCloud.bm.boxId,
-			'name': socket.gethostname(),
+			'name': self.plugin.get_settings().get(["product_variant_id"]),
 			'version': self._plugin_version,
 			'firstRun': True if self._settings.global_get_boolean(["server", "firstRun"]) else None,
 			'online': True,
@@ -432,7 +434,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 		return Response(
 			json.dumps({
 				'id': self.astroprintCloud.bm.boxId,
-				'name': socket.gethostname(),
+				'name': self.plugin.get_settings().get(["product_variant_id"]),
 				'printing': self._printer.is_printing(),
 				'fileName': fileName,
 				'printerModel': None,
