@@ -71,7 +71,15 @@
 </div>
 
 <!-- View when astroprint user logged -->
-<div id="astroPrintLogged"  style="display:none" class="row-fluid astroPrintView" data-bind="if: (astroprintUser() && isOctoprintAdmin())">
+<div id="astroPrintLogged" style="display:none" class="row-fluid astroPrintView" data-bind="if: (astroprintUser() && isOctoprintAdmin())">
+    <div class="row">
+        <div class="span2"></div>
+        <div class="text-center span8">
+            <h2><a href="#changeBoxName" data-toggle="modal"><i class="icon-cloud"></i> <span data-bind="text: settings.settings.plugins.astroprint.boxName"></span><span style="font-size: 10px"><i class="icon-edit"></i></span></h2></a>
+        </div>
+        <div class="span2">
+        </div>
+    </div>
     <div id="navbar-astroprint" class="navbar navbar-static">
         <div class="navbar-inner">
             <div class="container" style="width: auto;">
@@ -80,11 +88,16 @@
                     <span data-bind="if: (cam_status() == 'charging')"><i class="icon-refresh icon-spin"></i></span>
                     <span class="remove-opt" data-bind="ifnot: cam_status"><i  class="icon-remove"></i></span>
                     <span class="camera-opt" data-bind="if: (!cam_status() &&  cam_status() != 'charging')"><i class="icon-facetime-video"></i></span>
-                    <span class="camera-opt" data-bind="if: (cam_status() && cam_status() != 'charging')"><i style="color: #66ca66" class="icon-facetime-video"></i></span>
                 </a></span>
                 <span class="mobile-options" data-bind="ifnot: settings.settings.api.allowCrossOrigin, click:checkApiOption" >
                 <a title="Cross Origin Resource Access is disabled. The AstroPrint iOS mobile app won't find your printer in the local network. Click to fix." href="#">
                     <span  class="mobile-opt" data-bind="ifnot: settings.settings.api.allowCrossOrigin"><i class="icon-mobile-phone"></i></span>
+                </a>
+                </span>
+                <span class="mobile-options" data-bind="if: (boxrouter_status() == 'error' || boxrouter_status() == 'disconnected' ||boxrouter_status() == 'connecting'), click:connectBoxrouter" >
+                <a title="Astroprint Boxrouter is disconnected. Click to connect." href="#">
+                    <span  class="mobile-opt" data-bind="if: (boxrouter_status() == 'error' || boxrouter_status() == 'disconnected')"><i class="icon-cloud"></i></span>
+                    <span data-bind="if: (boxrouter_status() == 'connecting')"><i class="icon-refresh icon-spin"></i></span>
                 </a>
                 </span>
                 <ul class="nav pull-right">
@@ -110,7 +123,13 @@
                     <span>No camera detected</span>
                 </a>
             </div>
-            <div class="mobile-options" data-bind="ifnot: settings.settings.api.allowCrossOrigin, click:checkApiOption">
+            <div class="mobile-options" data-bind="ifnot: settings.settings.api.allowCrossOrigin, click:connectBoxrouter">
+                <a href="#" title="AstroPrint boxrouter is disconnected. The AstroPrint cloud won't find your printer. Click to fix.">
+                    <i  class="fa icon-black fa-info-circle"></i>
+                    <span> AstroPrint Boxrouter is disconnected</span>
+                </a>
+            </div>
+            <div class="mobile-options" data-bind="if: (boxrouter_status() == 'error' || boxrouter_status() == 'disconnected'), click:checkApiOption">
                 <a href="#" title="Cross Origin Resource Access is disabled. The AstroPrint iOS mobile app won't find your printer in the local network. Click to fix.">
                     <i  class="fa icon-black fa-info-circle"></i>
                     <span> Cross Origin Resource Access is disabled</span>
@@ -301,6 +320,21 @@
                 <p>Please try again later</p>
             </div>
         </div>
+    </div>
+</div>
+
+<div id="changeBoxName" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <h3 id="myModalLabel">Change Astroprint Box Name</h3>
+    </div>
+    <div class="modal-body">
+        <p>This will be the name this device will have in astroprint cloud and astroprint mobile application:</p>
+        <input data-bind="value: settings.settings.plugins.astroprint.boxName" type="text"/>
+    </div>
+    <div class="modal-footer">
+        <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+        <button class="btn btn-primary">Save changes</button>
     </div>
 </div>
 

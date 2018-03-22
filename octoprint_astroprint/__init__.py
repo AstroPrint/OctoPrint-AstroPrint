@@ -233,6 +233,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 			Events.PRINT_PAUSED,
 			Events.PRINT_RESUMED,
 			Events.ERROR,
+			Events.TOOL_CHANGE
 		]
 
 		cameraSuccessEvents = [
@@ -295,6 +296,13 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 			heating = self._printer._comm._heating
 
 		return heating
+
+	def currentTool(self):
+		tool = None
+		if self._printer.is_operational():
+			tool = self._printer._comm._currentTool
+
+		return tool
 
 	def count_material(self, comm_instance, phase, cmd, cmd_type, gcode, *args, **kwargs):
 		if self.materialCounter:
@@ -377,13 +385,21 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 	def iscameraconnected(self):
 		return jsonify({"connected" : True if self.cameraManager.cameraActive else False }), 200, {'ContentType':'application/json'}
 
+	@octoprint.plugin.BlueprintPlugin.route("/connectboxrouter", methods=["POST"])
+	@admin_permission.require(403)
+	def connectboxrouter(self):
+		if self.astroprintCloud and self.astroprintCloud.bm:
+			self.astroprintCloud.bm.boxrouter_connect()
+		return jsonify({"connecting" : True }), 200, {'ContentType':'application/json'}
+
 	@octoprint.plugin.BlueprintPlugin.route("/initialstate", methods=["GET"])
 	@admin_permission.require(403)
 	def initialstate(self):
 		return jsonify({
 					"user" : {"name" : self.user.name, "email" : self.user.email} if self.user else False,
 					"connected" : True if self.cameraManager.cameraActive else False,
-					"can_print" : True if self._printer.is_operational() and not (self._printer.is_paused() or self._printer.is_printing()) else False
+					"can_print" : True if self._printer.is_operational() and not (self._printer.is_paused() or self._printer.is_printing()) else False,
+					"boxrouter_status" : self.astroprintCloud.bm.status if self.astroprintCloud and self.astroprintCloud.bm else "disconnected"
 					}), 200, {'ContentType':'application/json'}
 
 	##LOCAL AREA
@@ -395,7 +411,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 			abort(503)
 		return Response(json.dumps({
 			'id': self.astroprintCloud.bm.boxId,
-			'name': self.plugin.get_settings().get(["product_variant_id"]),
+			'name': self.plugin.get_settings().get(["name"]),
 			'version': self._plugin_version,
 			'firstRun': True if self._settings.global_get_boolean(["server", "firstRun"]) else None,
 			'online': True,
@@ -434,7 +450,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 		return Response(
 			json.dumps({
 				'id': self.astroprintCloud.bm.boxId,
-				'name': self.plugin.get_settings().get(["product_variant_id"]),
+				'name': self.plugin.get_settings().get(["name"]),
 				'printing': self._printer.is_printing(),
 				'fileName': fileName,
 				'printerModel': None,
@@ -443,7 +459,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 				'paused': self._printer.is_paused(),
 				'camera': self.cameraManager.cameraActive,
 				'remotePrint': True,
-				'capabilities': ['remotePrint'] + self.cameraManager.capabilities
+				'capabilities': ['remotePrint', 'multiExtruders'] + self.cameraManager.capabilities
 			}),
 			mimetype= 'application/json'
 		)

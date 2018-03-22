@@ -244,7 +244,8 @@ class AstroprintCloud():
 			'printing': self.plugin.get_printer().is_paused() or self.plugin._printer.is_printing(),
 			'paused': self.plugin.get_printer().is_paused(),
 			'camera': self.plugin.cameraManager.cameraActive,
-			'heatingUp': self.plugin.printerIsHeating()
+			'heatingUp': self.plugin.printerIsHeating(),
+			'tool' : self.plugin.currentTool()
 		}
 
 	 	if self.statePayload != payload and self.bm:

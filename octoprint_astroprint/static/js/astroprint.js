@@ -18,6 +18,8 @@ $(function () {
         self.astroprintUser = ko.observable(null) //null while views are being rendered
         self.designList = ko.observable([])
         self.filter = ko.observable("");
+        self.boxrouter_status = ko.observable()
+        self.changeNameDialog = undefined;
         self.isOctoprintAdmin = ko.observable(self.loginState.isAdmin());
         self.subject = ko.observable("");
         self.description = ko.observable("");
@@ -237,6 +239,7 @@ $(function () {
         /* Event handler */
         self.onDataUpdaterPluginMessage = function (plugin, message) {
             if (plugin == "Astroprint") {
+                console.log(message.event)
                 switch (message.event) {
                     case "cameraStatus":
                         self.changeCameraStatus(message.data);
@@ -271,11 +274,53 @@ $(function () {
                         if(self.astroprintUser()){
                             self.astroprintUser(false);
                         }
+                    case "boxrouterStatus":
+                        self.boxrouterStatusChange(message.data)
                     default:
                         break;
                 }
             }
         }
+
+        self.boxrouterStatusChange = function (state){
+            console.log(state)
+            self.boxrouter_status(state)
+            switch (state){
+                case "error":
+                    new PNotify({
+                        title: gettext("Boxrouter error"),
+                        text: gettext("There was an error connecting your boxrouter to AstroPrint, please try again later."),
+                        type: "error"
+                    });
+                case "connected":
+                    new PNotify({
+                        title: gettext("AstroPrint Boxrouter Connected"),
+                        text: gettext("Your octopi is connected to Astroprint cloud"),
+                        type: "success"
+                    });
+            }
+        }
+
+        self.connectBoxrouter = function (){
+            $.ajax({
+                type: "POST",
+                contentType: "application/json; charset=utf-8",
+                url: PLUGIN_BASEURL + "astroprint/connectboxrouter",
+                succes : function (data){
+                    console.log(data)
+                }
+            })
+        }
+
+        self.changeNameDialog = $("#add_folder_dialog");
+        self.changeNameDialog.on("shown", function() {
+            $("input", self.changeNameDialog).focus();
+        });
+        $("form", self.changeNameDialog).on("submit", function(e) {
+            e.preventDefault();
+
+        });
+
 
         self.userLogged = function (logTries) {
             setTimeout(function () {
@@ -321,6 +366,7 @@ $(function () {
                     }
                     self.cam_status(data.connected)
                     self.can_print(data.can_print)
+                    self.boxrouter_status(data.boxrouter_status)
                     if (!astroPrintPluginStarted) {
                         self.showAstroPrintPages()
                     }

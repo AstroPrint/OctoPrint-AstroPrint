@@ -41,7 +41,8 @@ class RequestHandler(object):
 			'camera': self.cameraManager.cameraActive,
 			'printCapture': self.cameraManager.timelapseInfo,
 			'profile': profile,
-			'capabilities': ['remotePrint']
+			'capabilities': ['remotePrint', 'multiExtruders'],
+			'tool' : self.plugin.currentTool()
 		}
 
 		if state['printing'] or state['paused']:
