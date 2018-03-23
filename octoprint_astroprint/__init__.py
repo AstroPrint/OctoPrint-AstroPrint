@@ -411,7 +411,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 			abort(503)
 		return Response(json.dumps({
 			'id': self.astroprintCloud.bm.boxId,
-			'name': self.plugin.get_settings().get(["name"]),
+			'name': self.plugin.get_settings().get(["boxName"]),
 			'version': self._plugin_version,
 			'firstRun': True if self._settings.global_get_boolean(["server", "firstRun"]) else None,
 			'online': True,
@@ -450,7 +450,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 		return Response(
 			json.dumps({
 				'id': self.astroprintCloud.bm.boxId,
-				'name': self.plugin.get_settings().get(["name"]),
+				'name': self.plugin.get_settings().get(["boxName"]),
 				'printing': self._printer.is_printing(),
 				'fileName': fileName,
 				'printerModel': None,
