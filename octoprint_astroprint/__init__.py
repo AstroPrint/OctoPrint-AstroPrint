@@ -127,7 +127,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 		data = {
 			'heatingUp' : self.printerIsHeating(),
 			'currentLayer' : self._printerListener.get_current_layer() if self._printerListener else None,
-			'camera' : True, #self.cameraManager.cameraActive if self.cameraManager else None,
+			'camera' : self.cameraManager.cameraActive if self.cameraManager else None,
 			'userLogged' : self.user.email if self.user else None,
 			'job' : self._printerListener.get_job_data() if self._printerListener else None
 		}
@@ -398,7 +398,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 	def initialstate(self):
 		return jsonify({
 					"user" : {"name" : self.user.name, "email" : self.user.email} if self.user else False,
-					"connected" : True, #True if self.cameraManager.cameraActive else False,
+					"connected" : True if self.cameraManager.cameraActive else False,
 					"can_print" : True if self._printer.is_operational() and not (self._printer.is_paused() or self._printer.is_printing()) else False,
 					"boxrouter_status" : self.astroprintCloud.bm.status if self.astroprintCloud and self.astroprintCloud.bm else "disconnected"
 					}), 200, {'ContentType':'application/json'}
