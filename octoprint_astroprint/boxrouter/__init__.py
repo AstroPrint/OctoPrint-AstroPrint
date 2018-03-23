@@ -16,6 +16,7 @@ import json
 import threading
 import socket
 import os
+import sys
 import weakref
 import uuid
 from time import sleep, time
@@ -406,9 +407,7 @@ class AstroprintBoxRouter(object):
 			return None
 
 		else:
-			from octoprint.server import VERSION
-			import sys
-			nmhostname = self._settings.get(["boxName"]),
+			boxName = self._settings.get(["boxName"]),
 			platform = sys.platform
 			localIpAddress = octoprint.util.address_for_client("google.com", 80)
 			mayor, minor, build = self.plugin.get_plugin_version().split(".")
@@ -418,7 +417,7 @@ class AstroprintBoxRouter(object):
 			 		'silentReconnect': self._silentReconnect,
 			 		'boxId': self.boxId,
 			 		'variantId': self._settings.get(["product_variant_id"]),
-			 		'boxName': nmhostname,
+			 		'boxName': boxName,
 			 		'swVersion': "OctoPrint Plugin - v%s.%s(%s)" % (mayor, minor, build),
 			 		'platform': platform,
 			 		'localIpAddress': localIpAddress,
