@@ -127,7 +127,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 		data = {
 			'heatingUp' : self.printerIsHeating(),
 			'currentLayer' : self._printerListener.get_current_layer() if self._printerListener else None,
-			'camera' : self.cameraManager.cameraActive if self.cameraManager else None,
+			'camera' : True, #self.cameraManager.cameraActive if self.cameraManager else None,
 			'userLogged' : self.user.email if self.user else None,
 			'job' : self._printerListener.get_job_data() if self._printerListener else None
 		}
@@ -398,10 +398,20 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 	def initialstate(self):
 		return jsonify({
 					"user" : {"name" : self.user.name, "email" : self.user.email} if self.user else False,
-					"connected" : True if self.cameraManager.cameraActive else False,
+					"connected" : True, #True if self.cameraManager.cameraActive else False,
 					"can_print" : True if self._printer.is_operational() and not (self._printer.is_paused() or self._printer.is_printing()) else False,
 					"boxrouter_status" : self.astroprintCloud.bm.status if self.astroprintCloud and self.astroprintCloud.bm else "disconnected"
 					}), 200, {'ContentType':'application/json'}
+
+	@octoprint.plugin.BlueprintPlugin.route("/changename", methods=["POST"])
+	@admin_permission.require(403)
+	def changeboxroutername(self):
+		name = request.json['name']
+		self._settings.set(['boxName'], name, True)
+		if self.astroprintCloud and self.astroprintCloud.bm:
+			self.astroprintCloud.disconnectBoxrouter()
+			self.astroprintCloud.connectBoxrouter()
+		return jsonify({"connecting" : True }), 200, {'ContentType':'application/json'}
 
 	##LOCAL AREA
 	#Functions related to local aspects
@@ -458,7 +468,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 				'material': None,
 				'operational': self._printer.is_operational(),
 				'paused': self._printer.is_paused(),
-				'camera': self.cameraManager.cameraActive,
+				'camera': True, #self.cameraManager.cameraActive,
 				'remotePrint': True,
 				'capabilities': ['remotePrint', 'multiExtruders'] + self.cameraManager.capabilities
 			}),

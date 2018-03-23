@@ -333,13 +333,14 @@
                 <label class="control-label">Box name</label>
                 <div class="controls">
                     <input data-bind="value: cacheBoxName" type="text"/>
+                    <span class="help-inline hide">Invalid Device Name: use letters, numbers or dashes(-) only.</span>
                 </div>
             </form>
         </div>
     </div>
     <div class="modal-footer">
         <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-        <button class="btn btn-primary" data-bind="click: changeName"><i class="fa fa-spinner fa-spin" data-bind="visible: addingFolder"></i> Save</button>
+        <button class="btn btn-primary" data-bind="click: changeName"><i class="fa fa-spinner fa-spin" data-bind="visible: changingname"></i> Save</button>
     </div>
 </div>
 

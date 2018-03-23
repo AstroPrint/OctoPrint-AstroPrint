@@ -294,6 +294,8 @@ $(function () {
                         type: "error"
                     });
                 case "connected":
+                    self.changingname(false)
+                    self.changeNameDialog.modal('hide')
                     new PNotify({
                         title: gettext("AstroPrint Boxrouter Connected"),
                         text: gettext("Your octopi is connected to Astroprint cloud"),
@@ -797,7 +799,7 @@ $(function () {
 
         //change boxName
 
-        self.addingFolder = ko.observable(false)
+        self.changingname = ko.observable(false)
         self.changeNameDialog = $("#changeBoxName");
         self.changeNameDialog.on("shown", function() {
             console.log("changeNameDialog shown")
@@ -806,12 +808,35 @@ $(function () {
 
 
         self.changeNameDialog.on('hidden', function () {
+            $("#changeBoxName .control-group").removeClass("error")
+            $("#changeBoxName .help-inline").addClass("hide")
             console.log("changeNameDialog hidden")
             self.cacheBoxName(self.boxName());
         })
 
         self.changeName = function (){
-            self.addingFolder(true)
+            $("#changeBoxName .control-group").removeClass("error")
+            $("#changeBoxName .help-inline").addClass("hide")
+            hostname = /^[A-Za-z0-9\-]+$/
+            if (hostname.test(self.cacheBoxName())){
+                self.changingname(true)
+                $.ajax({
+                    type: "POST",
+                    contentType: "application/json; charset=utf-8",
+                    url: PLUGIN_BASEURL + "astroprint/changename",
+                    data: JSON.stringify({ 'name': self.cacheBoxName() }),
+                    dataType: "json",
+                    success: function (success) {
+                        self.boxName(self.cacheBoxName());
+                    },
+                    error: function (error) {
+                    }
+                });
+            } else {
+                $("#changeBoxName .control-group").addClass("error")
+                $("#changeBoxName .help-inline").removeClass("hide")
+                console.log("invalid regex")
+            }
         }
 
 

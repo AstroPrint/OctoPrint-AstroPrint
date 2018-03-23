@@ -38,7 +38,7 @@ class RequestHandler(object):
 			'heatingUp': self.plugin.printerIsHeating(),
 			'operational': self._printer.is_operational(),
 			'paused': self._printer.is_paused(),
-			'camera': self.cameraManager.cameraActive,
+			'camera': True, #self.cameraManager.cameraActive,
 			'printCapture': self.cameraManager.timelapseInfo,
 			'profile': profile,
 			'capabilities': ['remotePrint', 'multiExtruders'],

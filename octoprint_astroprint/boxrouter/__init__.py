@@ -47,7 +47,7 @@ class AstroprintBoxRouterClient(WebSocketClient):
 		return self._printerListener
 
 	def __del__(self):
-		self.unregisterEvents()
+		self._weakRefRouter.unregisterEvents()
 
 	def send(self, data):
 		with self._condition:
@@ -409,8 +409,6 @@ class AstroprintBoxRouter(object):
 			from octoprint.server import VERSION
 			import sys
 			nmhostname = self.plugin.get_settings().get(["boxName"]),
-			print "this is the hostname i send:"
-			print nmhostname
 			platform = sys.platform
 			localIpAddress = octoprint.util.address_for_client("google.com", 80)
 			mayor, minor, pacth = self.plugin.get_plugin_version().split(".")
