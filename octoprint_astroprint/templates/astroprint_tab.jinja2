@@ -2,6 +2,7 @@
   var astroprint_variables = {
     appSite : "{{ plugin_astroprint_appSite|escape }}",
     appId : "{{ plugin_astroprint_appId|escape }}",
+    boxName : "{{plugin_astroprint_boxName|escape}}"
   }
 </script>
 <!-- View while octoprint views are being rendered -->
@@ -73,11 +74,8 @@
 <!-- View when astroprint user logged -->
 <div id="astroPrintLogged" style="display:none" class="row-fluid astroPrintView" data-bind="if: (astroprintUser() && isOctoprintAdmin())">
     <div class="row">
-        <div class="span2"></div>
-        <div class="text-center span8">
-            <h2><a href="#changeBoxName" data-toggle="modal"><i class="icon-cloud"></i> <span data-bind="text: settings.settings.plugins.astroprint.boxName"></span><span style="font-size: 10px"><i class="icon-edit"></i></span></h2></a>
-        </div>
-        <div class="span2">
+        <div class="text-center span12">
+            <h2><a href="#changeBoxName" class="edit-name" data-toggle="modal"><span data-bind="text: boxName"></span><span style="font-size: 10px"><i class="icon-edit"></i></span></h2></a>
         </div>
     </div>
     <div id="navbar-astroprint" class="navbar navbar-static">
@@ -329,12 +327,19 @@
         <h3 id="myModalLabel">Change Astroprint Box Name</h3>
     </div>
     <div class="modal-body">
-        <p>This will be the name this device will have in astroprint cloud and astroprint mobile application:</p>
-        <input data-bind="value: settings.settings.plugins.astroprint.boxName" type="text"/>
+        <p>Please specify the name this device will have in Astroprint cloud and Astroprint mobile application.</p>
+        <div class="control-group">
+            <form class="form-horizontal" action="javascript:void(0)">
+                <label class="control-label">Box name</label>
+                <div class="controls">
+                    <input data-bind="value: cacheBoxName" type="text"/>
+                </div>
+            </form>
+        </div>
     </div>
     <div class="modal-footer">
         <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-        <button class="btn btn-primary">Save changes</button>
+        <button class="btn btn-primary" data-bind="click: changeName"><i class="fa fa-spinner fa-spin" data-bind="visible: addingFolder"></i> Save</button>
     </div>
 </div>
 

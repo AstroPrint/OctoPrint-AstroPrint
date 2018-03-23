@@ -16,15 +16,16 @@ $(function () {
         self.settings = parameters[0];
         self.loginState = parameters[1];
         self.astroprintUser = ko.observable(null) //null while views are being rendered
-        self.designList = ko.observable([])
+        self.designList = ko.observable([]);
         self.filter = ko.observable("");
-        self.boxrouter_status = ko.observable()
+        self.boxrouter_status = ko.observable();
         self.changeNameDialog = undefined;
         self.isOctoprintAdmin = ko.observable(self.loginState.isAdmin());
         self.subject = ko.observable("");
         self.description = ko.observable("");
         self.access_key = ko.observable("");
-
+        self.boxName = ko.observable(astroprint_variables.boxName);
+        self.cacheBoxName = ko.observable(self.boxName());
         //filter Designs
         self.filteredDesigns = ko.computed(function () {
             if (!self.filter()) {
@@ -312,14 +313,6 @@ $(function () {
             })
         }
 
-        self.changeNameDialog = $("#add_folder_dialog");
-        self.changeNameDialog.on("shown", function() {
-            $("input", self.changeNameDialog).focus();
-        });
-        $("form", self.changeNameDialog).on("submit", function(e) {
-            e.preventDefault();
-
-        });
 
 
         self.userLogged = function (logTries) {
@@ -801,6 +794,27 @@ $(function () {
             $('#settingsTabs a[href="#settings_api"]').tab('show')
             $('#settings-apiCors').closest("label").animate({fontSize : "18px"}, 1000 ).animate({fontSize : "15px"}, 1000 )
         }
+
+        //change boxName
+
+        self.addingFolder = ko.observable(false)
+        self.changeNameDialog = $("#changeBoxName");
+        self.changeNameDialog.on("shown", function() {
+            console.log("changeNameDialog shown")
+            $("input", self.changeNameDialog).focus();
+        });
+
+
+        self.changeNameDialog.on('hidden', function () {
+            console.log("changeNameDialog hidden")
+            self.cacheBoxName(self.boxName());
+        })
+
+        self.changeName = function (){
+            self.addingFolder(true)
+        }
+
+
 
     }
 
