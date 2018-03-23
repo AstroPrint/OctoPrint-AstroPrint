@@ -47,6 +47,7 @@ class AstroprintCloud():
 		user = self.db.getUser()
 		if user:
 			self.plugin.user = user
+			self.connectBoxrouter()
 			self.getUserInfo()
 
 	def tokenIsExpired(self):
@@ -132,11 +133,11 @@ class AstroprintCloud():
 			self.plugin.user.email = data['email']
 			self.plugin.user.name = data['name']
 			self.plugin.sendSocketInfo()
-			self.connectBoxrouter()
 			if saveUser:
 				self.db.saveUser(self.plugin.user)
 				user = {'name': self.plugin.user.name, 'email': self.plugin.user.email}
 				self._logger.info("%s logged to AstroPrint" % self.plugin.user.name)
+				self.connectBoxrouter()
 				return jsonify(user), 200, {'ContentType':'application/json'}
 
 		except requests.exceptions.HTTPError as err:
@@ -243,8 +244,9 @@ class AstroprintCloud():
 			'operational': self.plugin.get_printer().is_operational(),
 			'printing': self.plugin.get_printer().is_paused() or self.plugin._printer.is_printing(),
 			'paused': self.plugin.get_printer().is_paused(),
-			'camera': self.plugin.cameraManager.cameraActive,
-			'heatingUp': self.plugin.printerIsHeating()
+			'camera': True, #self.plugin.cameraManager.cameraActive
+			'heatingUp': self.plugin.printerIsHeating(),
+			'tool' : self.plugin.currentTool()
 		}
 
 	 	if self.statePayload != payload and self.bm:

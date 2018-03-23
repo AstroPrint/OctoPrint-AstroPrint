@@ -147,6 +147,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 		apiHost="https://api.astroprint.com/v2"
 		webSocket="wss://boxrouter.astroprint.com"
 		product_variant_id = "9e33c7a4303348e0b08714066bcc2750"
+		boxName = socket.gethostname()
 
 
 		return dict(
@@ -156,6 +157,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 			apiHost = apiHost,
 			webSocket = webSocket,
 			product_variant_id = product_variant_id,
+			boxName = boxName,
 			camera = False,
 			#Adittional printer settings
 			max_nozzle_temp = 280, #only for being set by AstroPrintCloud, it wont affect octoprint settings
@@ -167,6 +169,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 		return dict(appSite = self._settings.get(["appSite"]),
 					appId = self._settings.get(["appId"]),
 					appiHost = self._settings.get(["apiHost"]),
+					boxName = self._settings.get(["boxName"]),
 					user = json.dumps({'name': self.user.name, 'email': self.user.email}, cls=JsonEncoder, indent=4) if self.user else None ,
 					camera = self._settings.get(["camera"])
 					)
@@ -231,6 +234,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 			Events.PRINT_PAUSED,
 			Events.PRINT_RESUMED,
 			Events.ERROR,
+			Events.TOOL_CHANGE
 		]
 
 		cameraSuccessEvents = [
@@ -293,6 +297,13 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 			heating = self._printer._comm._heating
 
 		return heating
+
+	def currentTool(self):
+		tool = None
+		if self._printer.is_operational():
+			tool = self._printer._comm._currentTool
+
+		return tool
 
 	def count_material(self, comm_instance, phase, cmd, cmd_type, gcode, *args, **kwargs):
 		if self.materialCounter:
@@ -375,14 +386,33 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 	def iscameraconnected(self):
 		return jsonify({"connected" : True if self.cameraManager.cameraActive else False }), 200, {'ContentType':'application/json'}
 
+	@octoprint.plugin.BlueprintPlugin.route("/connectboxrouter", methods=["POST"])
+	@admin_permission.require(403)
+	def connectboxrouter(self):
+		if self.astroprintCloud and self.astroprintCloud.bm:
+			self.astroprintCloud.bm.boxrouter_connect()
+		return jsonify({"connecting" : True }), 200, {'ContentType':'application/json'}
+
 	@octoprint.plugin.BlueprintPlugin.route("/initialstate", methods=["GET"])
 	@admin_permission.require(403)
 	def initialstate(self):
 		return jsonify({
 					"user" : {"name" : self.user.name, "email" : self.user.email} if self.user else False,
 					"connected" : True if self.cameraManager.cameraActive else False,
-					"can_print" : True if self._printer.is_operational() and not (self._printer.is_paused() or self._printer.is_printing()) else False
+					"can_print" : True if self._printer.is_operational() and not (self._printer.is_paused() or self._printer.is_printing()) else False,
+					"boxrouter_status" : self.astroprintCloud.bm.status if self.astroprintCloud and self.astroprintCloud.bm else "disconnected"
 					}), 200, {'ContentType':'application/json'}
+
+	@octoprint.plugin.BlueprintPlugin.route("/changename", methods=["POST"])
+	@admin_permission.require(403)
+	def changeboxroutername(self):
+		name = request.json['name']
+		self._settings.set(['boxName'], name, True)
+		self._settings.save()
+		if self.astroprintCloud and self.astroprintCloud.bm:
+			self.astroprintCloud.disconnectBoxrouter()
+			self.astroprintCloud.connectBoxrouter()
+		return jsonify({"connecting" : True }), 200, {'ContentType':'application/json'}
 
 	##LOCAL AREA
 	#Functions related to local aspects
@@ -393,7 +423,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 			abort(503)
 		return Response(json.dumps({
 			'id': self.astroprintCloud.bm.boxId,
-			'name': socket.gethostname(),
+			'name': self.get_settings().get(["boxName"]),
 			'version': self._plugin_version,
 			'firstRun': True if self._settings.global_get_boolean(["server", "firstRun"]) else None,
 			'online': True,
@@ -432,16 +462,16 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 		return Response(
 			json.dumps({
 				'id': self.astroprintCloud.bm.boxId,
-				'name': socket.gethostname(),
+				'name': self.get_settings().get(["boxName"]),
 				'printing': self._printer.is_printing(),
 				'fileName': fileName,
 				'printerModel': None,
 				'material': None,
 				'operational': self._printer.is_operational(),
 				'paused': self._printer.is_paused(),
-				'camera': self.cameraManager.cameraActive,
+				'camera': True, #self.cameraManager.cameraActive,
 				'remotePrint': True,
-				'capabilities': ['remotePrint'] + self.cameraManager.capabilities
+				'capabilities': ['remotePrint', 'multiExtruders'] + self.cameraManager.capabilities
 			}),
 			mimetype= 'application/json'
 		)

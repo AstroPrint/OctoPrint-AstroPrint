@@ -47,7 +47,7 @@ class AstroprintBoxRouterClient(WebSocketClient):
 		return self._printerListener
 
 	def __del__(self):
-		self.unregisterEvents()
+		self._weakRefRouter.unregisterEvents()
 
 	def send(self, data):
 		with self._condition:
@@ -212,6 +212,7 @@ class AstroprintBoxRouter(object):
 
 				if self._publicKey and self._privateKey:
 					self.status = self.STATUS_CONNECTING
+					self.plugin.send_event("boxrouterStatus", self.STATUS_CONNECTING)
 
 					try:
 						if self._retryTimer:
@@ -235,6 +236,7 @@ class AstroprintBoxRouter(object):
 						self._logger.error("Error connecting to boxrouter: %s" % e)
 						self.connected = False
 						self.status = self.STATUS_ERROR
+						self.plugin.send_event("boxrouterStatus", self.STATUS_ERROR)
 
 						if self.ws:
 							self.ws.terminate()
@@ -257,6 +259,7 @@ class AstroprintBoxRouter(object):
 			self._publicKey = None
 			self._privateKey = None
 			self.status = self.STATUS_DISCONNECTED
+			self.plugin.send_event("boxrouterStatus", self.STATUS_DISCONNECTED)
 
 			self._printerListener.removeWatcher()
 
@@ -284,6 +287,7 @@ class AstroprintBoxRouter(object):
 		else:
 			self._logger.info('No more retries. Giving up...')
 			self.status = self.STATUS_DISCONNECTED
+			self.plugin.send_event("boxrouterStatus", self.STATUS_DISCONNECTED)
 			self._retries = 0
 			self._retryTimer = None
 
@@ -387,6 +391,7 @@ class AstroprintBoxRouter(object):
 			if 'error' in data:
 				self._logger.warn(data['message'] if 'message' in data else 'Unkonwn authentication error')
 				self.status = self.STATUS_ERROR
+				self.plugin.send_event("boxrouterStatus", self.STATUS_ERROR)
 				self.close()
 				self.plugin.astroprintCloud.unautorizedHandeler()
 
@@ -396,13 +401,14 @@ class AstroprintBoxRouter(object):
 				self._retries = 0
 				self._retryTimer = None
 				self.status = self.STATUS_CONNECTED
+				self.plugin.send_event("boxrouterStatus", self.STATUS_CONNECTED)
 
 			return None
 
 		else:
 			from octoprint.server import VERSION
 			import sys
-			nmhostname = socket.gethostname()
+			nmhostname = self.plugin.get_settings().get(["boxName"]),
 			platform = sys.platform
 			localIpAddress = octoprint.util.address_for_client("google.com", 80)
 			mayor, minor, pacth = self.plugin.get_plugin_version().split(".")

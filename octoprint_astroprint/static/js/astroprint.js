@@ -16,13 +16,16 @@ $(function () {
         self.settings = parameters[0];
         self.loginState = parameters[1];
         self.astroprintUser = ko.observable(null) //null while views are being rendered
-        self.designList = ko.observable([])
+        self.designList = ko.observable([]);
         self.filter = ko.observable("");
+        self.boxrouter_status = ko.observable();
+        self.changeNameDialog = undefined;
         self.isOctoprintAdmin = ko.observable(self.loginState.isAdmin());
         self.subject = ko.observable("");
         self.description = ko.observable("");
         self.access_key = ko.observable("");
-
+        self.boxName = ko.observable(astroprint_variables.boxName);
+        self.cacheBoxName = ko.observable(self.boxName());
         //filter Designs
         self.filteredDesigns = ko.computed(function () {
             if (!self.filter()) {
@@ -237,6 +240,7 @@ $(function () {
         /* Event handler */
         self.onDataUpdaterPluginMessage = function (plugin, message) {
             if (plugin == "Astroprint") {
+                console.log(message.event)
                 switch (message.event) {
                     case "cameraStatus":
                         self.changeCameraStatus(message.data);
@@ -271,11 +275,47 @@ $(function () {
                         if(self.astroprintUser()){
                             self.astroprintUser(false);
                         }
+                    case "boxrouterStatus":
+                        self.boxrouterStatusChange(message.data)
                     default:
                         break;
                 }
             }
         }
+
+        self.boxrouterStatusChange = function (state){
+            console.log(state)
+            self.boxrouter_status(state)
+            switch (state){
+                case "error":
+                    new PNotify({
+                        title: gettext("Boxrouter error"),
+                        text: gettext("There was an error connecting your boxrouter to AstroPrint, please try again later."),
+                        type: "error"
+                    });
+                case "connected":
+                    self.changingname(false)
+                    self.changeNameDialog.modal('hide')
+                    new PNotify({
+                        title: gettext("AstroPrint Boxrouter Connected"),
+                        text: gettext("Your octopi is connected to Astroprint cloud"),
+                        type: "success"
+                    });
+            }
+        }
+
+        self.connectBoxrouter = function (){
+            $.ajax({
+                type: "POST",
+                contentType: "application/json; charset=utf-8",
+                url: PLUGIN_BASEURL + "astroprint/connectboxrouter",
+                succes : function (data){
+                    console.log(data)
+                }
+            })
+        }
+
+
 
         self.userLogged = function (logTries) {
             setTimeout(function () {
@@ -321,6 +361,7 @@ $(function () {
                     }
                     self.cam_status(data.connected)
                     self.can_print(data.can_print)
+                    self.boxrouter_status(data.boxrouter_status)
                     if (!astroPrintPluginStarted) {
                         self.showAstroPrintPages()
                     }
@@ -755,6 +796,50 @@ $(function () {
             $('#settingsTabs a[href="#settings_api"]').tab('show')
             $('#settings-apiCors').closest("label").animate({fontSize : "18px"}, 1000 ).animate({fontSize : "15px"}, 1000 )
         }
+
+        //change boxName
+
+        self.changingname = ko.observable(false)
+        self.changeNameDialog = $("#changeBoxName");
+        self.changeNameDialog.on("shown", function() {
+            console.log("changeNameDialog shown")
+            $("input", self.changeNameDialog).focus();
+        });
+
+
+        self.changeNameDialog.on('hidden', function () {
+            $("#changeBoxName .control-group").removeClass("error")
+            $("#changeBoxName .help-inline").addClass("hide")
+            console.log("changeNameDialog hidden")
+            self.cacheBoxName(self.boxName());
+        })
+
+        self.changeName = function (){
+            $("#changeBoxName .control-group").removeClass("error")
+            $("#changeBoxName .help-inline").addClass("hide")
+            hostname = /^[A-Za-z0-9\-]+$/
+            if (hostname.test(self.cacheBoxName())){
+                self.changingname(true)
+                $.ajax({
+                    type: "POST",
+                    contentType: "application/json; charset=utf-8",
+                    url: PLUGIN_BASEURL + "astroprint/changename",
+                    data: JSON.stringify({ 'name': self.cacheBoxName() }),
+                    dataType: "json",
+                    success: function (success) {
+                        self.boxName(self.cacheBoxName());
+                    },
+                    error: function (error) {
+                    }
+                });
+            } else {
+                $("#changeBoxName .control-group").addClass("error")
+                $("#changeBoxName .help-inline").removeClass("hide")
+                console.log("invalid regex")
+            }
+        }
+
+
 
     }
 
