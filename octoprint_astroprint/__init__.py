@@ -4,7 +4,7 @@ from __future__ import absolute_import
 
 __author__ = "AstroPrint Product Team <product@astroprint.com>"
 __license__ = "GNU Affero General Public License http://www.gnu.org/licenses/agpl.html"
-__copyright__ = "Copyright (C) 2017 3DaGoGo, Inc - Released under terms of the AGPLv3 License"
+__copyright__ = "Copyright (C) 2017-2018 3DaGoGo, Inc - Released under terms of the AGPLv3 License"
 
 from .AstroprintCloud import AstroprintCloud
 from flask import request, Blueprint, make_response, jsonify, Response, abort
@@ -407,7 +407,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 	@admin_permission.require(403)
 	def changeboxroutername(self):
 		name = request.json['name']
-		self._settings.set(['boxName'], name, True)
+		self._settings.set(['boxName'], name)
 		self._settings.save()
 		if self.astroprintCloud and self.astroprintCloud.bm:
 			self.astroprintCloud.disconnectBoxrouter()
@@ -423,7 +423,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 			abort(503)
 		return Response(json.dumps({
 			'id': self.astroprintCloud.bm.boxId,
-			'name': self.get_settings().get(["boxName"]),
+			'name': self._settings.get(["boxName"]),
 			'version': self._plugin_version,
 			'firstRun': True if self._settings.global_get_boolean(["server", "firstRun"]) else None,
 			'online': True,
@@ -462,7 +462,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 		return Response(
 			json.dumps({
 				'id': self.astroprintCloud.bm.boxId,
-				'name': self.get_settings().get(["boxName"]),
+				'name': self._settings.get(["boxName"]),
 				'printing': self._printer.is_printing(),
 				'fileName': fileName,
 				'printerModel': None,
