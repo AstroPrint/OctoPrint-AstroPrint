@@ -408,18 +408,18 @@ class AstroprintBoxRouter(object):
 		else:
 			from octoprint.server import VERSION
 			import sys
-			nmhostname = self.plugin.get_settings().get(["boxName"]),
+			nmhostname = self._settings.get(["boxName"]),
 			platform = sys.platform
 			localIpAddress = octoprint.util.address_for_client("google.com", 80)
-			mayor, minor, pacth = self.plugin.get_plugin_version().split(".")
+			mayor, minor, build = self.plugin.get_plugin_version().split(".")
 			return {
 			 	'type': 'auth',
 			 	'data': {
 			 		'silentReconnect': self._silentReconnect,
 			 		'boxId': self.boxId,
-			 		'variantId': self.plugin.get_settings().get(["product_variant_id"]),
+			 		'variantId': self._settings.get(["product_variant_id"]),
 			 		'boxName': nmhostname,
-			 		'swVersion': "OctoPrint Plugin - v%s.%s(%s)" % (mayor, minor, pacth),
+			 		'swVersion': "OctoPrint Plugin - v%s.%s(%s)" % (mayor, minor, build),
 			 		'platform': platform,
 			 		'localIpAddress': localIpAddress,
 			 		'publicKey': self._publicKey,
