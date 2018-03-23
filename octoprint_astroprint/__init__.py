@@ -408,6 +408,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 	def changeboxroutername(self):
 		name = request.json['name']
 		self._settings.set(['boxName'], name, True)
+		self._settings.save()
 		if self.astroprintCloud and self.astroprintCloud.bm:
 			self.astroprintCloud.disconnectBoxrouter()
 			self.astroprintCloud.connectBoxrouter()
