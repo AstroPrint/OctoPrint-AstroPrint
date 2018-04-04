@@ -33,7 +33,7 @@ plugin_url = "https://github.com/AstroPrint/OctoPrint-AstroPrint"
 plugin_license = "AGPLv3"
 
 # Any additional requirements besides OctoPrint should be listed here
-plugin_requires = ["ws4py== 0.3.4","requests_toolbelt==0.8.0", "Pillow== 3.1.0"]
+plugin_requires = ["ws4py== 0.3.4","requests_toolbelt==0.8.0", "Pillow<= 3.1.0"]
 
 ### --------------------------------------------------------------------------------------------------------------------
 ### More advanced options that you usually shouldn't have to touch follow after this point
