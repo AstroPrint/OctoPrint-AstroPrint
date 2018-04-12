@@ -159,14 +159,15 @@ class PrinterListener(PrinterCallback):
 
 
 	def time_adjuster(self, data):
+		payload = dict(data)
 		if not self._printStartedAt:
-			self._printStartedAt = data['printTime']
+			self._printStartedAt = payload['printTime']
 		if not self._analyzed_job_layers:
-			data['currentLayer'] = 0
-			return data
+			payload['currentLayer'] = 0
+			return payload
 		else:
-			self.updateAnalyzedJobInformation(data['completion']/100)
-			data['currentLayer'] = self._currentLayer
+			self.updateAnalyzedJobInformation(payload['completion']/100)
+			payload['currentLayer'] = self._currentLayer
 
 			try:
 				layerFileUpperPercent = self._analyzed_job_layers["timePerLayers"][self._currentLayer-1]['upperPercent']
@@ -176,8 +177,8 @@ class PrinterListener(PrinterCallback):
 				else:
 					layerFileLowerPercent = 0
 
-				currentAbsoluteFilePercent = data['completion']/100
-				elapsedTime = data['printTime']
+				currentAbsoluteFilePercent = payload['completion']/100
+				elapsedTime = payload['printTime']
 
 				try:
 					currentLayerPercent = (currentAbsoluteFilePercent - layerFileLowerPercent) / (layerFileUpperPercent - layerFileLowerPercent)
@@ -194,17 +195,17 @@ class PrinterListener(PrinterCallback):
 				adjustedEstimatedTime = self._analyzed_job_layers["totalPrintTime"] + elapsedTimeVariance
 				estimatedTimeLeft = ( adjustedEstimatedTime * ( 1.0 - currentTimePercent ) )
 
-				if  data['printTimeLeft'] and  data['printTimeLeft'] < estimatedTimeLeft:
-					estimatedTimeLeft =  data['printTimeLeft']
+				if  payload['printTimeLeft'] and  payload['printTimeLeft'] < estimatedTimeLeft:
+					estimatedTimeLeft =  payload['printTimeLeft']
 				#we prefer to freeze time rather than increase it
 				if self._last_time_send > estimatedTimeLeft or self._last_time_send is 0:
 					self._last_time_send = estimatedTimeLeft
 				else:
 					estimatedTimeLeft = self._last_time_send
 
-				data['currentLayer'] = self._currentLayer
-				data['printTimeLeft'] = estimatedTimeLeft
+				payload['currentLayer'] = self._currentLayer
+				payload['printTimeLeft'] = estimatedTimeLeft
 
-				return data
+				return payload
 			except Exception:
-				return data
+				return payload
