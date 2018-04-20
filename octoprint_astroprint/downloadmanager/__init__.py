@@ -43,7 +43,11 @@ class DownloadWorker(threading.Thread):
 			if not 'designDownload' in item:
 				printFile = True
 			if printFile:
+
 				fileName = item['filename']
+				substr = ".gcode"
+				idx = fileName.index(substr)
+				fileName = fileName[:idx] + id + fileName[idx:]
 				image = item['design']['images']['square']
 
 
