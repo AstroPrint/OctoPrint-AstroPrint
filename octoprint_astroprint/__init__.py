@@ -8,7 +8,6 @@ __copyright__ = "Copyright (C) 2017-2018 3DaGoGo, Inc - Released under terms of 
 
 from .AstroprintCloud import AstroprintCloud
 from flask import request, Blueprint, make_response, jsonify, Response, abort
-from threading import Timer
 import octoprint.plugin
 import json
 import sys
@@ -264,7 +263,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 
 		elif event == Events.PRINT_CANCELLED or event == Events.PRINT_FAILED:
 			self.send_event("canPrint", True)
-			if self.user:
+			if self.user and self.astroprintCloud.currentlyPrinting:
 				self.astroprintCloud.updatePrintJob("failed", self.materialCounter.totalConsumedFilament)
 			self.astroprintCloud.currentlyPrinting = None
 			self.cameraManager.stop_timelapse()
