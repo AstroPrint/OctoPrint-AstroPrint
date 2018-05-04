@@ -6,7 +6,6 @@ __copyright__ = "Copyright (C) 2017 3DaGoGo, Inc - Released under terms of the A
 from flask import request, make_response, jsonify
 import time
 import json
-from threading import Timer
 import octoprint.filemanager
 from .AstroprintDB import AstroprintDB, AstroprintUser
 from .downloadmanager import DownloadManager
@@ -28,7 +27,6 @@ class AstroprintCloud():
 	refresh_token = None
 	expires = 10
 	last_request = 0
-	timer = None
 	currentlyPrinting = None
 
 	def __init__(self, plugin):
@@ -156,10 +154,8 @@ class AstroprintCloud():
 	def unautorizedHandeler (self):
 		self.db.deleteUser(self.plugin.user)
 		self.plugin.user = None
+		self.currentlyPrinting = None
 		self.disconnectBoxrouter()
-		if self.timer:
-			self.timer.cancel()
-			self.timer = None
 		self.plugin.astroPrintUserLoggedOut()
 
 	def printStarted(self, name, path):
@@ -209,7 +205,7 @@ class AstroprintCloud():
 			if totalConsumedFilament:
 				data['material_used'] = totalConsumedFilament
 
-			requests.post(
+			requests.put(
 				"%s/print-jobs/%s" % (self.apiHost, self.currentlyPrinting),
 				json = data,
 				headers={'Content-Type': 'application/x-www-form-urlencoded',
