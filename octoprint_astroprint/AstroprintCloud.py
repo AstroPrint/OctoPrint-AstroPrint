@@ -205,7 +205,7 @@ class AstroprintCloud():
 			if totalConsumedFilament:
 				data['material_used'] = totalConsumedFilament
 
-			requests.put(
+			requests.patch(
 				"%s/print-jobs/%s" % (self.apiHost, self.currentlyPrinting),
 				json = data,
 				headers={'Content-Type': 'application/x-www-form-urlencoded',
