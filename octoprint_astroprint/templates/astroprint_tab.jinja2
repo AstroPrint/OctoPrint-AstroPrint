@@ -121,13 +121,13 @@
                     <span>No camera detected</span>
                 </a>
             </div>
-            <div class="mobile-options" data-bind="ifnot: settings.settings.api.allowCrossOrigin, click:connectBoxrouter">
+            <div class="mobile-options" data-bind="if: (boxrouter_status() == 'error' || boxrouter_status() == 'disconnected'), click:connectBoxrouter">
                 <a href="#" title="AstroPrint boxrouter is disconnected. The AstroPrint cloud won't find your printer. Click to fix.">
                     <i  class="fa icon-black fa-info-circle"></i>
                     <span> AstroPrint Boxrouter is disconnected</span>
                 </a>
             </div>
-            <div class="mobile-options" data-bind="if: (boxrouter_status() == 'error' || boxrouter_status() == 'disconnected'), click:checkApiOption">
+            <div class="mobile-options" data-bind="ifnot: settings.settings.api.allowCrossOrigin, click:checkApiOption">
                 <a href="#" title="Cross Origin Resource Access is disabled. The AstroPrint iOS mobile app won't find your printer in the local network. Click to fix.">
                     <i  class="fa icon-black fa-info-circle"></i>
                     <span> Cross Origin Resource Access is disabled</span>
