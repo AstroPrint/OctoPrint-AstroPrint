@@ -14,7 +14,7 @@ plugin_package = "octoprint_astroprint"
 plugin_name = "AstroPrint"
 
 # The plugin's version. Can be overwritten within OctoPrint's internal data via __plugin_version__ in the plugin module
-plugin_version = "1.0.10"
+plugin_version = "1.0.11"
 
 # The plugin's description. Can be overwritten within OctoPrint's internal data via __plugin_description__ in the plugin
 # module
@@ -33,7 +33,7 @@ plugin_url = "https://github.com/AstroPrint/OctoPrint-AstroPrint"
 plugin_license = "AGPLv3"
 
 # Any additional requirements besides OctoPrint should be listed here
-plugin_requires = ["ws4py== 0.3.4","requests_toolbelt==0.8.0", "Pillow<= 3.1.0"]
+plugin_requires = ["ws4py== 0.3.4","requests_toolbelt==0.8.0", "Pillow"]
 
 ### --------------------------------------------------------------------------------------------------------------------
 ### More advanced options that you usually shouldn't have to touch follow after this point
