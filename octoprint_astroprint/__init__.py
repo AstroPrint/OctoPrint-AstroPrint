@@ -64,14 +64,15 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 					   octoprint.printer.PrinterCallback):
 
 	##~~ SettingsPlugin mixin
-	user = None
-	designs = None
-	astroprintCloud = None
-	cameraManager = None
-	materialCounter= None
-	_printerListener = None
 
 	def initialize(self):
+		self.user = None
+		self.designs = None
+		self.astroprintCloud = None
+		self.cameraManager = None
+		self.materialCounter= None
+		self._printerListener = None
+
 		def logOutHandler(sender, **kwargs):
 			self.onLogout()
 

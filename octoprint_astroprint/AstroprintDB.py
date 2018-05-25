@@ -143,4 +143,3 @@ def encrypt(s):
 
 def decrypt(s):
     return s.encode('rot-13')
-	
