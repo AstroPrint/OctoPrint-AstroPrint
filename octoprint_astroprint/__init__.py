@@ -64,14 +64,15 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 					   octoprint.printer.PrinterCallback):
 
 	##~~ SettingsPlugin mixin
-	user = None
-	designs = None
-	astroprintCloud = None
-	cameraManager = None
-	materialCounter= None
-	_printerListener = None
 
 	def initialize(self):
+		self.user = None
+		self.designs = None
+		self.astroprintCloud = None
+		self.cameraManager = None
+		self.materialCounter= None
+		self._printerListener = None
+
 		def logOutHandler(sender, **kwargs):
 			self.onLogout()
 
@@ -508,7 +509,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 # If you want your plugin to be registered within OctoPrint under a different name than what you defined in setup.py
 # ("OctoPrint-PluginSkeleton"), you may define that here. Same goes for the other metadata derived from setup.py that
 # can be overwritten via __plugin_xyz__ control properties. See the documentation for that.
-__plugin_name__ = "Astroprint"
+__plugin_name__ = "AstroPrint"
 
 def __plugin_load__():
 	global __plugin_implementation__

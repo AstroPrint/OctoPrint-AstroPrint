@@ -41,14 +41,12 @@ from sys import platform
 #
 
 class CameraManager(object):
-	name = None
-	cameraActive = False
-	astroprintCloud = None #set up when initialiced
 	def __init__(self, plugin):
+		self.name = None
+		self.cameraActive = False
+		self.astroprintCloud = None #set up when initialiced
 
 		#RECTIFYNIG default settings
-
-
 		self.plugin = plugin
 		self._settings = self.plugin.get_settings()
 		self._logger = self.plugin.get_logger()
@@ -352,4 +350,3 @@ class TimelapseWorker(threading.Thread):
 
 	def isPaused(self):
 		return not self._resumeFromPause.isSet()
-

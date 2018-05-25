@@ -21,15 +21,15 @@ import platform
 
 class AstroprintCloud():
 
-	plugin = None
-	appId = None
-	token = None
-	refresh_token = None
-	expires = 10
-	last_request = 0
-	currentlyPrinting = None
-
 	def __init__(self, plugin):
+		self.plugin = None
+		self.appId = None
+		self.token = None
+		self.refresh_token = None
+		self.expires = 10
+		self.last_request = 0
+		self.currentlyPrinting = None
+
 		self.plugin = plugin
 		self.apiHost = plugin.get_settings().get(["apiHost"])
 		self.appId = plugin.get_settings().get(["appId"])
