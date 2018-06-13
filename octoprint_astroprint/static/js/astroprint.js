@@ -239,8 +239,7 @@ $(function () {
 
         /* Event handler */
         self.onDataUpdaterPluginMessage = function (plugin, message) {
-            if (plugin == "Astroprint") {
-                console.log(message.event)
+            if (plugin == "AstroPrint") {
                 switch (message.event) {
                     case "cameraStatus":
                         self.changeCameraStatus(message.data);
@@ -284,7 +283,6 @@ $(function () {
         }
 
         self.boxrouterStatusChange = function (state){
-            console.log(state)
             self.boxrouter_status(state)
             switch (state){
                 case "error":
@@ -802,7 +800,6 @@ $(function () {
         self.changingname = ko.observable(false)
         self.changeNameDialog = $("#changeBoxName");
         self.changeNameDialog.on("shown", function() {
-            console.log("changeNameDialog shown")
             $("input", self.changeNameDialog).focus();
         });
 
@@ -810,7 +807,6 @@ $(function () {
         self.changeNameDialog.on('hidden', function () {
             $("#changeBoxName .control-group").removeClass("error")
             $("#changeBoxName .help-inline").addClass("hide")
-            console.log("changeNameDialog hidden")
             self.cacheBoxName(self.boxName());
         })
 
@@ -835,7 +831,6 @@ $(function () {
             } else {
                 $("#changeBoxName .control-group").addClass("error")
                 $("#changeBoxName .help-inline").removeClass("hide")
-                console.log("invalid regex")
             }
         }
 
