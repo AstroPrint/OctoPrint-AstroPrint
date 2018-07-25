@@ -10,10 +10,10 @@ dist
 .DS_Store
 *.zip
 
-octoprint_astroprint/stoel2-Ultimaker-2-Go-PLA-draft.gcode
 
-octoprint_astroprint/stoel2-Ultimaker-2-Go-PLA-draft.gcode
 
-octoprint_astroprint/stoel2-Ultimaker-2-Go-PLA-draft.gcode
+octoprint_astroprint/util/AstroprintGCodeAnalyzerLinux
+octoprint_astroprint/util/AstroprintGCodeAnalyzerMac
+
 
 *.gcode
