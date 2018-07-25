@@ -48,7 +48,7 @@ class DownloadWorker(threading.Thread):
 				substr = ".gcode"
 				idx = fileName.index(substr)
 				fileName = fileName[:idx] + id + fileName[idx:]
-				image = item['design']['images']['square']
+				image = item['design']['images']['square'] if item['design'] else None
 
 
 			self.activeDownload = id

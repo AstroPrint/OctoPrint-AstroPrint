@@ -20,7 +20,8 @@ class RequestHandler(object):
 		self._settings = self.plugin.get_settings()
 
 	def initial_state(self, data, clientId, done):
-
+		if not self.astroprintCloud:
+			self.astroprintCloud = self.plugin.astroprintCloud
 		dataProfile = self.wsClient.plugin._printer_profile_manager.get_current_or_default()
 
 		profile = {
@@ -41,7 +42,7 @@ class RequestHandler(object):
 			'camera': True, #self.cameraManager.cameraActive,
 			'printCapture': self.cameraManager.timelapseInfo,
 			'profile': profile,
-			'capabilities': ['remotePrint', 'multiExtruders'],
+			'capabilities': ['remotePrint', 'multiExtruders', 'allowPrintFile'],
 			'tool' : self.plugin.currentTool()
 		}
 

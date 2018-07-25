@@ -471,7 +471,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 				'paused': self._printer.is_paused(),
 				'camera': True, #self.cameraManager.cameraActive,
 				'remotePrint': True,
-				'capabilities': ['remotePrint', 'multiExtruders'] + self.cameraManager.capabilities
+				'capabilities': ['remotePrint', 'multiExtruders', 'allowPrintFile'] + self.cameraManager.capabilities
 			}),
 			mimetype= 'application/json'
 		)
