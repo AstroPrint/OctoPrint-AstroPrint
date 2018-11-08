@@ -265,23 +265,23 @@
                                                 </div>
                                             </div>
                                             <div data-bind="if: expanded" class="more-printfile-info">
-                                                <div class="info-row">
+                                                <div class="info-row" data-bind="if: sizeZ">
                                                     <div class="span4 bold">Print Area:</div>
                                                     <div class="span8"><span data-bind="text: sizeX"></span><span class="bold"> x </span><span data-bind="text: sizeY"></span><span class="bold"> x </span><span data-bind="text: sizeZ"></span> mm</div>
                                                 </div>
-                                                <div class="info-row">
+                                                <div class="info-row" data-bind="if: print_time">
                                                     <div class="span4 bold">Print Time:</div>
                                                     <div class="span8"><span data-bind="text: print_time"></span></div>
                                                 </div>
-                                                <div class="info-row">
+                                                <div class="info-row" data-bind="if: layer_height">
                                                     <div class="span4 bold">Layer Height:</div>
                                                     <div class="span8"><span data-bind="text: layer_height"></span> mm</div>
                                                 </div>
-                                                <div class="info-row">
+                                                <div class="info-row" data-bind="if: layer_count">
                                                     <div class="span4 bold">Number of Layers:</div>
                                                     <div class="span8"><span data-bind="text: layer_count"></span></div>
                                                 </div>
-                                                <div class="info-row">
+                                                <div class="info-row" data-bind="if: filament_volume">
                                                     <div class="span4 bold">Filament Used:</div>
                                                     <div class="span8"><span data-bind="text: filament_volume"></span> cm<sup>3</sup> / <span data-bind="text: filament_length"></span> cm /  ~ <span data-bind="text: filament_weight"></span> g</div>
                                                 </div>
@@ -366,23 +366,23 @@
                                     </div>
                                 </div>
                                 <div data-bind="if: expanded" class="more-printfile-info clearfix">
-                                    <div class="info-row clearfix">
+                                    <div class="info-row clearfix" data-bind="if: sizeZ">
                                         <div class="span4 bold">Print Area:</div>
                                         <div class="span8"><span data-bind="text: sizeX"></span><span class="bold"> x </span><span data-bind="text: sizeY"></span><span class="bold"> x </span><span data-bind="text: sizeZ"></span> mm</div>
                                     </div>
-                                    <div class="info-row clearfix">
+                                    <div class="info-row clearfix" data-bind="if: print_time">
                                         <div class="span4 bold">Print Time:</div>
                                         <div class="span8"><span data-bind="text: print_time"></span></div>
                                     </div>
-                                    <div class="info-row clearfix">
+                                    <div class="info-row clearfix" data-bind="if: layer_height">
                                         <div class="span4 bold">Layer Height:</div>
                                         <div class="span8"><span data-bind="text: layer_height"></span> mm</div>
                                     </div>
-                                    <div class="info-row clearfix">
+                                    <div class="info-row clearfix" data-bind="if: layer_count">
                                         <div class="span4 bold">Number of Layers:</div>
                                         <div class="span8"><span data-bind="text: layer_count"></span></div>
                                     </div>
-                                    <div class="info-row clearfix">
+                                    <div class="info-row clearfix" data-bind="if: filament_volume">
                                         <div class="span4 bold">Filament Used:</div>
                                         <div class="span8"><span data-bind="text: filament_volume"></span> cm<sup>3</sup> / <span data-bind="text: filament_length"></span> cm /  ~ <span data-bind="text: filament_weight"></span> g</div>
                                     </div>
