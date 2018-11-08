@@ -320,7 +320,9 @@ $(function () {
                 self.layer_count = info.layer_count;
                 self.filament_length = Math.round(Number(info.filament_length / 10) * 100) / 100;
                 self.filament_volume = Math.round(Number(info.filament_volume / 1000) * 100) / 100;
-                self.filament_weight = Math.round(Number(info.filament_weight) * 100) / 100;
+                if(material){
+                    self.filament_weight =  Math.round((self.filament_volume * 0.001 * material.density) * 100) / 100;
+                }
                 self.total_filament = info.total_filament;
             }
 
