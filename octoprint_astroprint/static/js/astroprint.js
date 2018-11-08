@@ -17,6 +17,7 @@ $(function () {
         self.loginState = parameters[1];
         self.astroprintUser = ko.observable(null) //null while views are being rendered
         self.designList = ko.observable([]);
+        self.printFileList = ko.observable([]);
         self.filter = ko.observable("");
         self.boxrouter_status = ko.observable();
         self.changeNameDialog = undefined;
@@ -26,6 +27,8 @@ $(function () {
         self.access_key = ko.observable("");
         self.boxName = ko.observable(astroprint_variables.boxName);
         self.cacheBoxName = ko.observable(self.boxName());
+
+
         //filter Designs
         self.filteredDesigns = ko.computed(function () {
             if (!self.filter()) {
@@ -37,7 +40,8 @@ $(function () {
             }
         });
 
-        //Pagination
+
+        // Design Pagination
         self.designsPerPage = 5; //lets show 5 design per page
 
         self.totalPages = ko.computed(function () {
@@ -101,7 +105,84 @@ $(function () {
             self.currentPage(self.totalPages() - 1);
         }
 
+
+        //filter PrintFiles
+        self.filteredPrintFiles = ko.computed(function () {
+            if (!self.filter()) {
+                return self.printFileList();
+            } else {
+                return ko.utils.arrayFilter(self.printFileList(), function (printFile) {
+                    return printFile.filename.indexOf(self.filter()) >= 0
+                });
+            }
+        });
+
+         // PrintFile Pagination
+         self.printFilePerPage = 5; //lets show 5 printFiles per page
+
+         self.totalPrintFilePage = ko.computed(function () {
+             var pages = Math.floor(self.filteredPrintFiles().length / self.printFilePerPage);
+             pages += self.filteredPrintFiles().length % self.printFilePerPage > 0 ? 1 : 0;
+             return pages > 0 ? pages : 0
+         });
+
+         self.currentPrintFilePage = ko.observable(0);
+
+         self.filteredCurrentPrintFilePage = ko.computed(function () {
+             if (self.totalPrintFilePage() <= self.currentPrintFilePage()) {
+                 self.currentPrintFilePage(self.totalPrintFilePage());
+                 return self.currentPrintFilePage();
+             }
+             if (!self.currentPrintFilePage()) {
+                 self.currentPrintFilePage(0)
+             }
+             return self.currentPrintFilePage()
+         });
+
+         self.indexPrintFilePagesToShow = ko.computed(function () {
+             var limitPageNumber = 5
+             var start = Math.max((self.filteredCurrentPrintFilePage() - Math.floor(limitPageNumber / 2)), 1);
+             var minDesviation = (self.filteredCurrentPrintFilePage() - Math.floor(limitPageNumber / 2)) > 0 ? 0 : Math.ceil(limitPageNumber / 2) - self.filteredCurrentPrintFilePage()
+             var end = Math.min((self.filteredCurrentPrintFilePage() + (Math.floor(limitPageNumber / 2) + minDesviation)), self.totalPrintFilePage())
+             var maxDesviation = self.totalPrintFilePage() - (self.filteredCurrentPrintFilePage() + Math.floor(limitPageNumber / 2) + minDesviation) >= 0 ? 0 : (Math.floor(limitPageNumber / 2) - (self.totalPrintFilePage() - self.filteredCurrentPrintFilePage()))
+             start = Math.max((self.filteredCurrentPrintFilePage() - (Math.floor(limitPageNumber / 2) + maxDesviation)), 1);
+             if (end < 1) {
+                 return ko.observable(Array(1 - start + 1).fill(start).map((a, b) => { return a + b }).filter(i => i >= start))
+             }
+             return ko.observable(Array(end - start + 1).fill(start).map((a, b) => { return a + b }).filter(i => i >= start))
+         })
+
+         self.changePrintFilePage = function (page) {
+             self.currentPrintFilePage(page - 1)
+         }
+
+         self.printFiles = ko.computed(function () {
+             var first = self.currentPrintFilePage() * self.printFilePerPage;
+             return (self.filteredPrintFiles().slice(first, first + self.printFilePerPage));
+         });
+
+         self.firstPrintFilePage = function () {
+             self.currentPrintFilePage(0);
+         }
+
+         self.prevPrintFilePage = function () {
+             if (self.currentPrintFilePage() > 0) {
+                 self.currentPrintFilePage(self.currentPrintFilePage() - 1);
+             }
+         }
+
+         self.nextPrintFilePage = function () {
+             if (self.currentPrintFilePage() < (self.totalPrintFilePage() - 1)) {
+                 self.currentPrintFilePage(self.currentPrintFilePage() + 1);
+             }
+         }
+
+         self.lastPrintFilePage = function () {
+             self.currentPrintFilePage(self.totalPrintFilePage() - 1);
+         }
+
         self.designsRetrieved = ko.observable("charging") //values: charging, done, error
+        self.printFilesRetrieved = ko.observable("charging") //values: charging, done, error
         self.currentUrl = window.location.href.split('?')[0];
         self.cam_status = ko.observable('charging') //null while refreshing state
         self.can_print = ko.observable(false)
@@ -209,29 +290,45 @@ $(function () {
         }
 
         //PrintFile model
-        function PrintFile(id, created, filename, image, sizeX, sizeY, sizeZ, print_time, layer_height, layer_count, filament_length, filament_volume, filament_weight, total_filament, format, printer, material, quality) {
+        function PrintFile(id, created, filename, image, info, format, printer, material, quality) {
             var self = this;
             self.id = id;
             self.created = moment().add(created + "Z").format("DD MMM YYYY (h:mmA)");
             self.filename = filename;
             self.image = image;
-            self.sizeX = Math.round(Number(sizeX) * 100) / 100;
-            self.sizeY = Math.round(Number(sizeY) * 100) / 100;
-            self.sizeZ = Math.round(Number(sizeZ) * 100) / 100;
-            var seconds = Number(print_time);
-            var hours = Math.floor(seconds / 3600);
-            var minutes = Math.floor(seconds % 3600 / 60);
-            seconds = Math.floor(seconds % 3600 % 60);
-            self.print_time = ((hours > 0 ? hours + ":" + (minutes < 10 ? "0" : "") : "") + minutes + ":" + (seconds < 10 ? "0" : "") + seconds);
-            self.layer_height = layer_height;
-            self.layer_count = layer_count;
-            self.filament_length = Math.round(Number(filament_length / 10) * 100) / 100;
-            self.filament_volume = Math.round(Number(filament_volume / 1000) * 100) / 100;
-            self.filament_weight = Math.round(Number(filament_weight) * 100) / 100;
-            self.total_filament = total_filament;
+            self.sizeX = null
+            self.sizeY = null
+            self.sizeZ = null
+            self.print_time = null
+            self.layer_height = null
+            self.layer_count = null;
+            self.filament_length = null
+            self.filament_volume = null
+            self.filament_weight = null
+            self.total_filament = null
+
+            if(info){
+                self.sizeX = Math.round(Number(info.sizeX) * 100) / 100;
+                self.sizeY = Math.round(Number(info.sizeY) * 100) / 100;
+                self.sizeZ = Math.round(Number(info.sizeZ) * 100) / 100;
+                var seconds = Number(info.print_time);
+                var hours = Math.floor(seconds / 3600);
+                var minutes = Math.floor(seconds % 3600 / 60);
+                seconds = Math.floor(seconds % 3600 % 60);
+                self.print_time = ((hours > 0 ? hours + ":" + (minutes < 10 ? "0" : "") : "") + minutes + ":" + (seconds < 10 ? "0" : "") + seconds);
+                self.layer_height = info.layer_height;
+                self.layer_count = info.layer_count;
+                self.filament_length = Math.round(Number(info.filament_length / 10) * 100) / 100;
+                self.filament_volume = Math.round(Number(info.filament_volume / 1000) * 100) / 100;
+                if(material){
+                    self.filament_weight =  Math.round((self.filament_volume * 0.001 * material.density) * 100) / 100;
+                }
+                self.total_filament = info.total_filament;
+            }
+
             self.format = format;
-            self.printer = printer;
-            self.material = material;
+            self.printer = printer ? printer.name : null;
+            self.material = material ? material.name : null;
             self.quality = quality;
             self.expanded = ko.observable(false);
             self.downloading = ko.observable(false);
@@ -338,6 +435,7 @@ $(function () {
                     self.isOctoprintAdmin(self.loginState.isAdmin());
                     self.astroprintUser(null);
                     self.designList([]);
+                    self.printFileList([]);
                 } else if (logOutTries > 0 && self.isOctoprintAdmin()) {
                     self.userLoggedOut(logOutTries);
                 }
@@ -354,6 +452,7 @@ $(function () {
                     if (data.user) {
                         self.astroprintUser(data.user)
                         self.getDesigns(false);
+                        self.unlinkedPrintFiles(false);
                     } else {
                         self.astroprintUser(false)
                     }
@@ -424,6 +523,7 @@ $(function () {
                 success: function (success) {
                     self.astroprintUser(success);
                     self.getDesigns(false);
+                    self.unlinkedPrintFiles(false);
                     new PNotify({
                         title: gettext("AstroPrint Login successful"),
                         text: gettext("You are now logged to Astroprint as " + self.astroprintUser().email),
@@ -571,7 +671,7 @@ $(function () {
                                     var printFiles = [];
                                     for (var p of data.data) {
                                         printFiles.push(
-                                            new PrintFile(p.id, p.created, p.filename, design.image, p.info.size.x, p.info.size.y, p.info.size.z, p.info.print_time, p.info.layer_height, p.info.layer_count, p.info.filament_length, p.info.filament_volume, p.info.filament_weight, p.info.total_filament, p.format, p.printer.name, p.material.name, p.quality)
+                                            new PrintFile(p.id, p.created, p.filename, design.image, p.info, p.format, p.printer, p.material, p.quality)
                                         );
                                     }
                                     design.printFilesCount(printFiles.length);
@@ -600,6 +700,59 @@ $(function () {
                 }
             }
         }
+
+        self.unlinkedPrintFiles = function (refresh = true) {
+            self.printFilesRetrieved("charging");
+            $.ajax({
+                type: "GET",
+                contentType: "application/json; charset=utf-8",
+                url: PLUGIN_BASEURL + "astroprint/printfiles",
+                start_time: new Date().getTime(),
+                success: function (data) {
+                    var printFiles = [];
+                    for (var p of data.data) {
+                        printFiles.push(
+                            new PrintFile(p.id, p.created, p.filename, null, p.info, p.format, p.printer, p.material, p.quality)
+                        );
+                    }
+                    self.printFileList(printFiles);
+                    var notify = function () {
+                        new PNotify({
+                            title: gettext("AstroPrint PrintFiles Retrieved"),
+                            text: gettext("Your designs and print files from AstroPrint have been refreshed"),
+                            type: "success"
+                        });
+                    }
+                    if ((new Date().getTime() - this.start_time) > 600) {
+                        self.printFilesRetrieved("done");
+                        if (refresh) {
+                            notify();
+                        }
+                    } else {
+                        setTimeout(function () {
+                            self.printFilesRetrieved("done");
+                            if (refresh) {
+                                notify();
+                            }
+                        }, 600 - ((new Date().getTime() - this.start_time)));
+                    }
+                },
+                error: function (data) {
+                    if (data.status == 401) {
+                        self.error401handling();
+                    } else {
+                        self.designsRetrieved("error");
+                        new PNotify({
+                            title: gettext("Error retrievind printFiles"),
+                            text: gettext("There was an error retrieving AstroPrint printFiles, please try again later."),
+                            type: "error"
+                        });
+                    }
+                },
+                dataType: "json"
+            });
+        };
+
 
         self.expandPrintfile = function (printFile) {
             if (printFile.expanded()) {

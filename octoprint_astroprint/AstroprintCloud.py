@@ -437,24 +437,42 @@ class AstroprintCloud():
 			return jsonify({'error': "Internal server error"}), 500, {'ContentType':'application/json'}
 
 	def getPrintFiles(self, designId):
+		if designId:
+			try:
+				token = self.getToken()
+				r = requests.get(
+					"%s/designs/%s/printfiles" % (self.apiHost, designId),
+					headers={'Content-Type': 'application/x-www-form-urlencoded',
+							'authorization': ("bearer %s" %token) }
+				)
+				r.raise_for_status()
+				data = r.json()
+				return jsonify(data), 200, {'ContentType':'application/json'}
 
-		try:
-			token = self.getToken()
-			r = requests.get(
-				"%s/designs/%s/printfiles" % (self.apiHost, designId),
-				headers={'Content-Type': 'application/x-www-form-urlencoded',
-						'authorization': ("bearer %s" %token) }
-			)
-			r.raise_for_status()
-			data = r.json()
-			return jsonify(data), 200, {'ContentType':'application/json'}
+			except requests.exceptions.HTTPError as err:
+				if (err.response.status_code == 401):
+					self.unautorizedHandeler()
+				return jsonify(json.loads(err.response.text)), err.response.status_code, {'ContentType':'application/json'}
+			except requests.exceptions.RequestException:
+				return jsonify({'error': "Internal server error"}), 500, {'ContentType':'application/json'}
+		else:
+			try:
+				token = self.getToken()
+				r = requests.get(
+					"%s/printfiles?design_id=null" % (self.apiHost),
+					headers={'Content-Type': 'application/x-www-form-urlencoded',
+							'authorization': ("bearer %s" %token) }
+				)
+				r.raise_for_status()
+				data = r.json()
+				return jsonify(data), 200, {'ContentType':'application/json'}
 
-		except requests.exceptions.HTTPError as err:
-			if (err.response.status_code == 401):
-				self.unautorizedHandeler()
-			return jsonify(json.loads(err.response.text)), err.response.status_code, {'ContentType':'application/json'}
-		except requests.exceptions.RequestException:
-			return jsonify({'error': "Internal server error"}), 500, {'ContentType':'application/json'}
+			except requests.exceptions.HTTPError as err:
+				if (err.response.status_code == 401):
+					self.unautorizedHandeler()
+				return jsonify(json.loads(err.response.text)), err.response.status_code, {'ContentType':'application/json'}
+			except requests.exceptions.RequestException:
+				return jsonify({'error': "Internal server error"}), 500, {'ContentType':'application/json'}
 
 	def cancelDownload(self, printFileId):
 		self.downloadmanager.cancelDownload(printFileId)

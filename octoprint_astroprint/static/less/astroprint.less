@@ -134,6 +134,12 @@
             padding : 5px 5px;
             margin: 0;
             border-top: 1px solid #DDD;
+
+            .icon-angle-down{
+                font-size: 26px;
+                color: darkgrey;
+            }
+
             .design-info{
                 padding : 0;
                 .sections-design-row{
@@ -202,7 +208,6 @@
                             display: block
                         }
                         .printFileName{
-                            font-weight: bold;
                             font-size: 12px;
                             white-space: nowrap;
                             text-overflow: ellipsis;
@@ -210,14 +215,12 @@
                         }
                         .slicerSettings{
                             font-weight: bold;
-                            font-size: 10px;
                             .infoSlicerSettings{
                                 font-size: 10px;
-                                color: #999;
                             }
                         }
                         .printFileCreated{
-                            font-size: 10px;
+                            font-size: 12px;
                             color: #999;
                         }
                     }
@@ -226,16 +229,50 @@
                         clear : both;
                         width: 83%;
                         margin: 0px 13% 20px;
-                        .info-row:nth-child(odd) {
-                            background: #f5f5f5;
-                        }
+
                         .info-row {
-                            height: 30px;
-                            margin: 2px 0;
                             clear : both;
                         }
                     }
                 }
+            }
+        }
+    }
+
+    .design-printfiles .print-file-row{
+        width: 100%;
+        padding: 5px 5px;
+        margin: 0;
+        border-bottom: 1px solid #DDD;
+
+        .printFileName{margin-bottom: 5px;}
+
+        .slicerSettings{
+            padding-right: 10px;
+            line-height: 110%;
+            font-weight: bold;
+        }
+
+        .printFileCreated{
+            opacity: 0.6;
+        }
+        .icon-angle-down{
+            font-size: 26px;
+            color: darkgrey;
+        }
+
+        .more-printfile-info{
+            .info-row .span4{
+                text-transform: uppercase;
+                letter-spacing: 2px;
+                font-size: 10px;
+                color: darkgrey;
+            }
+
+            .info-row:first-of-type{
+                margin-top: 10px;
+                padding-top: 10px;
+                border-top: 1px dashed #cacaca;
             }
         }
     }
