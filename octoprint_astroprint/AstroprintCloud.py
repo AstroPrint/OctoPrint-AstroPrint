@@ -412,7 +412,7 @@ class AstroprintCloud():
 		except requests.exceptions.HTTPError as err:
 			if (err.response.status_code == 401):
 				self.unautorizedHandeler()
-			return jsonify(json.loads(err.response.text)), err.response.status_code, {'ContentType':'application/json'}
+			return jsonify({'error': "Unauthorized user"}), err.response.status_code, {'ContentType':'application/json'}
 		except requests.exceptions.RequestException:
 			return jsonify({'error': "Internal server error"}), 500, {'ContentType':'application/json'}
 
@@ -432,7 +432,7 @@ class AstroprintCloud():
 		except requests.exceptions.HTTPError as err:
 			if (err.response.status_code == 401):
 				self.unautorizedHandeler()
-			return jsonify(json.loads(err.response.text)), err.response.status_code, {'ContentType':'application/json'}
+			return jsonify({'error': "Unauthorized user"}), err.response.status_code, {'ContentType':'application/json'}
 		except requests.exceptions.RequestException:
 			return jsonify({'error': "Internal server error"}), 500, {'ContentType':'application/json'}
 
@@ -452,7 +452,7 @@ class AstroprintCloud():
 			except requests.exceptions.HTTPError as err:
 				if (err.response.status_code == 401):
 					self.unautorizedHandeler()
-				return jsonify(json.loads(err.response.text)), err.response.status_code, {'ContentType':'application/json'}
+				return jsonify({'error': "Unauthorized user"}), err.response.status_code, {'ContentType':'application/json'}
 			except requests.exceptions.RequestException:
 				return jsonify({'error': "Internal server error"}), 500, {'ContentType':'application/json'}
 		else:
@@ -470,7 +470,7 @@ class AstroprintCloud():
 			except requests.exceptions.HTTPError as err:
 				if (err.response.status_code == 401):
 					self.unautorizedHandeler()
-				return jsonify(json.loads(err.response.text)), err.response.status_code, {'ContentType':'application/json'}
+				return jsonify({'error': "Unauthorized user"}), err.response.status_code, {'ContentType':'application/json'}
 			except requests.exceptions.RequestException:
 				return jsonify({'error': "Internal server error"}), 500, {'ContentType':'application/json'}
 
@@ -544,3 +544,78 @@ class AstroprintCloud():
 				return data
 			else:
 				return None
+
+	def getManufacturer(self):
+		try:
+			r = requests.get(
+				"%s/manufacturers" % (self.apiHost),
+				headers={'Content-Type': 'application/x-www-form-urlencoded' }
+			)
+			r.raise_for_status()
+			data = r.json()
+			return jsonify(data), 200, {'ContentType':'application/json'}
+
+		except requests.exceptions.HTTPError as err:
+			if (err.response.status_code == 401):
+				self.unautorizedHandeler()
+			return jsonify({'error': "Unauthorized user"}), err.response.status_code, {'ContentType':'application/json'}
+		except requests.exceptions.RequestException:
+
+			return jsonify({'error': "Internal server error"}), 500, {'ContentType':'application/json'}
+
+	def getManufacturerModels(self, manufacturer_id):
+		try:
+			r = requests.get(
+				"%s/manufacturers/%s/models?format=gcode" % (self.apiHost, manufacturer_id),
+				headers={'Content-Type': 'application/x-www-form-urlencoded' }
+			)
+			r.raise_for_status()
+			data = r.json()
+			return jsonify(data), 200, {'ContentType':'application/json'}
+
+		except requests.exceptions.HTTPError as err:
+			if (err.response.status_code == 401):
+				self.unautorizedHandeler()
+			return jsonify({'error': "Unauthorized user"}), err.response.status_code, {'ContentType':'application/json'}
+		except requests.exceptions.RequestException:
+			return jsonify({'error': "Internal server error"}), 500, {'ContentType':'application/json'}
+
+	def getModelInfo(self, model_id):
+		try:
+			r = requests.get(
+				"%s/manufacturers/models/%s" % (self.apiHost, model_id),
+				headers={'Content-Type': 'application/x-www-form-urlencoded' }
+			)
+			r.raise_for_status()
+			data = r.json()
+			return jsonify(data), 200, {'ContentType':'application/json'}
+
+		except requests.exceptions.HTTPError as err:
+			if (err.response.status_code == 401):
+				self.unautorizedHandeler()
+			return jsonify({'error': "Unauthorized user"}), err.response.status_code, {'ContentType':'application/json'}
+		except requests.exceptions.RequestException:
+			return jsonify({'error': "Internal server error"}), 500, {'ContentType':'application/json'}
+
+	def updateBoxrouterData(self, data):
+		try:
+
+			token = self.getToken()
+
+			r = requests.patch(
+				"%s/devices/%s/update-boxrouter-data" % (self.apiHost, self.bm.boxId),
+				headers={'Content-Type': 'application/json',
+				'authorization': ("bearer %s" %token) },
+				data=json.dumps(data),
+			)
+
+			r.raise_for_status()
+
+			return jsonify({'success': "Printer saved"}), 200, {'ContentType':'application/json'}
+
+		except requests.exceptions.HTTPError as err:
+			if (err.response.status_code == 401):
+				self.unautorizedHandeler()
+			return jsonify({'error': "Unauthorized user"}), err.response.status_code, {'ContentType':'application/json'}
+		except requests.exceptions.RequestException:
+			return jsonify({'error': "Internal server error"}), 500, {'ContentType':'application/json'}

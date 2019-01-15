@@ -142,11 +142,18 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 
 	def get_settings_defaults(self):
 
-		appSite ="https://cloud.astroprint.com"
-		appId="c4f4a98519194176842567680239a4c3"
-		apiHost="https://api.astroprint.com/v2"
-		webSocket="wss://boxrouter.astroprint.com"
-		product_variant_id = "9e33c7a4303348e0b08714066bcc2750"
+		#appSite ="https://cloud.astroprint.com"
+		#appId="c4f4a98519194176842567680239a4c3"
+		#apiHost="https://api.astroprint.com/v2"
+		#webSocket="wss://boxrouter.astroprint.com"
+		#product_variant_id = "9e33c7a4303348e0b08714066bcc2750"
+		#boxName = socket.gethostname()
+
+		appSite ="http://cloud.astroprint.test"
+		appId="c4f4a985-1919-4176-8425-67680239a4c3"
+		apiHost="http://api.astroprint.test/v2"
+		webSocket="ws://boxrouter.astroprint.test:8085"
+		product_variant_id = "bd1c875ee22947c79d28e268529d8e1e"
 		boxName = socket.gethostname()
 
 
@@ -158,6 +165,8 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 			webSocket = webSocket,
 			product_variant_id = product_variant_id,
 			boxName = boxName,
+			printerModel = None,
+			filament = {'name' : None, 'color' : None},
 			camera = False,
 			#Adittional printer settings
 			max_nozzle_temp = 280, #only for being set by AstroPrintCloud, it wont affect octoprint settings
@@ -170,6 +179,8 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 					appId = self._settings.get(["appId"]),
 					appiHost = self._settings.get(["apiHost"]),
 					boxName = self._settings.get(["boxName"]),
+					printerModel = json.dumps(self._settings.get(["printerModel"])) if self._settings.get(["printerModel"]) else "null",
+					filament = json.dumps(self._settings.get(["filament"])) if self._settings.get(["filament"]) and self._settings.get(["filament"])['name'] else "null",
 					user = json.dumps({'name': self.user.name, 'email': self.user.email}, cls=JsonEncoder, indent=4) if self.user else None ,
 					camera = self._settings.get(["camera"])
 					)
@@ -410,9 +421,67 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 		self._settings.set(['boxName'], name)
 		self._settings.save()
 		if self.astroprintCloud and self.astroprintCloud.bm:
-			self.astroprintCloud.disconnectBoxrouter()
-			self.astroprintCloud.connectBoxrouter()
-		return jsonify({"connecting" : True }), 200, {'ContentType':'application/json'}
+			data = {
+				"boxName": name
+			}
+			return self.astroprintCloud.updateBoxrouterData(data)
+		else:
+			return jsonify({"connecting" : True }), 200, {'ContentType':'application/json'}
+
+	@octoprint.plugin.BlueprintPlugin.route("/manufactures", methods=["GET"])
+	@admin_permission.require(403)
+	def getManufacturers(self):
+		return self.astroprintCloud.getManufacturer()
+
+	@octoprint.plugin.BlueprintPlugin.route("/manufacturermodels", methods=["GET"])
+	@admin_permission.require(403)
+	def getManufacturerModels(self):
+		manufacturerId = request.args.get('manufacturerId', None)
+		return self.astroprintCloud.getManufacturerModels(manufacturerId)
+
+	@octoprint.plugin.BlueprintPlugin.route("/manufacturermodelinfo", methods=["GET"])
+	@admin_permission.require(403)
+	def getModelInfo(self):
+		modelId = request.args.get('modelId', None)
+		return self.astroprintCloud.getPrintFiles(modelId)
+
+	@octoprint.plugin.BlueprintPlugin.route("/changeprinter", methods=["POST"])
+	@admin_permission.require(403)
+	def changeprinter(self):
+		printer = request.json['printerModel']
+		self._settings.set(['printerModel'], printer)
+		self._settings.save()
+		data = {
+			"printerModel": printer
+		}
+		return self.astroprintCloud.updateBoxrouterData(data)
+
+	@octoprint.plugin.BlueprintPlugin.route("/changeprinter", methods=["DELETE"])
+	@admin_permission.require(403)
+	def deleteprinter(self):
+		self._settings.set(['printerModel'], None)
+		self._settings.save()
+		data = {
+			"printerModel": None
+		}
+		return self.astroprintCloud.updateBoxrouterData(data)
+
+	@octoprint.plugin.BlueprintPlugin.route("/changefilament", methods=["POST"])
+	@admin_permission.require(403)
+	def changefilament(self):
+		filament = request.json['filament']
+		self._settings.set(['filament'], filament)
+		self._settings.save()
+		self.astroprintCloud.bm.triggerEvent('filamentChanged', {'filament' : filament})
+		return jsonify({"Filament updated" : True }), 200, {'ContentType':'application/json'}
+
+	@octoprint.plugin.BlueprintPlugin.route("/changefilament", methods=["DELETE"])
+	@admin_permission.require(403)
+	def removefilament(self):
+		self._settings.set(['filament'], {'name' : None, 'color' : None})
+		self._settings.save()
+		self.astroprintCloud.bm.triggerEvent('filamentChanged', {'filament' : {'name' : None, 'color' : None}})
+		return jsonify({"Filament removed" : True }), 200, {'ContentType':'application/json'}
 
 	##LOCAL AREA
 	#Functions related to local aspects

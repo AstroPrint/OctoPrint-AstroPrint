@@ -18,12 +18,16 @@ class EventSender(object):
 			'status_update': None,
 			'printing_progress': None,
 			'print_capture': None,
-			'print_file_download': None
+			'print_file_download': None,
+			'filament_update' : None,
 		}
 
 
 	def onCaptureInfoChanged(self, payload):
 		self.sendUpdate('print_capture', payload)
+
+	def filamentChanged(self, payload):
+		self.sendUpdate('filament_update', payload)
 
 	def onDownload(self, payload):
 		data = {
