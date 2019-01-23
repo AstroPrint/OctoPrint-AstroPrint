@@ -534,7 +534,8 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 				'name': self._settings.get(["boxName"]),
 				'printing': self._printer.is_printing(),
 				'fileName': fileName,
-				'printerModel': None,
+				'printer_model': self._settings.get(["printerModel"]),
+				'filament' : self._settings.get(["filament"]),
 				'material': None,
 				'operational': self._printer.is_operational(),
 				'paused': self._printer.is_paused(),
@@ -557,6 +558,8 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 			'heated_bed': printerProfile['heatedBed'],
 			'cancel_gcode': ['G28 X0 Y0'],#ToDo figure out how to get it from snipet
 			'invert_z': printerProfile['axes']['z']['inverted'],
+			'printer_model': self._settings.get(["printerModel"]),
+			'filament' : self._settings.get(["filament"])
 		}
 		return jsonify(profile)
 
