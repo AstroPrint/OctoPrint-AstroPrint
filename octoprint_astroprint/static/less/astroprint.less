@@ -177,7 +177,6 @@
                     .designImage{
                         width: 100%;
                         height: 100%;
-                        opacity: 0.85;
                     }
                 }
             }
@@ -359,6 +358,53 @@
             background: rgba(255, 161, 21, 0.12);
             letter-spacing: 0.6px;
         }
+
+        h4{margin-top: 0;}
+
+        .fa-trash-o{
+            color: #f05151;
+            font-size: 28px;
+            margin-left: 10px;
+        }
+
+        i.icon-edit{
+            font-size: 26px;
+            margin-left: 8px;
+            color: rgba(0, 135, 205, 1);
+            text-decoration: none;
+            border: 0;
+
+            &:hover{opacity: 0.7;}
+        }
+
+        .filament-icon{
+            text-align: center;
+            width: 26px;
+            height: 26px;
+            display: inline-block;
+            border: 1px solid gainsboro;
+            padding: 2px;
+            vertical-align: middle;
+            margin-right: 5px;
+        }
+    }
+}
+
+#changeFilament{
+    .filament-color >div {
+        width: 36px;
+        height: 36px;
+        display: inline-block;
+        margin: 2px;
+        border-radius: 3px;
+
+        &:hover{opacity: 0.8; cursor: pointer;}
+    }
+
+    .fields{
+        margin-bottom: 15px;
+
+        input#filament_color{width: 100%;}
     }
 }
 
@@ -375,11 +421,15 @@
 
 .edit-name{
 border-bottom: 3px solid rgba(0, 135, 205, 0.25);
-&:hover{text-decoration: none;}
+    &:hover{
+        text-decoration: none;
+
+        i{opacity: 0.7;}
+    }
 
     i.icon-edit{
         font-size: 26px;
         margin-left: 10px;
-        color: rgba(0, 135, 205, 0.3);
+        color: rgba(0, 135, 205, 1);
     }
 }

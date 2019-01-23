@@ -28,34 +28,35 @@
         </div>
 
         <h3>Printer Model</h3>
-        <div class="control-group">
-            <div class="text-center span12" data-bind="if: printerModel">
-                <h2>
+        <div class="control-group printer-model">
+            <div class="span12" data-bind="if: printerModel">
+                <h4>
                    <span data-bind="text: printerModel().name"></span><span style="font-size: 10px"></span>
                     <a href="#changePrinterModel" class="edit-name" data-toggle="modal"><i class="icon-edit"></i></a>
                     <a href="#removePrinterModel" data-toggle="modal"><i class="fa fa-trash-o"></i></a>
-                </h2>
+                </h4>
             </div>
-            <div class="text-center span12" data-bind="ifnot: printerModel">
-                <h2>
-                    <a href="#changePrinterModel" class="edit-name" data-toggle="modal"><span>Link Printer Model</span><span style="font-size: 10px"><i class="fa fa-plus"></i></span></a>
-                </h2>
+            <div class="span12" data-bind="ifnot: printerModel">
+                <h4>
+                    <a href="#changePrinterModel" class="edit-name" data-toggle="modal"><i class="fa fa-plus"></i> <span>Link Printer Model</span><span style="font-size: 10px"></span></a>
+                </h4>
             </div>
         </div>
         <h3>Printer Filament</h3>
         <div class="control-group">
-            <div class="text-center span12" data-bind="if: filamentModel">
-                <h2>
-                    <span data-bind="style: {'background-color' : filamentModel().color}">colorcito</span>
+            <div class="span12" data-bind="if: filamentModel">
+                <h4>
+                    <div class="filament-icon" data-bind="style: {'background-color' : filamentModel().color}">
+                    </div>
                     <span data-bind="text: filamentModel().name"></span><span style="font-size: 10px"></span>
                     <a href="#changeFilament" class="edit-filament" data-toggle="modal"><i class="icon-edit"></i></a>
                     <a href="#removeFilamentModel" data-toggle="modal"><i class="fa fa-trash-o"></i></a>
-                </h2>
+                </h4>
             </div>
-            <div class="text-center span12" data-bind="ifnot: filamentModel">
-                <h2>
-                    <a href="#changeFilament" class="edit-name" data-toggle="modal"><span>Add Filament Info</span><span style="font-size: 10px"><i class="fa fa-plus"></i></span></a>
-                </h2>
+            <div class="span12" data-bind="ifnot: filamentModel">
+                <h4>
+                    <a href="#changeFilament" class="edit-name" data-toggle="modal"><i class="fa fa-plus"></i> <span>Add Filament Info</span><span style="font-size: 10px"></span></a>
+                </h4>
             </div>
         </div>
         <h3>Printer Settings</h3>
@@ -138,14 +139,17 @@
         <div class="modal-body">
             <div class="control-group">
                 <form class="form-horizontal" action="javascript:void(0)">
-                    <input type="text" data-bind="value: filamentName"/>
-                    <small class="invalidName error hide">Invalid Name</small>
-                    <div class="columns small-4 more-colors">
-                        <input id="filament_color" type="color" name="filament_color" data-bind="value: filamentColor"/>
-                        <i class="icon-pencil"></i>
+                    <div class="fields row clearfix">
+                        <div class="span3">
+                            <input type="text" data-bind="value: filamentName"/>
+                            <small class="invalidName error hide">Invalid Name</small>
+                        </div>
+                         <div class="span1">
+                            <input id="filament_color" type="color" name="filament_color" data-bind="value: filamentColor"/>
+                        </div>
                     </div>
                     <div class="filament-color clearfix" data-bind="foreach: colors">
-                        <div data-bind="data-color : $data, style:{ 'background-color' : $data}, click: $root.selectFilamentColor" class="paletecolor">colorcito</div>
+                        <div data-bind="data-color : $data, style:{ 'background-color' : $data}, click: $root.selectFilamentColor" class="paletecolor"></div>
                     </div>
                 </form>
             </div>
