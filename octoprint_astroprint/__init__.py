@@ -158,6 +158,8 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 			webSocket = webSocket,
 			product_variant_id = product_variant_id,
 			boxName = boxName,
+			printerModel = {'id' : None, 'name' : None},
+			filament = {'name' : None, 'color' : None},
 			camera = False,
 			#Adittional printer settings
 			max_nozzle_temp = 280, #only for being set by AstroPrintCloud, it wont affect octoprint settings
@@ -170,6 +172,8 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 					appId = self._settings.get(["appId"]),
 					appiHost = self._settings.get(["apiHost"]),
 					boxName = self._settings.get(["boxName"]),
+					printerModel = json.dumps(self._settings.get(["printerModel"])) if self._settings.get(["printerModel"])['id'] else "null",
+					filament = json.dumps(self._settings.get(["filament"])) if self._settings.get(["filament"])['name'] else "null",
 					user = json.dumps({'name': self.user.name, 'email': self.user.email}, cls=JsonEncoder, indent=4) if self.user else None ,
 					camera = self._settings.get(["camera"])
 					)
@@ -410,9 +414,67 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 		self._settings.set(['boxName'], name)
 		self._settings.save()
 		if self.astroprintCloud and self.astroprintCloud.bm:
-			self.astroprintCloud.disconnectBoxrouter()
-			self.astroprintCloud.connectBoxrouter()
-		return jsonify({"connecting" : True }), 200, {'ContentType':'application/json'}
+			data = {
+				"name": name
+			}
+			return self.astroprintCloud.updateBoxrouterData(data)
+		else:
+			return jsonify({"connecting" : True }), 200, {'ContentType':'application/json'}
+
+	@octoprint.plugin.BlueprintPlugin.route("/manufactures", methods=["GET"])
+	@admin_permission.require(403)
+	def getManufacturers(self):
+		return self.astroprintCloud.getManufacturer()
+
+	@octoprint.plugin.BlueprintPlugin.route("/manufacturermodels", methods=["GET"])
+	@admin_permission.require(403)
+	def getManufacturerModels(self):
+		manufacturerId = request.args.get('manufacturerId', None)
+		return self.astroprintCloud.getManufacturerModels(manufacturerId)
+
+	@octoprint.plugin.BlueprintPlugin.route("/manufacturermodelinfo", methods=["GET"])
+	@admin_permission.require(403)
+	def getModelInfo(self):
+		modelId = request.args.get('modelId', None)
+		return self.astroprintCloud.getPrintFiles(modelId)
+
+	@octoprint.plugin.BlueprintPlugin.route("/changeprinter", methods=["POST"])
+	@admin_permission.require(403)
+	def changeprinter(self):
+		printer = request.json['printerModel']
+		self._settings.set(['printerModel'], printer)
+		self._settings.save()
+		data = {
+			"printerModel": printer
+		}
+		return self.astroprintCloud.updateBoxrouterData(data)
+
+	@octoprint.plugin.BlueprintPlugin.route("/changeprinter", methods=["DELETE"])
+	@admin_permission.require(403)
+	def deleteprinter(self):
+		self._settings.set(['printerModel'], {'id' : None, 'name' : None})
+		self._settings.save()
+		data = {
+			"printerModel": None
+		}
+		return self.astroprintCloud.updateBoxrouterData(data)
+
+	@octoprint.plugin.BlueprintPlugin.route("/changefilament", methods=["POST"])
+	@admin_permission.require(403)
+	def changefilament(self):
+		filament = request.json['filament']
+		self._settings.set(['filament'], filament)
+		self._settings.save()
+		self.astroprintCloud.bm.triggerEvent('filamentChanged', {'filament' : filament})
+		return jsonify({"Filament updated" : True }), 200, {'ContentType':'application/json'}
+
+	@octoprint.plugin.BlueprintPlugin.route("/changefilament", methods=["DELETE"])
+	@admin_permission.require(403)
+	def removefilament(self):
+		self._settings.set(['filament'], {'name' : None, 'color' : None})
+		self._settings.save()
+		self.astroprintCloud.bm.triggerEvent('filamentChanged', {'filament' : {'name' : None, 'color' : None}})
+		return jsonify({"Filament removed" : True }), 200, {'ContentType':'application/json'}
 
 	##LOCAL AREA
 	#Functions related to local aspects
@@ -465,7 +527,8 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 				'name': self._settings.get(["boxName"]),
 				'printing': self._printer.is_printing(),
 				'fileName': fileName,
-				'printerModel': None,
+				'printerModel': self._settings.get(["printerModel"]) if self._settings.get(['printerModel'])['id']  else None,
+				'filament' : self._settings.get(["filament"]),
 				'material': None,
 				'operational': self._printer.is_operational(),
 				'paused': self._printer.is_paused(),
@@ -488,6 +551,8 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 			'heated_bed': printerProfile['heatedBed'],
 			'cancel_gcode': ['G28 X0 Y0'],#ToDo figure out how to get it from snipet
 			'invert_z': printerProfile['axes']['z']['inverted'],
+			'printerModel': self._settings.get(["printerModel"]) if self._settings.get(['printerModel'])['id']  else None,
+			'filament' : self._settings.get(["filament"])
 		}
 		return jsonify(profile)
 

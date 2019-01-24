@@ -5,6 +5,7 @@ __copyright__ = "Copyright (C) 2017 3DaGoGo, Inc - Released under terms of the A
 
 import base64
 import threading
+import re
 from time import sleep
 
 class RequestHandler(object):
@@ -32,6 +33,8 @@ class RequestHandler(object):
 			'heated_bed': dataProfile['heatedBed'],
 			'cancel_gcode': ['G28 X0 Y0'],
 			'invert_z': dataProfile['axes']['z']['inverted'],
+			'printer_model': self._settings.get(["printerModel"]) if self._settings.get(['printerModel'])['id']  else None,
+			'filament' : self._settings.get(["filament"])
 		}
 
 		state = {
@@ -40,6 +43,7 @@ class RequestHandler(object):
 			'operational': self._printer.is_operational(),
 			'paused': self._printer.is_paused(),
 			'camera': True, #self.cameraManager.cameraActive,
+			'filament' : self._settings.get(["filament"]),
 			'printCapture': self.cameraManager.timelapseInfo,
 			'profile': profile,
 			'capabilities': ['remotePrint', 'multiExtruders', 'allowPrintFile'],
@@ -129,6 +133,32 @@ class RequestHandler(object):
 		self.astroprintCloud.cancelDownload(print_file_id)
 
 		done(None)
+
+	def set_filament(self, data, clientId, done):
+
+		filament = {}
+
+		if data['filament'] and data['filament']['name'] and data['filament']['color']:
+			filament['name'] = data['filament']['name']
+			#Better to make sure that are getting right color codes
+			if re.search(r'^#(?:[0-9a-fA-F]{3}){1,2}$', data['filament']['color']):
+				filament['color'] = data['filament']['color']
+				self._settings.set(['filament'], filament)
+				self._settings.save()
+				self.astroprintCloud.bm.triggerEvent('filamentChanged', data)
+				done(None)
+			else:
+				done({
+					'error': True,
+					'message': 'Invalid color code'
+				})
+
+		else:
+			data['filament'] = None
+			self._settings.set(['filament'], None)
+			self._settings.save()
+			self.astroprintCloud.bm.triggerEvent('filamentChanged', data)
+			done(None)
 
 	#set CommandGroup for future camera and 2p2 updates
 	def _handleCommandGroup(self, handlerClass, data, clientId, done, plugin = None):

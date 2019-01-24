@@ -17,6 +17,7 @@ $(function () {
         self.loginState = parameters[1];
         self.astroprintUser = ko.observable(null) //null while views are being rendered
         self.designList = ko.observable([]);
+        self.manufacturesList = ko.observable([]);
         self.printFileList = ko.observable([]);
         self.filter = ko.observable("");
         self.boxrouter_status = ko.observable();
@@ -26,8 +27,8 @@ $(function () {
         self.description = ko.observable("");
         self.access_key = ko.observable("");
         self.boxName = ko.observable(astroprint_variables.boxName);
+        self.printerModel = ko.observable(astroprint_variables.printerModel)
         self.cacheBoxName = ko.observable(self.boxName());
-
 
         //filter Designs
         self.filteredDesigns = ko.computed(function () {
@@ -275,6 +276,213 @@ $(function () {
             }
         }
 
+
+        //Manufacture model
+        function Manufacturer(id, name, printerCount) {
+            var self = this;
+            self.id = id;
+            self.name = name;
+            self.printerCount = printerCount
+            self.charging = ko.observable(true);
+            self.manufacturerModels = ko.observable()
+            self.getModels = function(){
+                if(!self.manufacturerModels() && self.printerCount > 0){
+                    $.ajax({
+                        type: "GET",
+                        contentType: "application/json; charset=utf-8",
+                        url: PLUGIN_BASEURL + "astroprint/manufacturermodels",
+                        data: {
+                            manufacturerId: self.id
+                        },
+                        success: function (data) {
+                            var manufacturerModels = [];
+                            for (var model of data.data) {
+                                manufacturerModels.push(
+                                    new PrinterModel(model.id, model.name, model.printer_count)
+                                );
+                            }
+                            self.charging(false)
+                            self.manufacturerModels(manufacturerModels);
+                        },
+                        error: function () {
+                            new PNotify({
+                                title: gettext("Error retrievind manufacturers models"),
+                                text: gettext("There was an error retrieving AstroPrint models, please try again later."),
+                                type: "error"
+                            });
+                        },
+                        dataType: "json"
+                    });
+                }
+            }
+        }
+
+        self.selectManufacturer = function()
+        {
+            self.selectedManufactured().getModels()
+        }
+
+        self.selectManufacturerModel = function()
+        {
+        }
+
+        self.selectedManufactured =  ko.observable();
+        self.selectedManufacturedModel = ko.observable();
+        self.changingPrinter = ko.observable(false)
+
+        self.getManufacturers = function () {
+            $.ajax({
+                type: "GET",
+                contentType: "application/json; charset=utf-8",
+                url: PLUGIN_BASEURL + "astroprint/manufactures",
+                start_time: new Date().getTime(),
+                success: function (data) {
+                    var manufactures = [];
+                    for (var manufacture of data.data) {
+                        manufactures.push(
+                            new Manufacturer(manufacture.id, manufacture.name, manufacture.printer_count)
+                        );
+                    }
+                    self.manufacturesList(manufactures);
+                },
+                error: function () {
+                    new PNotify({
+                        title: gettext("Error retrievind manufacturers information"),
+                        text: gettext("There was an error retrieving AstroPrint manufacturers, please try again later."),
+                        type: "error"
+                    });
+                },
+                dataType: "json"
+            });
+        }
+
+        //Printer Manufacturer model
+        function PrinterModel(id, name) {
+            var self = this;
+            self.id = id;
+            self.name = name;
+            self.config = ko.observable();
+            self.start_commands = ko.observable(null);
+            self.end_commands = ko.observable(null);
+            self.slicer = ko.observable(null);
+            self.format = ko.observable(null);
+            self.setModelInfo = function (config, start_commands, end_commands, slicer, format){
+                self.config(config);
+                self.start_commands(start_commands);
+                self.end_commands(end_commands);
+                self.slicer(slicer);
+                self.format(format);
+            }
+        }
+
+        self.changePrinter = function (){
+            self.changingPrinter(true)
+            let printerModel = { 'id': self.selectedManufacturedModel().id, name : self.selectedManufacturedModel().name}
+            $.ajax({
+                type: "POST",
+                contentType: "application/json; charset=utf-8",
+                url: PLUGIN_BASEURL + "astroprint/changeprinter",
+                data: JSON.stringify({printerModel : printerModel}),
+                dataType: "json",
+                success: function () {
+                    self.printerModel(printerModel);
+                    self.changingPrinter(false)
+                    $('#changePrinterModel').modal('hide');
+                },
+                error: function (error) {
+                    self.changingPrinter(false)
+                    console.error(error)
+                }
+            });
+        }
+
+        self.removePrinter = function (){
+            self.changingPrinter(true)
+            $.ajax({
+                type: "DELETE",
+                contentType: "application/json; charset=utf-8",
+                url: PLUGIN_BASEURL + "astroprint/changeprinter",
+                dataType: "json",
+                success: function () {
+                    self.printerModel(null);
+                    self.changingPrinter(false)
+                    $('#removePrinterModel').modal('hide');
+                },
+                error: function (error) {
+                    self.changingPrinter(false)
+                    console.error(error)
+                }
+            });
+        }
+
+        self.filamentModel =  ko.observable(astroprint_variables.filament)
+        self.filamentName = ko.observable("")
+        self.filamentColor = ko.observable("#000000")
+        self.changingFilament = ko.observable(false)
+        self.colors = ko.observableArray([
+        "#f05251", //RED
+        "#FF872B", //ORANGE
+        "#FFD54C", //YELLOW
+        "#59cd90", //GREEN
+        "#00bef5", //BLUE
+        "#435FEF", //DARKBLUE
+        "#A25ADD", //PURPLE
+        "#EF7587", //PINK OR CORAL
+        "#f7f7f7", //WHITE
+        "#889192", //SILVER
+        "#BA915D", //BROWN
+        "#333333",  //BLACK
+        ])
+
+        if(self.filamentModel()){
+            self.filamentName(self.filamentModel().name)
+            self.filamentColor(self.filamentModel().color)
+        }
+
+        self.selectFilamentColor = function() {
+            self.filamentColor(this.valueOf());
+        }
+
+        self.changeFilament = function (){
+            self.changingFilament(true)
+            let filament = { name: self.filamentName(), color : self.filamentColor()}
+            $.ajax({
+                type: "POST",
+                contentType: "application/json; charset=utf-8",
+                url: PLUGIN_BASEURL + "astroprint/changefilament",
+                data: JSON.stringify({filament : filament}),
+                dataType: "json",
+                success: function () {
+                    self.filamentModel(filament);
+                    self.changingFilament(false)
+                    $('#changeFilament').modal('hide');
+                },
+                error: function (error) {
+                    self.changingPrinter(false)
+                    console.error(error)
+                }
+            });
+        }
+
+        self.removeFilament = function (){
+            self.changingFilament(true)
+            $.ajax({
+                type: "DELETE",
+                contentType: "application/json; charset=utf-8",
+                url: PLUGIN_BASEURL + "astroprint/changefilament",
+                dataType: "json",
+                success: function () {
+                    self.filamentModel(null);
+                    self.changingFilament(false)
+                    $('#removeFilamentModel').modal('hide');
+                },
+                error: function (error) {
+                    self.changingPrinter(false)
+                    console.error(error)
+                }
+            });
+        }
+
         //Design model
         function Design(id, name, image, printFilesCount, allow_download) {
             var self = this;
@@ -452,6 +660,7 @@ $(function () {
                     if (data.user) {
                         self.astroprintUser(data.user)
                         self.getDesigns(false);
+                        self.getManufacturers();
                         self.unlinkedPrintFiles(false);
                     } else {
                         self.astroprintUser(false)
@@ -495,7 +704,7 @@ $(function () {
               var url = astroprint_variables.appSite + "/authorize" +
                   "?client_id=" + astroprint_variables.appId +
                   "&redirect_uri=" + currentUrl +
-                  "&scope=" + encodeURI("profile:read project:read design:read design:download print-file:read print-file:download print-job:read device:connect")+
+                  "&scope=" + encodeURI("profile:read project:read design:read design:download print-file:read print-file:download print-job:read device:connect device:update")+
                   "&state="+ap_access_key+
                   "&response_type=code";
               location.href = url;
@@ -975,10 +1184,14 @@ $(function () {
                     url: PLUGIN_BASEURL + "astroprint/changename",
                     data: JSON.stringify({ 'name': self.cacheBoxName() }),
                     dataType: "json",
-                    success: function (success) {
+                    success: function () {
                         self.boxName(self.cacheBoxName());
+                        self.changingname(false)
+                        $('#changeBoxName').modal('hide');
                     },
                     error: function (error) {
+                        self.changingname(false)
+                        console.error(error)
                     }
                 });
             } else {

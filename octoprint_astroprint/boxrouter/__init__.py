@@ -422,6 +422,7 @@ class AstroprintBoxRouter(object):
 			 		'platform': platform,
 			 		'localIpAddress': localIpAddress,
 			 		'publicKey': self._publicKey,
-			 		'privateKey': self._privateKey
+			 		'privateKey': self._privateKey,
+					'printerModel': self._settings.get(["printerModel"]) if self._settings.get(['printerModel'])['id'] else None
 			 	}
 			}

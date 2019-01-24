@@ -1,8 +1,10 @@
 <script>
   var astroprint_variables = {
-    appSite : "{{ plugin_astroprint_appSite|escape }}",
-    appId : "{{ plugin_astroprint_appId|escape }}",
-    boxName : "{{plugin_astroprint_boxName|escape}}"
+    appSite : '{{ plugin_astroprint_appSite|escape }}',
+    appId : '{{ plugin_astroprint_appId|escape }}',
+    boxName : '{{plugin_astroprint_boxName|escape}}',
+    printerModel : {{plugin_astroprint_printerModel}},
+    filament : {{plugin_astroprint_filament}}
   }
 </script>
 <!-- View while octoprint views are being rendered -->
@@ -56,7 +58,7 @@
         </div>
         <div class="row-fluid">
             <p class="astDescrip">
-                Enter your Astroprint Access Key (you can find it <a href="https://cloud.astroprint.com/settings#access-key" target="_blank">here</a>),
+                Enter your Astroprint Access Key (you can find it <a href="{{ plugin_astroprint_appSite|escape }}/settings#access-key" target="_blank">here</a>),
                 and authorize the plugin access to your account.
             </p>
             <input data-bind="value:access_key" class="access_key" type="text" placeholder="Introduce your Access Key"/>
@@ -181,12 +183,12 @@
                             <div class="design-row row">
                                 <div class="design-info">
                                     <div class="span2 sections-design-row">
-                                        <a data-bind="attr:{href: 'https://cloud.astroprint.com/design/info/' + id}"><div class="designImageContainer"><img class="designImage" width="200" height="200" data-bind="attr:{src: image}"/></div></a>
+                                        <a data-bind="attr:{href: '{{ plugin_astroprint_appSite|escape }}/design/info/' + id}"><div class="designImageContainer"><img class="designImage" width="200" height="200" data-bind="attr:{src: image}"/></div></a>
                                     </div>
                                     <div class="span2 sections-design-row">
                                         <span class="center-button">
                                             <span>
-                                                <a title="Cloud Slice" data-bind="attr:{href: 'https://cloud.astroprint.com/design/info/' + id}">
+                                                <a title="Cloud Slice" data-bind="attr:{href: '{{ plugin_astroprint_appSite|escape }}/design/info/' + id}">
                                                     <span class="btn">
                                                         <i class="fa fa-magic"></i>
                                                     </span>
