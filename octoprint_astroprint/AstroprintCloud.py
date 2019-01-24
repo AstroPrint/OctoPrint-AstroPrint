@@ -611,7 +611,7 @@ class AstroprintCloud():
 
 			r.raise_for_status()
 
-			return jsonify({'success': "Printer saved"}), 200, {'ContentType':'application/json'}
+			return jsonify({'success': "Device Updated"}), 200, {'ContentType':'application/json'}
 
 		except requests.exceptions.HTTPError as err:
 			if (err.response.status_code == 401):

@@ -322,6 +322,10 @@ $(function () {
             self.selectedManufactured().getModels()
         }
 
+        self.selectManufacturerModel = function()
+        {
+        }
+
         self.selectedManufactured =  ko.observable();
         self.selectedManufacturedModel = ko.observable();
         self.changingPrinter = ko.observable(false)

@@ -415,7 +415,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 		self._settings.save()
 		if self.astroprintCloud and self.astroprintCloud.bm:
 			data = {
-				"boxName": name
+				"name": name
 			}
 			return self.astroprintCloud.updateBoxrouterData(data)
 		else:
