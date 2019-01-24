@@ -411,6 +411,7 @@ class AstroprintBoxRouter(object):
 			platform = sys.platform
 			localIpAddress = octoprint.util.address_for_client("google.com", 80)
 			mayor, minor, build = self.plugin.get_plugin_version().split(".")
+			self._logger.info(self._settings.get(["printerModel"]))
 			return {
 			 	'type': 'auth',
 			 	'data': {
@@ -423,6 +424,6 @@ class AstroprintBoxRouter(object):
 			 		'localIpAddress': localIpAddress,
 			 		'publicKey': self._publicKey,
 			 		'privateKey': self._privateKey,
-					'printerModel': self._settings.get(["printerModel"])
+					'printerModel': self._settings.get(["printerModel"]) if self._settings.get(['printerModel'])['id'] else None
 			 	}
 			}

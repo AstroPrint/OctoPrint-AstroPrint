@@ -33,7 +33,7 @@ class RequestHandler(object):
 			'heated_bed': dataProfile['heatedBed'],
 			'cancel_gcode': ['G28 X0 Y0'],
 			'invert_z': dataProfile['axes']['z']['inverted'],
-			'printer_model': self._settings.get(["printerModel"]),
+			'printer_model': self._settings.get(["printerModel"]) if self._settings.get(['printerModel'])['id']  else None,
 			'filament' : self._settings.get(["filament"])
 		}
 

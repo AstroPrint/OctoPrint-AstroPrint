@@ -29,7 +29,6 @@ $(function () {
         self.boxName = ko.observable(astroprint_variables.boxName);
         self.printerModel = ko.observable(astroprint_variables.printerModel)
         self.cacheBoxName = ko.observable(self.boxName());
-        console.log(self.printerModel())
 
         //filter Designs
         self.filteredDesigns = ko.computed(function () {
@@ -287,9 +286,6 @@ $(function () {
             self.charging = ko.observable(true);
             self.manufacturerModels = ko.observable()
             self.getModels = function(){
-                console.log("getMOdels")
-                console.log(self.printerCount)
-                console.log(self.manufacturerModels())
                 if(!self.manufacturerModels() && self.printerCount > 0){
                     $.ajax({
                         type: "GET",
@@ -307,8 +303,6 @@ $(function () {
                             }
                             self.charging(false)
                             self.manufacturerModels(manufacturerModels);
-                            console.log(self.manufacturerModels())
-                            console.log(manufacturerModels)
                         },
                         error: function () {
                             new PNotify({
@@ -325,16 +319,7 @@ $(function () {
 
         self.selectManufacturer = function()
         {
-            console.log("selectedManufacturer")
-            console.log(self.selectedManufactured())
             self.selectedManufactured().getModels()
-        }
-
-        self.selectManufacturerModel = function()
-        {
-            console.log("selectedManufacturerModel")
-            console.log(self.selectedManufacturedModel())
-
         }
 
         self.selectedManufactured =  ko.observable();
@@ -426,7 +411,6 @@ $(function () {
             });
         }
 
-        console.log(astroprint_variables.filament)
         self.filamentModel =  ko.observable(astroprint_variables.filament)
         self.filamentName = ko.observable("")
         self.filamentColor = ko.observable("#000000")
