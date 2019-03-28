@@ -237,7 +237,6 @@ $(function () {
                 if (!self.failed() && id == self.id() && self.progress() != 100) {
                     self.progress(progress);
                     if (self.progress() == 100) {
-                        console.log(self.file)
                         if (self.file.format) {
                             new PNotify({
                                 title: gettext("File Downloaded"),
@@ -614,7 +613,6 @@ $(function () {
                 contentType: "application/json; charset=utf-8",
                 url: PLUGIN_BASEURL + "astroprint/connectboxrouter",
                 succes : function (data){
-                    console.log(data)
                 }
             })
         }
