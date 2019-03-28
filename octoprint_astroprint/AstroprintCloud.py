@@ -44,9 +44,13 @@ class AstroprintCloud():
 		self.statePayload = None
 		user = self.db.getUser()
 		if user:
+			self._logger.info("User %s logged to AstroPrint" % user.userId)
 			self.plugin.user = user
 			self.connectBoxrouter()
 			self.getUserInfo()
+		else:
+			self._logger.info("No user logged to AstroPrint")
+
 
 	def tokenIsExpired(self):
 		return self.plugin.user.expires - round(time.time()) < 60
@@ -80,7 +84,6 @@ class AstroprintCloud():
 			return self.plugin.user.token
 		except requests.exceptions.HTTPError as err:
 			if err.response.status_code == 400 or err.response.status_code == 401:
-				self._logger.warning("refresh token expired, AstroPrint user logged out.")
 				self.plugin.send_event("logOut")
 				self.unautorizedHandeler()
 			pass
@@ -148,10 +151,12 @@ class AstroprintCloud():
 				return jsonify({'error': "Internal server error"}), 500, {'ContentType':'application/json'}
 
 	def logoutAstroPrint(self):
-		self.unautorizedHandeler()
+		self.unautorizedHandeler(False)
 		return jsonify({"Success" : True }), 200, {'ContentType':'application/json'}
 
-	def unautorizedHandeler (self):
+	def unautorizedHandeler (self, expired = True):
+		if(expired):
+			self._logger.warning("Refresh token expired, AstroPrint user logged out.")
 		self.db.deleteUser(self.plugin.user)
 		self.plugin.user = None
 		self.currentlyPrinting = None
@@ -250,13 +255,14 @@ class AstroprintCloud():
 			self.statePayload = payload
 
 
-	def printFile(self, printFileId):
+	def printFile(self, printFileId, printNow = False):
 		printFile = self.db.getPrintFileById(printFileId)
-		if printFile:
+		if printFile and printNow:
 			self.printFileIsDownloaded(printFile)
 			return "print"
 		else:
 			printFile = self.addPrintfileDownloadUrl(self.getPrintFileInfoForDownload(printFileId))
+			printFile['printNow'] = printNow
 			if printFile:
 				if not self.downloadmanager.isDownloading(printFileId):
 					self.downloadmanager.startDownload(printFile)
@@ -344,7 +350,6 @@ class AstroprintCloud():
 
 
 	def wrapAndSave(self, fileType, file, printNow=False):
-
 		name = file if fileType == "design" else file.printFileName
 		filepath = ("%s/%s" %(self.plugin._basefolder, name))
 		fileObject = octoprint.filemanager.util.DiskFileWrapper(name, filepath)

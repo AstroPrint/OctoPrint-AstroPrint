@@ -30,6 +30,7 @@ def cameraManager(plugin):
 	return _instance
 
 import threading
+from threading import Thread
 import os.path
 import time
 import logging
@@ -40,7 +41,7 @@ from sys import platform
 # Camera Manager base class
 #
 
-class CameraManager(object):
+class CameraManager():
 	def __init__(self, plugin):
 		self.name = None
 		self.cameraActive = False
