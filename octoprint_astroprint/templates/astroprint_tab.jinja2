@@ -245,14 +245,17 @@
                                                 <div  class="span8 all-printFile-row" data-bind="click: $root.expandPrintfile">
                                                     <div class="row half-printFile-row printFileName" data-bind="text: filename"></div>
                                                     <div class="half-printFile-row row">
-                                                        <div class="span6 slicerSettings"><span class="infoSlicerSettings" data-bind="text: printer"></span>/<span data-bind="text: material" class="infoSlicerSettings"></span>/<span data-bind="text: quality" class="infoSlicerSettings"></span></div>
+                                                        <div class="span6 slicerSettings"><span class="infoSlicerSettings" data-bind="if: printer; text: printer + '/'"></span><span data-bind="if:material; text: material + '/'" class="infoSlicerSettings"></span><span data-bind="if:quality; text: quality" class="infoSlicerSettings"></span></div>
                                                         <div class="span6 printFileCreated"><i class="icon icon-calendar" aria-hidden="true"> </i><span  data-bind="text: created"></span></div>
                                                     </div>
                                                 </div>
                                                 <div class="span2 all-printFile-row">
                                                     <span data-bind="ifnot: downloading">
                                                         <span class="center-button">
-                                                            <div class="btn" data-bind="css :{disabled : (!$root.can_print() || ($root.downloadDialog().downloading() && $root.downloadDialog().progress() < 100))}, click: $root.downloadPrintFile">
+                                                            <div class="btn" data-bind="css :{disabled : ($root.downloadDialog().downloading() && $root.downloadDialog().progress() < 100)}, click: $root.downloadPrintFile">
+                                                                <i class="icon icon-cloud-download" aria-hidden="true"></i>
+                                                            </div>
+                                                            <div class="btn" data-bind="css :{disabled : (!$root.can_print() || ($root.downloadDialog().downloading() && $root.downloadDialog().progress() < 100))}, click: $root.printPrintFile">
                                                                 <i class="icon icon-print" aria-hidden="true"></i>
                                                             </div>
                                                         </span>
@@ -283,9 +286,9 @@
                                                     <div class="span4 bold">Number of Layers:</div>
                                                     <div class="span8"><span data-bind="text: layer_count"></span></div>
                                                 </div>
-                                                <div class="info-row" data-bind="if: filament_volume">
+                                                <div class="info-row" data-bind="if: filament_volume || filament_length || filament_weight">
                                                     <div class="span4 bold">Filament Used:</div>
-                                                    <div class="span8"><span data-bind="text: filament_volume"></span> cm<sup>3</sup> / <span data-bind="text: filament_length"></span> cm /  ~ <span data-bind="text: filament_weight"></span> g</div>
+                                                    <div class="span8"><span  data-bind="if: filament_volume"><span data-bind="text: filament_volume"></span> cm<sup>3</sup> / </span> <span data-bind="if: filament_length"><span data-bind="text: filament_length"></span> cm / </span><span data-bind="text: ' ~ ' + filament_weight + 'g'"></span></div>
                                                 </div>
                                             </div>
                                         </div>
@@ -346,14 +349,17 @@
                                     <div  class="span8 all-printFile-row" data-bind="click: $root.expandPrintfile">
                                         <div class="row half-printFile-row printFileName" data-bind="text: filename"></div>
                                         <div class="half-printFile-row row">
-                                            <div class="span6 slicerSettings"><span class="infoSlicerSettings" data-bind="text: printer"></span> / <span data-bind="text: material" class="infoSlicerSettings"></span> / <span data-bind="text: quality" class="infoSlicerSettings"></span></div>
+                                            <div class="span6 slicerSettings"><span class="infoSlicerSettings" data-bind="if:printer; text: printer + '/'"></span><span data-bind="if: material; text: material + '/'" class="infoSlicerSettings"></span><span data-bind="if: quality; text: quality" class="infoSlicerSettings"></span></div>
                                             <div class="span6 printFileCreated"><i class="icon icon-calendar" aria-hidden="true"> </i><span  data-bind="text: created"></span></div>
                                         </div>
                                     </div>
                                     <div class="span2 all-printFile-row">
                                         <span data-bind="ifnot: downloading">
                                             <span class="center-button">
-                                                <div class="btn" data-bind="css :{disabled : (!$root.can_print() || ($root.downloadDialog().downloading() && $root.downloadDialog().progress() < 100))}, click: $root.downloadPrintFile">
+                                                <div class="btn" data-bind="css :{disabled : ($root.downloadDialog().downloading() && $root.downloadDialog().progress() < 100)}, click: $root.downloadPrintFile">
+                                                    <i class="icon icon-cloud-download" aria-hidden="true"></i>
+                                                </div>
+                                                <div class="btn" data-bind="css :{disabled : (!$root.can_print() || ($root.downloadDialog().downloading() && $root.downloadDialog().progress() < 100))}, click: $root.printPrintFile">
                                                     <i class="icon icon-print" aria-hidden="true"></i>
                                                 </div>
                                             </span>
@@ -384,9 +390,9 @@
                                         <div class="span4 bold">Number of Layers:</div>
                                         <div class="span8"><span data-bind="text: layer_count"></span></div>
                                     </div>
-                                    <div class="info-row clearfix" data-bind="if: filament_volume">
+                                    <div class="info-row clearfix" data-bind="if: filament_volume || filament_length || filament_weight">
                                         <div class="span4 bold">Filament Used:</div>
-                                        <div class="span8"><span data-bind="text: filament_volume"></span> cm<sup>3</sup> / <span data-bind="text: filament_length"></span> cm /  ~ <span data-bind="text: filament_weight"></span> g</div>
+                                        <div class="span8"><span  data-bind="if: filament_volume"><span data-bind="text: filament_volume"></span> cm<sup>3</sup> /<span> <span data-bind="if: filament_length"><span data-bind="text: filament_length"></span> cm /   </span><span data-bind="if: filament_weight"> ~ <span data-bind="text: filament_weight"></span> g</span></div>
                                     </div>
                                 </div>
                             </div>

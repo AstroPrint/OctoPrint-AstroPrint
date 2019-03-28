@@ -358,9 +358,10 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 	@admin_permission.require(403)
 	def downloadPrintFile(self):
 		printFileId = request.json['printFileId']
-		if self.astroprintCloud.printFile(printFileId) == "print":
+		printNow = request.json['printNow']
+		if self.astroprintCloud.printFile(printFileId, printNow) == "print":
 			return jsonify({"state" : "printing"}), 200, {'ContentType':'application/json'}
-		if self.astroprintCloud.printFile(printFileId) == "download":
+		if self.astroprintCloud.printFile(printFileId, printNow) == "download":
 			return jsonify({"state" : "downloading"}), 200, {'ContentType':'application/json'}
 		return jsonify({'error': "Internal server error"}), 500, {'ContentType':'application/json'}
 

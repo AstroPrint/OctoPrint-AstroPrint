@@ -36,6 +36,7 @@ class DownloadWorker(threading.Thread):
 
 			id = item['id']
 			name = item['name']
+			printNow = item['printNow']
 			fileName = name
 			url = image = item['download_url']
 			destination = None
@@ -47,7 +48,7 @@ class DownloadWorker(threading.Thread):
 				fileName = item['filename']
 				substr = ".gcode"
 				idx = fileName.index(substr)
-				fileName = fileName[:idx] + id + fileName[idx:]
+				fileName = fileName[:idx] + "-" + id[:7] + fileName[idx:]
 				image = item['design']['images']['square'] if item['design'] else None
 
 
@@ -93,7 +94,7 @@ class DownloadWorker(threading.Thread):
 				else:
 					if printFile:
 						pf = AstroprintPrintFile(id, name, fileName, fileName, image)
-						self.astroprintCloud.wrapAndSave("printFile", pf, True)
+						self.astroprintCloud.wrapAndSave("printFile", pf, printNow)
 					else:
 						self.astroprintCloud.wrapAndSave("design", name, False)
 

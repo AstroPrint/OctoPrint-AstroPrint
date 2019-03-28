@@ -237,10 +237,11 @@ $(function () {
                 if (!self.failed() && id == self.id() && self.progress() != 100) {
                     self.progress(progress);
                     if (self.progress() == 100) {
-                        if (self.file.print_time) {
+                        console.log(self.file)
+                        if (self.file.format) {
                             new PNotify({
                                 title: gettext("File Downloaded"),
-                                text: gettext("Your AstroPrint Cloud print file:" + self.name() + ", started to print."),
+                                text: gettext("Your AstroPrint Cloud print file:" + self.name() + ", was added to your files."),
                                 type: "success"
                             });
                         } else {
@@ -1017,7 +1018,13 @@ $(function () {
             }
         }
 
-        self.downloadPrintFile = function (printFile) {
+        self.printPrintFile = function (printFile)
+        {
+            self.downloadPrintFile(printFile, true)
+        }
+
+        self.downloadPrintFile = function (printFile, printNow = false) {
+            printNow = printNow !== true ? false : true
             if (self.isOctoprintAdmin()) {
                 if (!self.downloadDialog().downloading() || self.downloadDialog().progress() == 100) {
                     printFile.downloading(true);
@@ -1025,7 +1032,7 @@ $(function () {
                         type: "POST",
                         contentType: "application/json; charset=utf-8",
                         url: PLUGIN_BASEURL + "astroprint/downloadPrintFile",
-                        data: JSON.stringify({ printFileId: printFile.id, name: printFile.filename }),
+                        data: JSON.stringify({ printFileId: printFile.id, name: printFile.filename, printNow : printNow }),
                         dataType: "text",
                         success: function (data) {
                             data = JSON.parse(data)
@@ -1041,7 +1048,7 @@ $(function () {
                                 self.error401handling();
                             } else {
                                 printFile.downloading(false);
-                                var text = "There was an error retrieving design, please try again later.";
+                                var text = "There was an error retrieving print file, please try again later.";
                                 var title = "Error retrieving Design";
                                 if (error.status == 400) {
                                     title = ("Error adding Design");
