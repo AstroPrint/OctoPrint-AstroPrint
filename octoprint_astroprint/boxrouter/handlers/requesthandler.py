@@ -126,7 +126,7 @@ class RequestHandler(object):
 				"progress": 0
 			}
 		done(state)
-		self.astroprintCloud.printFile(print_file_id)
+		self.astroprintCloud.printFile(print_file_id, True)
 
 	def cancel_download(self, data, clientId, done):
 		print_file_id = data['printFileId']
