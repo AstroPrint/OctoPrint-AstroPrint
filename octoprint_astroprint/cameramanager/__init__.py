@@ -41,7 +41,7 @@ from sys import platform
 # Camera Manager base class
 #
 
-class CameraManager():
+class CameraManager(object):
 	def __init__(self, plugin):
 		self.name = None
 		self.cameraActive = False
