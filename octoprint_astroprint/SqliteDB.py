@@ -27,7 +27,7 @@ class SqliteDB():
 
 		if user:
 			print user
-			userData = { "id" : user[0], "name" : decrypt(user[1]), "email" : user[2] ,"token" : decrypt(user[3]), "refresh_token" : decrypt(user[4]), "accessKey" : decrypt(user[6]), "expires" : user[7], "last_request" : user[8]}
+			userData = {"name" : decrypt(user[1]), "email" : user[2] ,"token" : decrypt(user[3]), "refresh_token" : decrypt(user[4]), "accessKey" : decrypt(user[6]), "expires" : user[7], "last_request" : user[8]}
 		else:
 			userData = None
 		return userData

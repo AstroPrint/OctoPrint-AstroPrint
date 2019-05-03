@@ -164,11 +164,6 @@ class AstroprintBoxRouter(object):
 		self._logger = self.plugin.get_logger()
 		self._address = self._settings.get(["webSocket"])
 
-		if self._address:
-			self.boxrouter_connect()
-
-		else:
-			self._logger.error('cloudSlicer.boxrouter not present in config file')
 
 	def shutdown(self):
 		self._logger.info('Shutting down Box router...')
@@ -204,7 +199,7 @@ class AstroprintBoxRouter(object):
 		return self._boxId
 
 	def boxrouter_connect(self):
-
+		self._logger.info("boxrouter_connect aaaa")
 		if not self.connected:
 			if self.plugin.user:
 				self._logger.info("boxrouter connect")

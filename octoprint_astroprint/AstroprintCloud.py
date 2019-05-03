@@ -155,7 +155,7 @@ class AstroprintCloud():
 
 	def unautorizedHandeler (self, expired = True):
 		if(expired):
-			self._logger.warning("Refresh token expired, AstroPrint user logged out.")
+			self._logger.warning("Unautorized token, AstroPrint user logged out.")
 		self.db.deleteUser()
 		self.currentlyPrinting = None
 		self.disconnectBoxrouter()
@@ -225,7 +225,7 @@ class AstroprintCloud():
 
 	def connectBoxrouter(self):
 		self._logger.info("Connecting Box Router")
-		if self.plugin.user and self.plugin.user['accessKey'] and self.plugin.user['id']:
+		if self.plugin.user and "accessKey" in self.plugin.user and "id" in self.plugin.user['id']:
 			self.bm.boxrouter_connect()
 			#let the singleton be recreated again, so new credentials are taken into use
 			global _instance
