@@ -68,12 +68,12 @@ class AstroprintCloud():
 				data = {
 					"client_id": self.appId,
 					"grant_type": "refresh_token",
-					"refresh_token": self.plugin['refresh_token']
+					"refresh_token": self.plugin.user['refresh_token']
 					},
 			)
 			r.raise_for_status()
 			data = r.json()
-			self.plugin['token'] = data['access_token']
+			self.plugin.user['token'] = data['access_token']
 			self.plugin.user['refresh_token'] = data['refresh_token']
 			self.plugin.user['last_request'] = round(time.time())
 			self.plugin.user['expires'] = round(self.plugin.user['last_request'] + data['expires_in'])
@@ -224,8 +224,8 @@ class AstroprintCloud():
 			self._logger.error("Failed to send print_job request: %s" % e)
 
 	def connectBoxrouter(self):
-		self._logger.info("Connecting Box Router")
-		if self.plugin.user and "accessKey" in self.plugin.user and "id" in self.plugin.user['id']:
+		if self.plugin.user and "accessKey" in self.plugin.user and "id" in self.plugin.user:
+			self._logger.info("Connecting Box Router")
 			self.bm.boxrouter_connect()
 			#let the singleton be recreated again, so new credentials are taken into use
 			global _instance
