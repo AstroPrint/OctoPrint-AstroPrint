@@ -154,8 +154,7 @@ class AstroprintCloud():
 	def unautorizedHandeler (self, expired = True):
 		if(expired):
 			self._logger.warning("Refresh token expired, AstroPrint user logged out.")
-		self.db.deleteUser(self.plugin.user)
-		self.plugin.user = None
+		self.db.deleteUser()
 		self.currentlyPrinting = None
 		self.disconnectBoxrouter()
 		self.plugin.astroPrintUserLoggedOut()
