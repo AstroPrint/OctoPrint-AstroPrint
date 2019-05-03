@@ -36,7 +36,7 @@ class AstroprintDB():
 				user = yaml.safe_load(f)
 				self._logger.info("this is the user")
 				self._logger.info(user)
-				if user['user']:
+				if user and user['user']:
 					self.user = user['user']
 					self.user['email'] = decrypt(self.user['email'])
 					self.user['accessKey'] = decrypt(self.user['accessKey'])
@@ -52,7 +52,9 @@ class AstroprintDB():
 	def getPrintFiles(self):
 		try:
 			with open(self.infoPrintFiles, "r") as f:
-				self.printFiles = yaml.safe_load(f)
+				printFiles = yaml.safe_load(f)
+				if printFiles:
+					self.printFiles = printFiles
 		except:
 			self._logger.info("There was an error loading %s:" % self.infoPrintFiles, exc_info= True)
 		self.plugin.printFiles = self.printFiles
@@ -69,21 +71,25 @@ class AstroprintDB():
 
 	def deletePrintFile(self, path):
 		printFiles = {}
-		for printFile in self.printFiles:
-			if self.printFiles[printFile]["octoPrintPath"] != path:
-				printFiles[printFile] = self.printFiles[printFile]
-		self.savePrintFile(printFiles)
+		if self.printFiles:
+			for printFile in self.printFiles:
+				if self.printFiles[printFile]["octoPrintPath"] != path:
+					printFiles[printFile] = self.printFiles[printFile]
+			self.savePrintFiles(printFiles)
 
 	def getPrintFileById(self, printFileId):
-		if not self.printFiles[printFileId]:
-			return None
-		return 	AstroprintPrintFile(printFileId, self.printFiles[printFileId]["name"], self.printFiles[printFileId]["octoPrintPath"], self.printFiles[printFileId]["printFileName"], self.printFiles[printFileId]["renderedImage"])
+		self._logger.info(self.printFiles)
+		if self.printFiles and printFileId in self.printFiles:
+			return 	AstroprintPrintFile(printFileId, self.printFiles[printFileId]["name"], self.printFiles[printFileId]["octoPrintPath"], self.printFiles[printFileId]["printFileName"], self.printFiles[printFileId]["renderedImage"])
+		return None
 
 
 	def getPrintFileByOctoPrintPath(self, octoPrintPath):
-		for printFile in self.printFiles:
-			if self.printFiles[printFile]["octoPrintPath"] == octoPrintPath:
-				return AstroprintPrintFile(printFile, self.printFiles[printFile]["name"], self.printFiles[printFile]["octoPrintPath"], self.printFiles[printFile]["printFileName"], self.printFiles[printFile]["renderedImage"])
+		self._logger.info(self.printFiles)
+		if self.printFiles:
+			for printFile in self.printFiles:
+				if self.printFiles[printFile]["octoPrintPath"] == octoPrintPath:
+					return AstroprintPrintFile(printFile, self.printFiles[printFile]["name"], self.printFiles[printFile]["octoPrintPath"], self.printFiles[printFile]["printFileName"], self.printFiles[printFile]["renderedImage"])
 		return None
 
 class AstroprintPrintFile():
