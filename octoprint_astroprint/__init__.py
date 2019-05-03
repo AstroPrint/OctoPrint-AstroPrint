@@ -517,7 +517,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 		if not email or not accessKey:
 			abort(401) # wouldn't a 400 make more sense here?
 
-		if self.user and self['email'] == email and self.user['accessKey'] == accessKey and self.user['id']:
+		if self.user and self.user['email'] == email and self.user['accessKey'] == accessKey and self.user['id']:
 			# only respond positively if we have an AstroPrint user and their mail AND accessKey match AND
 			# they also have a valid id
 			return jsonify(api_key=self._settings.global_get(["api", "key"]),
