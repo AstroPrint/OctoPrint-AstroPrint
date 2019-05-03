@@ -7,11 +7,18 @@ __license__ = "GNU Affero General Public License http://www.gnu.org/licenses/agp
 __copyright__ = "Copyright (C) 2017-2018 3DaGoGo, Inc - Released under terms of the AGPLv3 License"
 
 from .AstroprintCloud import AstroprintCloud
+from .AstroprintDB import AstroprintDB
+from .SqliteDB import SqliteDB
+from .boxrouter import boxrouterManager
+
+
 from flask import request, Blueprint, make_response, jsonify, Response, abort
 import octoprint.plugin
 import json
 import sys
 import socket
+import os
+import yaml
 from octoprint.server.util.flask import restricted_access
 from octoprint.server import admin_permission
 from octoprint.settings import valid_boolean_trues
@@ -66,8 +73,9 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 	##~~ SettingsPlugin mixin
 
 	def initialize(self):
-		self.user = None
+		self.user = {}
 		self.designs = None
+		self.db = None
 		self.astroprintCloud = None
 		self.cameraManager = None
 		self.materialCounter= None
@@ -88,9 +96,17 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 		user_logged_out.connect(logOutHandler)
 
 	def on_after_startup(self):
-		self.register_printer_listener()
+		self.db = AstroprintDB(self)
+		if os.path.isfile(self.get_plugin_data_folder() + "/octoprint_astroprint.db"):
+			sqlitledb = SqliteDB(self)
+			self.db.saveUser(sqlitledb.getUser())
+			self.db.savePrintFiles(sqlitledb.getPrintFiles())
+			os.remove(self.get_plugin_data_folder() + "/octoprint_astroprint.db")
+
 		self.cameraManager = cameraManager(self)
 		self.astroprintCloud = AstroprintCloud(self)
+		self.cameraManager.astroprintCloud = self.astroprintCloud
+		self.register_printer_listener()
 		self.materialCounter = MaterialCounter(self)
 
 	def onLogout(self):
@@ -128,7 +144,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 			'heatingUp' : self.printerIsHeating(),
 			'currentLayer' : self._printerListener.get_current_layer() if self._printerListener else None,
 			'camera' : self.cameraManager.cameraActive if self.cameraManager else None,
-			'userLogged' : self.user.email if self.user else None,
+			'userLogged' : self.user['email'] if self.user else None,
 			'job' : self._printerListener.get_job_data() if self._printerListener else None
 		}
 		self.send_event("socketUpdate", data)
@@ -174,7 +190,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 					boxName = self._settings.get(["boxName"]),
 					printerModel = json.dumps(self._settings.get(["printerModel"])) if self._settings.get(["printerModel"])['id'] else "null",
 					filament = json.dumps(self._settings.get(["filament"])) if self._settings.get(["filament"])['name'] else "null",
-					user = json.dumps({'name': self.user.name, 'email': self.user.email}, cls=JsonEncoder, indent=4) if self.user else None ,
+					user = json.dumps({'name': self.user['name'], 'email': self.user['email']}, cls=JsonEncoder, indent=4) if self.user else None ,
 					camera = self._settings.get(["camera"])
 					)
 
@@ -382,7 +398,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 	@admin_permission.require(403)
 	def isloggeduser(self):
 		if self.user:
-			return jsonify({"user" : {"name" : self.user.name, "email" : self.user.email}}), 200, {'ContentType':'application/json'}
+			return jsonify({"user" : {"name" : self.user['name'], "email" : self.user['email']}}), 200, {'ContentType':'application/json'}
 		else:
 			return jsonify({"user" : False }), 200, {'ContentType':'application/json'}
 
@@ -402,7 +418,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 	@admin_permission.require(403)
 	def initialstate(self):
 		return jsonify({
-					"user" : {"name" : self.user.name, "email" : self.user.email} if self.user else False,
+					"user" : {"name" : self['name'], "email" : self.user['email']} if self.user else False,
 					"connected" : True if self.cameraManager.cameraActive else False,
 					"can_print" : True if self._printer.is_operational() and not (self._printer.is_paused() or self._printer.is_printing()) else False,
 					"boxrouter_status" : self.astroprintCloud.bm.status if self.astroprintCloud and self.astroprintCloud.bm else "disconnected"
@@ -501,11 +517,11 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 		if not email or not accessKey:
 			abort(401) # wouldn't a 400 make more sense here?
 
-		if self.user and self.user.email == email and self.user.accessKey == accessKey and self.user.userId:
+		if self.user and self['email'] == email and self.user['accessKey'] == accessKey and self.user['id']:
 			# only respond positively if we have an AstroPrint user and their mail AND accessKey match AND
-			# they also have a valid userId
+			# they also have a valid id
 			return jsonify(api_key=self._settings.global_get(["api", "key"]),
-								ws_token=create_ws_token(self.user.userId))
+								ws_token=create_ws_token(self.user['id']))
 
 		if not self.user:
 			abort (401)

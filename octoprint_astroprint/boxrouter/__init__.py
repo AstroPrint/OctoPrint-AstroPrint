@@ -206,10 +206,9 @@ class AstroprintBoxRouter(object):
 	def boxrouter_connect(self):
 
 		if not self.connected:
-
 			if self.plugin.user:
-				self._publicKey = self.plugin.user.userId
-				self._privateKey = self.plugin.user.accessKey
+				self._publicKey = self.plugin.user['id']
+				self._privateKey = self.plugin.user['accessKey']
 
 				if self._publicKey and self._privateKey:
 					self.status = self.STATUS_CONNECTING
