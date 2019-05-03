@@ -223,7 +223,7 @@ class AstroprintCloud():
 			self._logger.error("Failed to send print_job request: %s" % e)
 
 	def connectBoxrouter(self):
-		if self.plugin.user and self.plugin['accessKey'] and self.plugin.user['id']:
+		if self.plugin.user and self.plugin.user['accessKey'] and self.plugin.user['id']:
 			self.bm.boxrouter_connect()
 			#let the singleton be recreated again, so new credentials are taken into use
 			global _instance
