@@ -30,20 +30,15 @@ class AstroprintDB():
 		self.plugin.user = self.user
 
 	def getUser(self):
-		self._logger.info("GET SAVED USER")
 		try:
 			with open(self.infoUser, "r") as f:
 				user = yaml.safe_load(f)
-				self._logger.info("this is the user")
-				self._logger.info(user)
 				if user and user['user']:
 					self.user = user['user']
 					self.user['email'] = decrypt(self.user['email'])
 					self.user['accessKey'] = decrypt(self.user['accessKey'])
 		except:
 			self._logger.info("There was an error loading %s:" % self.infoUser, exc_info= True)
-		self._logger.info("this is the plugin user")
-		self._logger.info(self.user)
 		self.plugin.user = self.user
 
 	def deleteUser(self):
@@ -78,14 +73,12 @@ class AstroprintDB():
 			self.savePrintFiles(printFiles)
 
 	def getPrintFileById(self, printFileId):
-		self._logger.info(self.printFiles)
 		if self.printFiles and printFileId in self.printFiles:
 			return 	AstroprintPrintFile(printFileId, self.printFiles[printFileId]["name"], self.printFiles[printFileId]["octoPrintPath"], self.printFiles[printFileId]["printFileName"], self.printFiles[printFileId]["renderedImage"])
 		return None
 
 
 	def getPrintFileByOctoPrintPath(self, octoPrintPath):
-		self._logger.info(self.printFiles)
 		if self.printFiles:
 			for printFile in self.printFiles:
 				if self.printFiles[printFile]["octoPrintPath"] == octoPrintPath:

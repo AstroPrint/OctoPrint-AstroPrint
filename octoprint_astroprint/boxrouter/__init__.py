@@ -199,17 +199,12 @@ class AstroprintBoxRouter(object):
 		return self._boxId
 
 	def boxrouter_connect(self):
-		self._logger.info("boxrouter_connect aaaa")
 		if not self.connected:
 			if self.plugin.user:
-				self._logger.info("boxrouter connect")
 				self._publicKey = self.plugin.user['id']
 				self._privateKey = self.plugin.user['accessKey']
-				self._logger.info(self._publicKey)
-				self._logger.info(self._privateKey)
 				if self._publicKey and self._privateKey:
 					self.status = self.STATUS_CONNECTING
-					self._logger.info("status connecting")
 					self.plugin.send_event("boxrouterStatus", self.STATUS_CONNECTING)
 
 					try:
@@ -385,10 +380,7 @@ class AstroprintBoxRouter(object):
 	def processAuthenticate(self, data):
 		if data:
 			self._silentReconnect = False
-			self._logger.info("processAuthenticate")
 			if 'error' in data:
-				self._logger.info("errorr!!!!")
-				print data
 				self._logger.warn(data['message'] if 'message' in data else 'Unkonwn authentication error')
 				self.status = self.STATUS_ERROR
 				self.plugin.send_event("boxrouterStatus", self.STATUS_ERROR)
@@ -396,7 +388,7 @@ class AstroprintBoxRouter(object):
 				self.plugin.astroprintCloud.unautorizedHandeler()
 
 			elif 'success' in data:
-				self._logger.info("Connected to astroprint service")
+				self._logger.info("Boxrouter connected to astroprint service")
 				self.authenticated = True
 				self._retries = 0
 				self._retryTimer = None
