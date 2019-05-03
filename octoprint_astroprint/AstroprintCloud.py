@@ -430,7 +430,7 @@ class AstroprintCloud():
 			r.raise_for_status()
 			data = r.json()
 
-			self.downloadmanager.startDownload({"id": designId, "name" : name, "download_url" : data['download_url'], "designDownload" : True})
+			self.downloadmanager.startDownload({"id": designId, "name" : name, "download_url" : data['download_url'], "designDownload" : True, "printNow" : False})
 			return jsonify({"Success" : True }), 200, {'ContentType':'application/json'}
 		except requests.exceptions.HTTPError as err:
 			if (err.response.status_code == 401):

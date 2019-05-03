@@ -41,7 +41,7 @@ class AstroprintDB():
 					self.user['email'] = decrypt(self.user['email'])
 					self.user['accessKey'] = decrypt(self.user['accessKey'])
 		except:
-			self._logger.info("There was an error loading %s:" % f, exc_info= True)
+			self._logger.info("There was an error loading %s:" % self.infoUser, exc_info= True)
 		self._logger.info("this is the plugin user")
 		self._logger.info(self.user)
 		self.plugin.user = self.user
@@ -54,7 +54,7 @@ class AstroprintDB():
 			with open(self.infoPrintFiles, "r") as f:
 				self.printFiles = yaml.safe_load(f)
 		except:
-			self._logger.info("There was an error loading %s:" % f, exc_info= True)
+			self._logger.info("There was an error loading %s:" % self.infoPrintFiles, exc_info= True)
 		self.plugin.printFiles = self.printFiles
 
 	def savePrintFiles(self, printFiles):
