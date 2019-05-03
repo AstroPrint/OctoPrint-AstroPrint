@@ -5,6 +5,7 @@ __copyright__ = "Copyright (C) 2017 3DaGoGo, Inc - Released under terms of the A
 
 import os
 import yaml
+import copy
 
 class AstroprintDB():
 
@@ -20,7 +21,7 @@ class AstroprintDB():
 		self.getUser()
 
 	def saveUser(self, user):
-		self.user = user
+		self.user = copy.copy(user)
 		if user:
 			user['email'] = encrypt(user['email'])
 			user['accessKey'] = encrypt(user['accessKey'])
@@ -29,28 +30,31 @@ class AstroprintDB():
 		self.plugin.user = self.user
 
 	def getUser(self):
-		if os.path.isdir(self.infoUser):
-			try:
-				with open(self.infoUser, "r") as f:
-					user = yaml.safe_load(f)
-					if user['user']:
-						self.user = user['user']
-						self.user['email'] = decrypt(self.user['email'])
-						self.user['accessKey'] = decrypt(self.user['accessKey'])
-			except:
-				self._logger.info("There was an error loading %s:" % f, exc_info= True)
+		self._logger.info("GET SAVED USER")
+		try:
+			with open(self.infoUser, "r") as f:
+				user = yaml.safe_load(f)
+				self._logger.info("this is the user")
+				self._logger.info(user)
+				if user['user']:
+					self.user = user['user']
+					self.user['email'] = decrypt(self.user['email'])
+					self.user['accessKey'] = decrypt(self.user['accessKey'])
+		except:
+			self._logger.info("There was an error loading %s:" % f, exc_info= True)
+		self._logger.info("this is the plugin user")
+		self._logger.info(self.user)
 		self.plugin.user = self.user
 
 	def deleteUser(self):
 		self.saveUser(None)
 
 	def getPrintFiles(self):
-		if os.path.isdir(self.infoPrintFiles):
-			try:
-				with open(self.infoPrintFiles, "r") as f:
-					self.printFiles = yaml.safe_load(f)
-			except:
-				self._logger.info("There was an error loading %s:" % f, exc_info= True)
+		try:
+			with open(self.infoPrintFiles, "r") as f:
+				self.printFiles = yaml.safe_load(f)
+		except:
+			self._logger.info("There was an error loading %s:" % f, exc_info= True)
 		self.plugin.printFiles = self.printFiles
 
 	def savePrintFiles(self, printFiles):

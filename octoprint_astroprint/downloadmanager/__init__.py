@@ -31,6 +31,7 @@ class DownloadWorker(threading.Thread):
 		while True:
 
 			item = downloadQueue.get()
+			self._logger.info(item)
 			if item == 'shutdown':
 				return
 

@@ -418,7 +418,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 	@admin_permission.require(403)
 	def initialstate(self):
 		return jsonify({
-					"user" : {"name" : self['name'], "email" : self.user['email']} if self.user else False,
+					"user" : {"name" : self.user['name'], "email" : self.user['email']} if self.user else False,
 					"connected" : True if self.cameraManager.cameraActive else False,
 					"can_print" : True if self._printer.is_operational() and not (self._printer.is_paused() or self._printer.is_printing()) else False,
 					"boxrouter_status" : self.astroprintCloud.bm.status if self.astroprintCloud and self.astroprintCloud.bm else "disconnected"

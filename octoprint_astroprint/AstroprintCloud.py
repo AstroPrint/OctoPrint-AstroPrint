@@ -42,9 +42,9 @@ class AstroprintCloud():
 		self.statePayload = None
 		user = self.plugin.user
 		if user:
-			self._logger.info("User %s logged to AstroPrint" % user['id'])
-			self.connectBoxrouter()
+			self._logger.info("User %s logged to AstroPrint" % user['name'])
 			self.getUserInfo()
+			self.connectBoxrouter()
 		else:
 			self._logger.info("No user logged to AstroPrint")
 
@@ -89,6 +89,7 @@ class AstroprintCloud():
 			pass
 
 	def loginAstroPrint(self, code, url, apAccessKey):
+		self._logger.info("Loging AstroPrint")
 		try:
 			r = requests.post(
 				"%s/token" % (self.apiHost),
@@ -118,6 +119,7 @@ class AstroprintCloud():
 			return jsonify({'error': "Internal server error"}), 500, {'ContentType':'application/json'}
 
 	def getUserInfo(self, saveUser = False):
+		self._logger.info("Getting AstroPrint user info")
 		try:
 			token = self.getToken()
 			r = requests.get(
@@ -133,7 +135,7 @@ class AstroprintCloud():
 			self.plugin.sendSocketInfo()
 			if saveUser:
 				self.db.saveUser(self.plugin.user)
-				user = {'name': self.plugin.user['name'], 'email': self.plugin['email']}
+				user = {'name': self.plugin.user['name'], 'email': self.plugin.user['email']}
 				self._logger.info("%s logged to AstroPrint" % self.plugin.user['name'])
 				self.connectBoxrouter()
 				return jsonify(user), 200, {'ContentType':'application/json'}
@@ -222,6 +224,7 @@ class AstroprintCloud():
 			self._logger.error("Failed to send print_job request: %s" % e)
 
 	def connectBoxrouter(self):
+		self._logger.info("Connecting Box Router")
 		if self.plugin.user and self.plugin.user['accessKey'] and self.plugin.user['id']:
 			self.bm.boxrouter_connect()
 			#let the singleton be recreated again, so new credentials are taken into use
