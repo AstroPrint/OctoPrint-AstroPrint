@@ -10,8 +10,8 @@ from octoprint_astroprint.gCodeAnalyzer import GCodeAnalyzer
 class PrinterListener(PrinterCallback):
 
 	def __init__(self, plugin):
-		self.cameraManager = None	#set up when initialiced
-		self.astroprintCloud = None
+		self.cameraManager = plugin.cameraManager
+		self.astroprintCloud = plugin.astroprintCloud
 		self._analyzed_job_layers = None
 
 		self._router = None
@@ -113,17 +113,21 @@ class PrinterListener(PrinterCallback):
 
 	def set_job_data(self, data):
 		if data['file']['name'] and data['file']['size']:
-			cloudPrintFile = None
+			renderedImage = None
+			cloudId = None
 			if data['file']['origin'] == 'local':
-				cloudPrintFile = self._plugin.astroprintCloud.db.getPrintFileByOctoPrintPath(data['file']['path'])
+				cloudPrintFile = self.astroprintCloud.db.getPrintFileByOctoPrintPath(data['file']['path'])
+				if cloudPrintFile:
+					renderedImage = cloudPrintFile.renderedImage
+					cloudId = cloudPrintFile.printFileId
 			payload = {
 				"estimatedPrintTime": data['estimatedPrintTime'],
 				"layerCount": self._analyzed_job_layers['layerCount'] if self._analyzed_job_layers else None,
 				"file": {
 					"origin": data['file']['origin'],
-					"rendered_image": cloudPrintFile.renderedImage if cloudPrintFile else None,
+					"rendered_image": renderedImage,
 					"name": data['file']['name'],
-					"cloudId": cloudPrintFile.printFileId if cloudPrintFile else None,
+					"cloudId": cloudId,
 					"date": data['file']['date'],
 					"printFileName":data['file']['name'],
 					"size": data['file']['size']

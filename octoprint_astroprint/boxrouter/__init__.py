@@ -164,11 +164,6 @@ class AstroprintBoxRouter(object):
 		self._logger = self.plugin.get_logger()
 		self._address = self._settings.get(["webSocket"])
 
-		if self._address:
-			self.boxrouter_connect()
-
-		else:
-			self._logger.error('cloudSlicer.boxrouter not present in config file')
 
 	def shutdown(self):
 		self._logger.info('Shutting down Box router...')
@@ -204,13 +199,10 @@ class AstroprintBoxRouter(object):
 		return self._boxId
 
 	def boxrouter_connect(self):
-
 		if not self.connected:
-
 			if self.plugin.user:
-				self._publicKey = self.plugin.user.userId
-				self._privateKey = self.plugin.user.accessKey
-
+				self._publicKey = self.plugin.user['id']
+				self._privateKey = self.plugin.user['accessKey']
 				if self._publicKey and self._privateKey:
 					self.status = self.STATUS_CONNECTING
 					self.plugin.send_event("boxrouterStatus", self.STATUS_CONNECTING)
@@ -388,7 +380,6 @@ class AstroprintBoxRouter(object):
 	def processAuthenticate(self, data):
 		if data:
 			self._silentReconnect = False
-
 			if 'error' in data:
 				self._logger.warn(data['message'] if 'message' in data else 'Unkonwn authentication error')
 				self.status = self.STATUS_ERROR
@@ -397,7 +388,7 @@ class AstroprintBoxRouter(object):
 				self.plugin.astroprintCloud.unautorizedHandeler()
 
 			elif 'success' in data:
-				self._logger.info("Connected to astroprint service")
+				self._logger.info("Boxrouter connected to astroprint service")
 				self.authenticated = True
 				self._retries = 0
 				self._retryTimer = None

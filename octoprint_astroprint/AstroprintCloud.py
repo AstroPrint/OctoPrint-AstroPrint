@@ -7,7 +7,6 @@ from flask import request, make_response, jsonify
 import time
 import json
 import octoprint.filemanager
-from .AstroprintDB import AstroprintDB, AstroprintUser
 from .downloadmanager import DownloadManager
 from .boxrouter import boxrouterManager
 from requests_toolbelt import MultipartEncoder
@@ -33,31 +32,29 @@ class AstroprintCloud():
 		self.plugin = plugin
 		self.apiHost = plugin.get_settings().get(["apiHost"])
 		self.appId = plugin.get_settings().get(["appId"])
-		self.db = AstroprintDB(self.plugin)
+		self.db = self.plugin.db
 		self.bm = boxrouterManager(self.plugin)
 		self.downloadmanager = DownloadManager(self)
 		self._logger = self.plugin.get_logger()
 		self._printer = plugin.get_printer()
 		self._file_manager = plugin.get_file_manager()
 		self.plugin.cameraManager.astroprintCloud = self
-		self.plugin.get_printer_listener().astroprintCloud = self
 		self.statePayload = None
-		user = self.db.getUser()
+		user = self.plugin.user
 		if user:
-			self._logger.info("User %s logged to AstroPrint" % user.userId)
-			self.plugin.user = user
-			self.connectBoxrouter()
+			self._logger.info("User %s logged to AstroPrint" % user['name'])
 			self.getUserInfo()
+			self.connectBoxrouter()
 		else:
 			self._logger.info("No user logged to AstroPrint")
 
 
 	def tokenIsExpired(self):
-		return self.plugin.user.expires - round(time.time()) < 60
+		return self.plugin.user['expires'] - round(time.time()) < 60
 
 	def getToken(self):
 		if not self.tokenIsExpired():
-			return self.plugin.user.token
+			return self.plugin.user['token']
 
 		else:
 			return self.refresh()
@@ -71,17 +68,17 @@ class AstroprintCloud():
 				data = {
 					"client_id": self.appId,
 					"grant_type": "refresh_token",
-					"refresh_token": self.plugin.user.refresh_token
+					"refresh_token": self.plugin.user['refresh_token']
 					},
 			)
 			r.raise_for_status()
 			data = r.json()
-			self.plugin.user.token = data['access_token']
-			self.plugin.user.refresh_token = data['refresh_token']
-			self.plugin.user.last_request = round(time.time())
-			self.plugin.user.expires = round(self.plugin.user.last_request + data['expires_in'])
-			self.db.updateUser(self.plugin.user)
-			return self.plugin.user.token
+			self.plugin.user['token'] = data['access_token']
+			self.plugin.user['refresh_token'] = data['refresh_token']
+			self.plugin.user['last_request'] = round(time.time())
+			self.plugin.user['expires'] = round(self.plugin.user['last_request'] + data['expires_in'])
+			self.db.saveUser(self.plugin.user)
+			return self.plugin.user['token']
 		except requests.exceptions.HTTPError as err:
 			if err.response.status_code == 400 or err.response.status_code == 401:
 				self.plugin.send_event("logOut")
@@ -92,6 +89,7 @@ class AstroprintCloud():
 			pass
 
 	def loginAstroPrint(self, code, url, apAccessKey):
+		self._logger.info("Loging AstroPrint")
 		try:
 			r = requests.post(
 				"%s/token" % (self.apiHost),
@@ -105,12 +103,12 @@ class AstroprintCloud():
 			)
 			r.raise_for_status()
 			data = r.json()
-			self.plugin.user = AstroprintUser()
-			self.plugin.user.token = data['access_token']
-			self.plugin.user.refresh_token = data['refresh_token']
-			self.plugin.user.last_request = round(time.time())
-			self.plugin.user.accessKey = apAccessKey
-			self.plugin.user.expires = round(self.plugin.user.last_request + data['expires_in'])
+			self.plugin.user = {}
+			self.plugin.user['token'] = data['access_token']
+			self.plugin.user['refresh_token'] = data['refresh_token']
+			self.plugin.user['last_request'] = round(time.time())
+			self.plugin.user['accessKey'] = apAccessKey
+			self.plugin.user['expires'] = round(self.plugin.user['last_request'] + data['expires_in'])
 			return self.getUserInfo(True)
 
 		except requests.exceptions.HTTPError as err:
@@ -121,6 +119,7 @@ class AstroprintCloud():
 			return jsonify({'error': "Internal server error"}), 500, {'ContentType':'application/json'}
 
 	def getUserInfo(self, saveUser = False):
+		self._logger.info("Getting AstroPrint user info")
 		try:
 			token = self.getToken()
 			r = requests.get(
@@ -130,14 +129,14 @@ class AstroprintCloud():
 			)
 			r.raise_for_status()
 			data = r.json()
-			self.plugin.user.userId = data['id']
-			self.plugin.user.email = data['email']
-			self.plugin.user.name = data['name']
+			self.plugin.user['id'] = data['id']
+			self.plugin.user['email'] = data['email']
+			self.plugin.user['name'] = data['name']
 			self.plugin.sendSocketInfo()
 			if saveUser:
 				self.db.saveUser(self.plugin.user)
-				user = {'name': self.plugin.user.name, 'email': self.plugin.user.email}
-				self._logger.info("%s logged to AstroPrint" % self.plugin.user.name)
+				user = {'name': self.plugin.user['name'], 'email': self.plugin.user['email']}
+				self._logger.info("%s logged to AstroPrint" % self.plugin.user['name'])
 				self.connectBoxrouter()
 				return jsonify(user), 200, {'ContentType':'application/json'}
 
@@ -156,9 +155,8 @@ class AstroprintCloud():
 
 	def unautorizedHandeler (self, expired = True):
 		if(expired):
-			self._logger.warning("Refresh token expired, AstroPrint user logged out.")
-		self.db.deleteUser(self.plugin.user)
-		self.plugin.user = None
+			self._logger.warning("Unautorized token, AstroPrint user logged out.")
+		self.db.deleteUser()
 		self.currentlyPrinting = None
 		self.disconnectBoxrouter()
 		self.plugin.astroPrintUserLoggedOut()
@@ -226,8 +224,8 @@ class AstroprintCloud():
 			self._logger.error("Failed to send print_job request: %s" % e)
 
 	def connectBoxrouter(self):
-
-		if self.plugin.user and self.plugin.user.accessKey and self.plugin.user.userId:
+		if self.plugin.user and "accessKey" in self.plugin.user and "id" in self.plugin.user:
+			self._logger.info("Connecting Box Router")
 			self.bm.boxrouter_connect()
 			#let the singleton be recreated again, so new credentials are taken into use
 			global _instance
@@ -432,7 +430,7 @@ class AstroprintCloud():
 			r.raise_for_status()
 			data = r.json()
 
-			self.downloadmanager.startDownload({"id": designId, "name" : name, "download_url" : data['download_url'], "designDownload" : True})
+			self.downloadmanager.startDownload({"id": designId, "name" : name, "download_url" : data['download_url'], "designDownload" : True, "printNow" : False})
 			return jsonify({"Success" : True }), 200, {'ContentType':'application/json'}
 		except requests.exceptions.HTTPError as err:
 			if (err.response.status_code == 401):

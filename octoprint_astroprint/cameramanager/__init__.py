@@ -45,7 +45,7 @@ class CameraManager(object):
 	def __init__(self, plugin):
 		self.name = None
 		self.cameraActive = False
-		self.astroprintCloud = None #set up when initialiced
+		self.astroprintCloud = None #set up when astroprint cloud is initialized
 
 		#RECTIFYNIG default settings
 		self.plugin = plugin
@@ -59,7 +59,6 @@ class CameraManager(object):
 		self._photos = {} # To hold sync photos
 		self.timelapseWorker = None
 		self.timelapseInfo = None
-		self.plugin.get_printer_listener().cameraManager = self
 
 	def layerChanged(self):
 		if self.timelapseInfo and self.timelapseInfo['freq'] == "layer":

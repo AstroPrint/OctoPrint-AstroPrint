@@ -3,131 +3,87 @@ __author__ = "AstroPrint Product Team <product@astroprint.com>"
 __license__ = "GNU Affero General Public License http://www.gnu.org/licenses/agpl.html"
 __copyright__ = "Copyright (C) 2017 3DaGoGo, Inc - Released under terms of the AGPLv3 License"
 
-import sqlite3
+import os
+import yaml
+import copy
 
 class AstroprintDB():
 
 	def __init__(self, plugin):
-		self.DB_NAME = plugin.get_plugin_data_folder() + "/octoprint_astroprint.db"
-		conn = sqlite3.connect(self.DB_NAME)
-		db = conn.cursor()
+		self.plugin = plugin
+		self._logger = plugin.get_logger()
+		self.infoPrintFiles = plugin.get_plugin_data_folder() + "/print_files.yaml"
+		self.printFiles = {}
+		self.getPrintFiles()
 
-		db.execute('''CREATE TABLE IF NOT EXISTS user
-		(
-		id INT PRIMARY KEY NOT NULL DEFAULT(1),
-		userId TEXT,
-		name TEXT,
-		email TEXT,
-		token TEXT,
-		refresh_token TEXT,
-		accessKey TEXT,
-		expires INTEGER,
-		last_request INTEGER)''')
-
-		db.execute('''CREATE TABLE IF NOT EXISTS printFile
-		(
-		printFileId TEXT,
-		name TEXT,
-		octoPrintPath TEXT,
-		printFileName TEXT,
-		renderedImage TEXT)''')
-
-		conn.commit()
-		conn.close()
-
-	def dropDatabase(self):
-		conn = sqlite3.connect(self.DB_NAME)
-		db = conn.cursor()
-
-		db.execute('''DROP TABLE IF EXISTS user''')
-		db.execute('''DROP TABLE IF EXISTS printfile''')
-
-		conn.commit()
-		conn.close()
-
-
-	def execute(self, sql):
-		conn = sqlite3.connect(self.DB_NAME)
-		db = conn.cursor()
-		db.execute(sql)
-		conn.commit()
-		conn.close()
-
-	def query(self, sql):
-		conn = sqlite3.connect(self.DB_NAME)
-		db = conn.cursor()
-		db.execute(sql)
-		return db.fetchall()
+		self.infoUser = plugin.get_plugin_data_folder() + "/user.yaml"
+		self.user = {}
+		self.getUser()
 
 	def saveUser(self, user):
-		sql = "INSERT INTO user (userId, name, email, token, refresh_token, accessKey, expires, last_request) VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')" % (encrypt(user.userId), user.name, encrypt(user.email), encrypt(user.token), encrypt(user.refresh_token), encrypt(user.accessKey), user.expires, user.last_request)
-		return self.execute(sql)
-
-	def deleteUser(self, user):
-		sql = "DELETE FROM user WHERE email = '%s'" % (encrypt(user.email))
-		return self.execute(sql)
-
-	def updateUser(self, user):
-		sql = "UPDATE user SET userId= '%s', name = '%s', email = '%s', token = '%s', refresh_token = '%s', accessKey = '%s', expires = '%s', last_request = '%s' WHERE email = '%s'" % (encrypt(user.userId), user.name, encrypt(user.email), encrypt(user.token), encrypt(user.refresh_token), encrypt(user.accessKey), user.expires, user.last_request, encrypt(user.email),)
-		return self.execute(sql)
+		self.user = copy.copy(user)
+		if user:
+			user['email'] = encrypt(user['email'])
+			user['accessKey'] = encrypt(user['accessKey'])
+		with open(self.infoUser, "wb") as infoFile:
+			yaml.safe_dump({"user" : user}, infoFile, default_flow_style=False, indent="    ", allow_unicode=True)
+		self.plugin.user = self.user
 
 	def getUser(self):
-		conn = sqlite3.connect(self.DB_NAME)
-		db = conn.cursor()
-		sql = "SELECT * FROM user"
-		db.execute(sql)
-		user = db.fetchone()
+		try:
+			with open(self.infoUser, "r") as f:
+				user = yaml.safe_load(f)
+				if user and user['user']:
+					self.user = user['user']
+					self.user['email'] = decrypt(self.user['email'])
+					self.user['accessKey'] = decrypt(self.user['accessKey'])
+		except:
+			self._logger.info("There was an error loading %s:" % self.infoUser, exc_info= True)
+		self.plugin.user = self.user
 
-		if user:
-			return AstroprintUser(decrypt(user[1]), user[2] ,decrypt(user[3]), decrypt(user[4]), decrypt(user[5]), decrypt(user[6]), user[7], user[8])
-		else:
-			return None
+	def deleteUser(self):
+		self.saveUser(None)
+
+	def getPrintFiles(self):
+		try:
+			with open(self.infoPrintFiles, "r") as f:
+				printFiles = yaml.safe_load(f)
+				if printFiles:
+					self.printFiles = printFiles
+		except:
+			self._logger.info("There was an error loading %s:" % self.infoPrintFiles, exc_info= True)
+		self.plugin.printFiles = self.printFiles
+
+	def savePrintFiles(self, printFiles):
+		self.printFiles = printFiles
+		with open(self.infoPrintFiles, "wb") as infoFile:
+			yaml.safe_dump(printFiles, infoFile, default_flow_style=False, indent="    ", allow_unicode=True)
+		self.plugin.printFiles = self.printFiles
 
 	def savePrintFile(self, printFile):
-		sql = "INSERT INTO printfile (printFileId, name, octoPrintPath, printFileName, renderedImage) VALUES ('%s', '%s', '%s', '%s', '%s')" % (printFile.printFileId, printFile.name, printFile.octoPrintPath, printFile.printFileName, printFile.renderedImage)
-		return self.execute(sql)
-
+		self.printFiles[printFile.printFileId] = {"name" : printFile.name, "octoPrintPath" : printFile.octoPrintPath, "printFileName" : printFile.printFileName, "renderedImage" : printFile.renderedImage}
+		self.savePrintFiles(self.printFiles)
 
 	def deletePrintFile(self, path):
-		sql = "DELETE FROM printfile WHERE octoPrintPath = '%s'" % (path)
-		return self.execute(sql)
+		printFiles = {}
+		if self.printFiles:
+			for printFile in self.printFiles:
+				if self.printFiles[printFile]["octoPrintPath"] != path:
+					printFiles[printFile] = self.printFiles[printFile]
+			self.savePrintFiles(printFiles)
 
 	def getPrintFileById(self, printFileId):
-		conn = sqlite3.connect(self.DB_NAME)
-		db = conn.cursor()
-		sql = "SELECT * FROM printfile WHERE printFileId = '%s'" %printFileId
-		db.execute(sql)
-		printFile = db.fetchone()
+		if self.printFiles and printFileId in self.printFiles:
+			return 	AstroprintPrintFile(printFileId, self.printFiles[printFileId]["name"], self.printFiles[printFileId]["octoPrintPath"], self.printFiles[printFileId]["printFileName"], self.printFiles[printFileId]["renderedImage"])
+		return None
 
-		if printFile:
-			return AstroprintPrintFile(printFile[0], printFile[1], printFile[2], printFile[3], printFile[4])
-		else:
-			return None
 
 	def getPrintFileByOctoPrintPath(self, octoPrintPath):
-		conn = sqlite3.connect(self.DB_NAME)
-		db = conn.cursor()
-		sql = "SELECT * FROM printfile WHERE octoPrintPath = '%s'" %octoPrintPath
-		db.execute(sql)
-		printFile = db.fetchone()
-
-		if printFile:
-			return AstroprintPrintFile(printFile[0], printFile[1], printFile[2], printFile[3], printFile[4])
-		else:
-			return None
-
-
-class AstroprintUser():
-
-	def __init__(self, userId="", name = "", email = "", token = "", refresh_token = "", accessKey= "", expires = 0, last_request = 0):
-		self.userId = userId
-		self.name = name
-		self.email = email
-		self.token = token
-		self.refresh_token = refresh_token
-		self.accessKey = accessKey
-		self.expires = expires
-		self.last_request = last_request
+		if self.printFiles:
+			for printFile in self.printFiles:
+				if self.printFiles[printFile]["octoPrintPath"] == octoPrintPath:
+					return AstroprintPrintFile(printFile, self.printFiles[printFile]["name"], self.printFiles[printFile]["octoPrintPath"], self.printFiles[printFile]["printFileName"], self.printFiles[printFile]["renderedImage"])
+		return None
 
 class AstroprintPrintFile():
 
