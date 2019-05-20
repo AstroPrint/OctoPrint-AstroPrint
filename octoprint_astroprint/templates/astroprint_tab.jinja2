@@ -234,15 +234,17 @@
                                     <div data-bind="foreach: printFiles">
                                         <div class="print-file-row">
                                             <div class="main-info">
-                                                <div  class="span2 all-printFile-row" data-bind="click: $root.expandPrintfile">
-                                                    <span data-bind="ifnot: expanded">
-                                                        <span class="center-button"><i class="icon icon-plus" aria-hidden="true"></i></span>
-                                                    </span>
-                                                    <span data-bind="if: expanded">
-                                                        <span class="center-button"><i class="icon icon-minus" aria-hidden="true"></i></span>
-                                                    </span>
-                                                </div>
-                                                <div  class="span8 all-printFile-row" data-bind="click: $root.expandPrintfile">
+                                                <span data-bind="click: $root.expandPrintfile">
+                                                    <div  class="span2 all-printFile-row" data-bind=" if: printer || material || quality || sizeZ || print_time || layer_height || layer_count || filament_volume || filament_length || filament_weight">
+                                                        <span data-bind="ifnot: expanded">
+                                                            <span class="center-button"><i class="icon icon-plus" aria-hidden="true"></i></span>
+                                                        </span>
+                                                        <span data-bind="if: expanded">
+                                                            <span class="center-button"><i class="icon icon-minus" aria-hidden="true"></i></span>
+                                                        </span>
+                                                    </div>
+                                                </span>
+                                                <div  class="span8 all-printFile-row">
                                                     <div class="row half-printFile-row printFileName" data-bind="text: filename"></div>
                                                     <div class="half-printFile-row row">
                                                         <div class="span6 slicerSettings"><span class="infoSlicerSettings" data-bind="if: printer; text: printer + '/'"></span><span data-bind="if:material; text: material + '/'" class="infoSlicerSettings"></span><span data-bind="if:quality; text: quality" class="infoSlicerSettings"></span></div>
@@ -270,6 +272,18 @@
                                                 </div>
                                             </div>
                                             <div data-bind="if: expanded" class="more-printfile-info">
+                                                <div class="info-row" data-bind="if: printer">
+                                                    <div class="span4 bold">Printer:</div>
+                                                    <div class="span8"><span data-bind="text: printer"></span></div>
+                                                </div>
+                                                <div class="info-row" data-bind="if: material">
+                                                    <div class="span4 bold">Material:</div>
+                                                    <div class="span8"><span data-bind="text: material"></span></div>
+                                                </div>
+                                                <div class="info-row" data-bind="if: quality">
+                                                    <div class="span4 bold">Quality:</div>
+                                                    <div class="span8"><span data-bind="text: quality"></span></div>
+                                                </div>
                                                 <div class="info-row" data-bind="if: sizeZ">
                                                     <div class="span4 bold">Print Area:</div>
                                                     <div class="span8"><span data-bind="text: sizeX"></span><span class="bold"> x </span><span data-bind="text: sizeY"></span><span class="bold"> x </span><span data-bind="text: sizeZ"></span> mm</div>
@@ -338,15 +352,17 @@
                         <div data-bind="foreach: printFiles">
                             <div class="print-file-row clearfix">
                                 <div class="main-info clearfix">
-                                    <div  class="span2 all-printFile-row pull-right text-center" data-bind="click: $root.expandPrintfile">
-                                        <span data-bind="ifnot: expanded">
-                                            <span class="center-button"><i class="icon icon-angle-down" aria-hidden="true"></i></span>
-                                        </span>
-                                        <span data-bind="if: expanded">
-                                            <span class="center-button"><i class="icon icon-minus" aria-hidden="true"></i></span>
+                                    <div class="span2 all-printFile-row pull-right text-center" data-bind="click: $root.expandPrintfile;">
+                                        <span data-bind=" if: printer || material || quality || sizeZ || print_time || layer_height || layer_count || filament_volume || filament_length || filament_weight">
+                                            <span data-bind="ifnot: expanded">
+                                                <span class="center-button"><i class="icon icon-angle-down" aria-hidden="true"></i></span>
+                                            </span>
+                                            <span data-bind="if: expanded">
+                                                <span class="center-button"><i class="icon icon-minus" aria-hidden="true"></i></span>
+                                            </span>
                                         </span>
                                     </div>
-                                    <div  class="span8 all-printFile-row" data-bind="click: $root.expandPrintfile">
+                                    <div  class="span8 all-printFile-row" >
                                         <div class="row half-printFile-row printFileName" data-bind="text: filename"></div>
                                         <div class="half-printFile-row row">
                                             <div class="span6 slicerSettings"><span class="infoSlicerSettings" data-bind="if:printer; text: printer + '/'"></span><span data-bind="if: material; text: material + '/'" class="infoSlicerSettings"></span><span data-bind="if: quality; text: quality" class="infoSlicerSettings"></span></div>
@@ -374,6 +390,18 @@
                                     </div>
                                 </div>
                                 <div data-bind="if: expanded" class="more-printfile-info clearfix">
+                                    <div class="info-row" data-bind="if: printer">
+                                        <div class="span4 bold">Printer:</div>
+                                        <div class="span8"><span data-bind="text: printer"></span></div>
+                                    </div>
+                                    <div class="info-row" data-bind="if: material">
+                                        <div class="span4 bold">Material:</div>
+                                        <div class="span8"><span data-bind="text: material"></span></div>
+                                    </div>
+                                    <div class="info-row" data-bind="if: quality">
+                                        <div class="span4 bold">Quality:</div>
+                                        <div class="span8"><span data-bind="text: quality"></span></div>
+                                    </div>
                                     <div class="info-row clearfix" data-bind="if: sizeZ">
                                         <div class="span4 bold">Print Area:</div>
                                         <div class="span8"><span data-bind="text: sizeX"></span><span class="bold"> x </span><span data-bind="text: sizeY"></span><span class="bold"> x </span><span data-bind="text: sizeZ"></span> mm</div>
