@@ -5,6 +5,7 @@ __copyright__ = "Copyright (C) 2017-2019 3DaGoGo, Inc - Released under terms of 
 
 import sqlite3
 #KEEP FOR MIGRATION, IT WILL BE REMOVED AFTER SOME VERSIONS
+
 class SqliteDB():
 
 	def __init__(self, plugin):
