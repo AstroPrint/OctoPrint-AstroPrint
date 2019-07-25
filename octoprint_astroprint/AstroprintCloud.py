@@ -1,7 +1,7 @@
 # coding=utf-8
 __author__ = "AstroPrint Product Team <product@astroprint.com>"
 __license__ = "GNU Affero General Public License http://www.gnu.org/licenses/agpl.html"
-__copyright__ = "Copyright (C) 2017 3DaGoGo, Inc - Released under terms of the AGPLv3 License"
+__copyright__ = "Copyright (C) 2017-2019 3DaGoGo, Inc - Released under terms of the AGPLv3 License"
 
 from flask import request, make_response, jsonify
 import time
@@ -58,8 +58,6 @@ class AstroprintCloud():
 
 		else:
 			return self.refresh()
-
-
 
 	def refresh(self):
 		try:
@@ -248,7 +246,7 @@ class AstroprintCloud():
 			'tool' : self.plugin.currentTool()
 		}
 
-	 	if self.statePayload != payload and self.bm:
+		if self.statePayload != payload and self.bm:
 			self.bm.broadcastEvent('status_update', payload)
 			self.statePayload = payload
 

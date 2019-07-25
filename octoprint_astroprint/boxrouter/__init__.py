@@ -1,7 +1,7 @@
 # coding=utf-8
 __author__ = "AstroPrint Product Team <product@astroprint.com>"
 __license__ = 'GNU Affero General Public License http://www.gnu.org/licenses/agpl.html'
-__copyright__ = "Copyright (C) 2017 3DaGoGo, Inc - Released under terms of the AGPLv3 License"
+__copyright__ = "Copyright (C) 2017-2019 3DaGoGo, Inc - Released under terms of the AGPLv3 License"
 
 # singleton
 _instance = None
@@ -19,11 +19,14 @@ import os
 import sys
 import weakref
 import uuid
+
 from time import sleep, time
+
 from ws4py.client.threadedclient import WebSocketClient
 from ws4py.messaging import PingControlMessage
 
 import octoprint.util
+
 from .handlers import BoxRouterMessageHandler
 from .events import EventSender
 

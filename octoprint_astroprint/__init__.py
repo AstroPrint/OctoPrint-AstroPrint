@@ -1,40 +1,41 @@
 # coding=utf-8
 from __future__ import absolute_import
 
-
 __author__ = "AstroPrint Product Team <product@astroprint.com>"
 __license__ = "GNU Affero General Public License http://www.gnu.org/licenses/agpl.html"
-__copyright__ = "Copyright (C) 2017-2018 3DaGoGo, Inc - Released under terms of the AGPLv3 License"
+__copyright__ = "Copyright (C) 2017-2019 3DaGoGo, Inc - Released under terms of the AGPLv3 License"
 
-from .AstroprintCloud import AstroprintCloud
-from .AstroprintDB import AstroprintDB
-from .SqliteDB import SqliteDB
-from .boxrouter import boxrouterManager
-
-
-from flask import request, Blueprint, make_response, jsonify, Response, abort
 import octoprint.plugin
 import json
 import sys
 import socket
 import os
 import yaml
-from octoprint.server.util.flask import restricted_access
-from octoprint.server import admin_permission
-from octoprint.settings import valid_boolean_trues
-from octoprint.users import SessionUser
-from watchdog.observers import Observer
 import re
-from flask.ext.login import user_logged_in, user_logged_out
-from octoprint.filemanager.destinations import FileDestinations
-from octoprint.events import Events
+
+from .AstroprintCloud import AstroprintCloud
+from .AstroprintDB import AstroprintDB
+from .SqliteDB import SqliteDB
+from .boxrouter import boxrouterManager
 from .cameramanager import cameraManager
 from .materialcounter import MaterialCounter
 from .printerlistener import PrinterListener
 
+from octoprint.server.util.flask import restricted_access
+from octoprint.server import admin_permission
+from octoprint.settings import valid_boolean_trues
+from octoprint.users import SessionUser
+from octoprint.filemanager.destinations import FileDestinations
+from octoprint.events import Events
+
+from watchdog.observers import Observer
+
+from flask import request, Blueprint, make_response, jsonify, Response, abort
+from flask.ext.login import user_logged_in, user_logged_out
+
+
 NO_CONTENT = ("", 204)
 OK = ("", 200)
-
 
 class JsonEncoder(json.JSONEncoder):
     def default(self, obj):
