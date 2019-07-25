@@ -390,9 +390,9 @@ class AstroprintBoxRouter(object):
 				self.close()
 				if 'should_retry' in data and data['should_retry']:
 					self._doRetry()
-				else:
-					#Why is this needed?
-					self.plugin.astroprintCloud.unautorizedHandler()
+				# else:
+				# 	Why is this needed?
+				# 	self.plugin.astroprintCloud.unautorizedHandler()
 
 			elif 'success' in data:
 				self._logger.info("Boxrouter connected to astroprint service")
