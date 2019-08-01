@@ -1,11 +1,12 @@
 # coding=utf-8
 __author__ = "AstroPrint Product Team <product@astroprint.com>"
 __license__ = 'GNU Affero General Public License http://www.gnu.org/licenses/agpl.html'
-__copyright__ = "Copyright (C) 2017 3DaGoGo, Inc - Released under terms of the AGPLv3 License"
+__copyright__ = "Copyright (C) 2017-2019 3DaGoGo, Inc - Released under terms of the AGPLv3 License"
 
 import base64
 import threading
 import re
+
 from time import sleep
 
 class RequestHandler(object):
@@ -115,7 +116,7 @@ class RequestHandler(object):
 		done(None)
 
 	def signoff(self, data, clientId, done):
-		threading.Timer(1, self.astroprintCloud.unautorizedHandeler).start()
+		threading.Timer(1, self.astroprintCloud.unautorizedHandler).start()
 		done(None)
 
 	def print_file(self, data, clientId, done):

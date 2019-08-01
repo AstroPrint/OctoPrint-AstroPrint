@@ -1,7 +1,7 @@
 # coding=utf-8
 __author__ = "AstroPrint Product Team <product@astroprint.com>"
 __license__ = 'GNU Affero General Public License http://www.gnu.org/licenses/agpl.html'
-__copyright__ = "Copyright (C) 2017 3DaGoGo, Inc - Released under terms of the AGPLv3 License"
+__copyright__ = "Copyright (C) 2017-2019 3DaGoGo, Inc - Released under terms of the AGPLv3 License"
 
 # singleton
 _instance = None
@@ -19,11 +19,14 @@ import os
 import sys
 import weakref
 import uuid
+
 from time import sleep, time
+
 from ws4py.client.threadedclient import WebSocketClient
 from ws4py.messaging import PingControlMessage
 
 import octoprint.util
+
 from .handlers import BoxRouterMessageHandler
 from .events import EventSender
 
@@ -48,7 +51,8 @@ class AstroprintBoxRouterClient(WebSocketClient):
 		return self._printerListener
 
 	def __del__(self):
-		self._weakRefRouter.unregisterEvents()
+		router = self._weakRefRouter()
+		router.unregisterEvents()
 
 	def send(self, data):
 		with self._condition:
@@ -385,7 +389,11 @@ class AstroprintBoxRouter(object):
 				self.status = self.STATUS_ERROR
 				self.plugin.send_event("boxrouterStatus", self.STATUS_ERROR)
 				self.close()
-				self.plugin.astroprintCloud.unautorizedHandeler()
+				if 'should_retry' in data and data['should_retry']:
+					self._doRetry()
+				# else:
+				# 	Why is this needed?
+				# 	self.plugin.astroprintCloud.unautorizedHandler()
 
 			elif 'success' in data:
 				self._logger.info("Boxrouter connected to astroprint service")
