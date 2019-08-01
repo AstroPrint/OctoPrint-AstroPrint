@@ -51,7 +51,8 @@ class AstroprintBoxRouterClient(WebSocketClient):
 		return self._printerListener
 
 	def __del__(self):
-		self._weakRefRouter.unregisterEvents()
+		router = self._weakRefRouter()
+		router.unregisterEvents()
 
 	def send(self, data):
 		with self._condition:

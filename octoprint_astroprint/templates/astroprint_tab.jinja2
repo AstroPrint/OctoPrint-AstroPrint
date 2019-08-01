@@ -83,7 +83,7 @@
     <div id="navbar-astroprint" class="navbar navbar-static">
         <div class="navbar-inner">
             <div class="container" style="width: auto;">
-                <a class="brand" href="https://www.astroprint.com"><span class="favicon-rocketImageContainer"><div class="favicon-rocket"></div></span> <span class="astroprint-nav-title">AstroPrint</span></a>
+                <a class="brand" href="{{ plugin_astroprint_appSite|escape }}"><span class="favicon-rocketImageContainer"><div class="favicon-rocket"></div></span> <span class="astroprint-nav-title">AstroPrint</span></a>
                 <span class="camera-options" data-bind="click:scanForCamera"><a title="Scan for camera">
                     <span data-bind="if: (cam_status() == 'charging')"><i class="icon-refresh icon-spin"></i></span>
                     <span class="remove-opt" data-bind="ifnot: cam_status"><i  class="icon-remove"></i></span>
