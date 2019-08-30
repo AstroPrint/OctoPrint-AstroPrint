@@ -15,6 +15,7 @@ import os
 import octoprint.filemanager.util
 from octoprint.filemanager.destinations import FileDestinations
 from octoprint.server import VERSION
+from threading import Lock
 import sys
 import platform
 
@@ -28,6 +29,7 @@ class AstroprintCloud():
 		self.expires = 10
 		self.last_request = 0
 		self.currentlyPrinting = None
+		self.getTokenLock = Lock()
 
 		self.plugin = plugin
 		self.apiHost = plugin.get_settings().get(["apiHost"])
@@ -53,11 +55,12 @@ class AstroprintCloud():
 		return self.plugin.user['expires'] - round(time.time()) < 60
 
 	def getToken(self):
-		if not self.tokenIsExpired():
-			return self.plugin.user['token']
+		with self.getTokenLock:
+			if not self.tokenIsExpired():
+				return self.plugin.user['token']
 
-		else:
-			return self.refresh()
+			else:
+				return self.refresh()
 
 	def refresh(self):
 		try:
