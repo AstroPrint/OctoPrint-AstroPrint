@@ -97,6 +97,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 		user_logged_out.connect(logOutHandler)
 
 	def on_after_startup(self):
+		self.register_printer_listener()
 		self.db = AstroprintDB(self)
 		if os.path.isfile(self.get_plugin_data_folder() + "/octoprint_astroprint.db"):
 			sqlitledb = SqliteDB(self)

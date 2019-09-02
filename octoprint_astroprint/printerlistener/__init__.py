@@ -11,8 +11,8 @@ from octoprint_astroprint.gCodeAnalyzer import GCodeAnalyzer
 class PrinterListener(PrinterCallback):
 
 	def __init__(self, plugin):
-		self.cameraManager = plugin.cameraManager
-		self.astroprintCloud = plugin.astroprintCloud
+		self.cameraManager = None
+		self.astroprintCloud = None
 		self._analyzed_job_layers = None
 
 		self._router = None
