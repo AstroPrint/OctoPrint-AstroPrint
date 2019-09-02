@@ -97,7 +97,6 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 		user_logged_out.connect(logOutHandler)
 
 	def on_after_startup(self):
-		self.register_printer_listener()
 		self.db = AstroprintDB(self)
 		if os.path.isfile(self.get_plugin_data_folder() + "/octoprint_astroprint.db"):
 			sqlitledb = SqliteDB(self)
@@ -109,6 +108,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 		self.astroprintCloud = AstroprintCloud(self)
 		self.cameraManager.astroprintCloud = self.astroprintCloud
 		self.materialCounter = MaterialCounter(self)
+		self.register_printer_listener()
 
 	def onLogout(self):
 		self.send_event("userLoggedOut", True)
