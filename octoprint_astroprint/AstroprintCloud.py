@@ -41,6 +41,7 @@ class AstroprintCloud():
 		self._printer = plugin.get_printer()
 		self._file_manager = plugin.get_file_manager()
 		self.plugin.cameraManager.astroprintCloud = self
+		self.plugin.get_printer_listener().astroprintCloud = self
 		self.statePayload = None
 		user = self.plugin.user
 		if user:

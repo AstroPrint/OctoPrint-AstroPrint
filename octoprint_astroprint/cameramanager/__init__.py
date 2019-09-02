@@ -61,6 +61,7 @@ class CameraManager(object):
 		self._photos = {} # To hold sync photos
 		self.timelapseWorker = None
 		self.timelapseInfo = None
+		self.plugin.get_printer_listener().cameraManager = self
 
 	def layerChanged(self):
 		if self.timelapseInfo and self.timelapseInfo['freq'] == "layer":
