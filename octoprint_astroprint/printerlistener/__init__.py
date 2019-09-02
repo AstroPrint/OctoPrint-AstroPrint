@@ -29,9 +29,13 @@ class PrinterListener(PrinterCallback):
 
 	def addWatcher(self, socket):
 		self._router = socket
+		self.astroprintCloud = self._plugin.astroprintCloud
+		self.cameraManager = self._plugin.cameraManager
 
 	def removeWatcher(self):
 		self._router = None
+		self.astroprintCloud = None
+		self.cameraManager = None
 
 	def get_current_layer(self):
 		return self._currentLayer
