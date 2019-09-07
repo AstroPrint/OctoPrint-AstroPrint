@@ -24,12 +24,8 @@ class AstroprintCloud():
 	def __init__(self, plugin):
 		self.plugin = None
 		self.appId = None
-		self.token = None
-		self.refresh_token = None
-		self.expires = 10
-		self.last_request = 0
 		self.currentlyPrinting = None
-		self.getTokenLock = Lock()
+		self.getTokenRefreshLock = Lock()
 
 		self.plugin = plugin
 		self.apiHost = plugin.get_settings().get(["apiHost"])
@@ -53,15 +49,20 @@ class AstroprintCloud():
 
 
 	def tokenIsExpired(self):
-		return self.plugin.user['expires'] - round(time.time()) < 60
+		return self.plugin.user['expires'] - int(time.time()) < 60
 
 	def getToken(self):
-		with self.getTokenLock:
-			if not self.tokenIsExpired():
-				return self.plugin.user['token']
+		if self.tokenIsExpired():
+			with self.getTokenRefreshLock:
+				# We need to check again because there could be calls that were waiting on the lock.
+				# These calls should not have to refresh again.
+				if self.tokenIsExpired():
+					self.refresh()
 
-			else:
-				return self.refresh()
+			return self.getToken()
+
+		else:
+			return self.plugin.user['token']
 
 	def refresh(self):
 		try:
@@ -77,15 +78,16 @@ class AstroprintCloud():
 			data = r.json()
 			self.plugin.user['token'] = data['access_token']
 			self.plugin.user['refresh_token'] = data['refresh_token']
-			self.plugin.user['last_request'] = round(time.time())
-			self.plugin.user['expires'] = round(self.plugin.user['last_request'] + data['expires_in'])
+			self.plugin.user['last_request'] = int(time.time())
+			self.plugin.user['expires'] = self.plugin.user['last_request'] + data['expires_in']
 			self.db.saveUser(self.plugin.user)
-			return self.plugin.user['token']
+
 		except requests.exceptions.HTTPError as err:
 			if err.response.status_code == 400 or err.response.status_code == 401:
 				self._logger.error("Unable to refresh token with error [%d]" % err.response.status_code)
 				self.plugin.send_event("logOut")
 				self.unauthorizedHandler()
+
 		except requests.exceptions.RequestException as e:
 			self._logger.error(e)
 
@@ -107,9 +109,9 @@ class AstroprintCloud():
 			self.plugin.user = {}
 			self.plugin.user['token'] = data['access_token']
 			self.plugin.user['refresh_token'] = data['refresh_token']
-			self.plugin.user['last_request'] = round(time.time())
+			self.plugin.user['last_request'] = int(time.time())
 			self.plugin.user['accessKey'] = apAccessKey
-			self.plugin.user['expires'] = round(self.plugin.user['last_request'] + data['expires_in'])
+			self.plugin.user['expires'] = self.plugin.user['last_request'] + data['expires_in']
 			return self.getUserInfo(True)
 
 		except requests.exceptions.HTTPError as err:
