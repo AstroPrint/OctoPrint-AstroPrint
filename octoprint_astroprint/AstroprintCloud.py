@@ -54,8 +54,8 @@ class AstroprintCloud():
 	def getToken(self):
 		if self.tokenIsExpired():
 			with self.getTokenRefreshLock:
-				# We need to check again because there could be calls that were waiting on the lock.
-				# These calls should not have to refresh again.
+				# We need to check again because there could be calls that were waiting on the lock for an active refresh.
+				# These calls should not have to refresh again as the token would be valid
 				if self.tokenIsExpired():
 					self.refresh()
 
