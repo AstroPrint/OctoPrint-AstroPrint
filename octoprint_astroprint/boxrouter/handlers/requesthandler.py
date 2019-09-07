@@ -116,7 +116,7 @@ class RequestHandler(object):
 		done(None)
 
 	def signoff(self, data, clientId, done):
-		threading.Timer(1, self.astroprintCloud.unauthorizedHandler).start()
+		threading.Timer(1, self.astroprintCloud.unauthorizedHandler, [False]).start()
 		done(None)
 
 	def print_file(self, data, clientId, done):
