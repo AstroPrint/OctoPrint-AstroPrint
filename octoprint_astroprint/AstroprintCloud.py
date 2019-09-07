@@ -84,7 +84,7 @@ class AstroprintCloud():
 		except requests.exceptions.HTTPError as err:
 			if err.response.status_code == 400 or err.response.status_code == 401:
 				self.plugin.send_event("logOut")
-				self.unautorizedHandler()
+				self.unauthorizedHandler()
 			pass
 		except requests.exceptions.RequestException as e:
 			self._logger.error(e)
@@ -144,7 +144,7 @@ class AstroprintCloud():
 
 		except requests.exceptions.HTTPError as err:
 			if (err.response.status_code == 401):
-				self.unautorizedHandler()
+				self.unauthorizedHandler()
 			if saveUser:
 				return jsonify(json.loads(err.response.text)), err.response.status_code, {'ContentType':'application/json'}
 		except requests.exceptions.RequestException:
@@ -152,10 +152,10 @@ class AstroprintCloud():
 				return jsonify({'error': "Internal server error"}), 500, {'ContentType':'application/json'}
 
 	def logoutAstroPrint(self):
-		self.unautorizedHandler(False)
+		self.unauthorizedHandler(False)
 		return jsonify({"Success" : True }), 200, {'ContentType':'application/json'}
 
-	def unautorizedHandler (self, expired = True):
+	def unauthorizedHandler (self, expired = True):
 		if(expired):
 			self._logger.warning("Unautorized token, AstroPrint user logged out.")
 		self.db.deleteUser()
@@ -197,7 +197,7 @@ class AstroprintCloud():
 
 		except requests.exceptions.HTTPError as err:
 			if (err.response.status_code == 401):
-				self.unautorizedHandler()
+				self.unauthorizedHandler()
 			self._logger.error("Failed to send print_job request: %s" % err.response.text)
 		except requests.exceptions.RequestException as e:
 			self._logger.error("Failed to send print_job request: %s" % e)
@@ -220,7 +220,7 @@ class AstroprintCloud():
 
 		except requests.exceptions.HTTPError as err:
 			if (err.response.status_code == 401):
-				self.unautorizedHandler()
+				self.unauthorizedHandler()
 			self._logger.error("Failed to send print_job request: %s" % err.response.text)
 		except requests.exceptions.RequestException as e:
 			self._logger.error("Failed to send print_job request: %s" % e)
@@ -300,7 +300,7 @@ class AstroprintCloud():
 			}
 			self.bm.triggerEvent('onDownload', payload)
 			if (err.response.status_code == 401):
-				self.unautorizedHandler()
+				self.unauthorizedHandler()
 			return None
 		except requests.exceptions.RequestException:
 			payload = {
@@ -336,7 +336,7 @@ class AstroprintCloud():
 			}
 			self.bm.triggerEvent('onDownload', payload)
 			if (err.response.status_code == 401):
-				self.unautorizedHandler()
+				self.unauthorizedHandler()
 			return None
 		except requests.exceptions.RequestException:
 
@@ -416,7 +416,7 @@ class AstroprintCloud():
 
 		except requests.exceptions.HTTPError as err:
 			if (err.response.status_code == 401):
-				self.unautorizedHandler()
+				self.unauthorizedHandler()
 			return jsonify({'error': "Unauthorized user"}), err.response.status_code, {'ContentType':'application/json'}
 		except requests.exceptions.RequestException:
 			return jsonify({'error': "Internal server error"}), 500, {'ContentType':'application/json'}
@@ -436,7 +436,7 @@ class AstroprintCloud():
 			return jsonify({"Success" : True }), 200, {'ContentType':'application/json'}
 		except requests.exceptions.HTTPError as err:
 			if (err.response.status_code == 401):
-				self.unautorizedHandler()
+				self.unauthorizedHandler()
 			return jsonify({'error': "Unauthorized user"}), err.response.status_code, {'ContentType':'application/json'}
 		except requests.exceptions.RequestException:
 			return jsonify({'error': "Internal server error"}), 500, {'ContentType':'application/json'}
@@ -456,7 +456,7 @@ class AstroprintCloud():
 
 			except requests.exceptions.HTTPError as err:
 				if (err.response.status_code == 401):
-					self.unautorizedHandler()
+					self.unauthorizedHandler()
 				return jsonify({'error': "Unauthorized user"}), err.response.status_code, {'ContentType':'application/json'}
 			except requests.exceptions.RequestException:
 				return jsonify({'error': "Internal server error"}), 500, {'ContentType':'application/json'}
@@ -474,7 +474,7 @@ class AstroprintCloud():
 
 			except requests.exceptions.HTTPError as err:
 				if (err.response.status_code == 401):
-					self.unautorizedHandler()
+					self.unauthorizedHandler()
 				return jsonify({'error': "Unauthorized user"}), err.response.status_code, {'ContentType':'application/json'}
 			except requests.exceptions.RequestException:
 				return jsonify({'error': "Internal server error"}), 500, {'ContentType':'application/json'}
@@ -562,7 +562,7 @@ class AstroprintCloud():
 
 		except requests.exceptions.HTTPError as err:
 			if (err.response.status_code == 401):
-				self.unautorizedHandler()
+				self.unauthorizedHandler()
 			return jsonify({'error': "Unauthorized user"}), err.response.status_code, {'ContentType':'application/json'}
 		except requests.exceptions.RequestException:
 
@@ -580,7 +580,7 @@ class AstroprintCloud():
 
 		except requests.exceptions.HTTPError as err:
 			if (err.response.status_code == 401):
-				self.unautorizedHandler()
+				self.unauthorizedHandler()
 			return jsonify({'error': "Unauthorized user"}), err.response.status_code, {'ContentType':'application/json'}
 		except requests.exceptions.RequestException:
 			return jsonify({'error': "Internal server error"}), 500, {'ContentType':'application/json'}
@@ -597,7 +597,7 @@ class AstroprintCloud():
 
 		except requests.exceptions.HTTPError as err:
 			if (err.response.status_code == 401):
-				self.unautorizedHandler()
+				self.unauthorizedHandler()
 			return jsonify({'error': "Unauthorized user"}), err.response.status_code, {'ContentType':'application/json'}
 		except requests.exceptions.RequestException:
 			return jsonify({'error': "Internal server error"}), 500, {'ContentType':'application/json'}
@@ -620,7 +620,7 @@ class AstroprintCloud():
 
 		except requests.exceptions.HTTPError as err:
 			if (err.response.status_code == 401):
-				self.unautorizedHandler()
+				self.unauthorizedHandler()
 			return jsonify({'error': "Unauthorized user"}), err.response.status_code, {'ContentType':'application/json'}
 		except requests.exceptions.RequestException:
 			return jsonify({'error': "Internal server error"}), 500, {'ContentType':'application/json'}
