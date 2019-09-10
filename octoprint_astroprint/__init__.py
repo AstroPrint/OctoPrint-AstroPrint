@@ -56,7 +56,7 @@ def getJsonCommandFromRequest(request, valid_commands):
 
 	return command, data, None
 
-def create_ws_token(public_key=None, api_key=None):
+def create_ws_token(public_key = None, api_key = None):
 	from itsdangerous import URLSafeTimedSerializer
 
 	s = URLSafeTimedSerializer(api_key)
@@ -523,7 +523,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 			# they also have a valid id
 			apiKey = self._settings.global_get(["api", "key"])
 			return jsonify(api_key=apiKey,
-								ws_token=create_ws_token(self.user['id']), apiKey)
+								ws_token=create_ws_token(self.user['id'], apiKey))
 
 		if not self.user:
 			abort (401)
