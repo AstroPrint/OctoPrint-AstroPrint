@@ -24,12 +24,8 @@ class AstroprintCloud():
 	def __init__(self, plugin):
 		self.plugin = None
 		self.appId = None
-		self.token = None
-		self.refresh_token = None
-		self.expires = 10
-		self.last_request = 0
 		self.currentlyPrinting = None
-		self.getTokenLock = Lock()
+		self.getTokenRefreshLock = Lock()
 
 		self.plugin = plugin
 		self.apiHost = plugin.get_settings().get(["apiHost"])
@@ -45,23 +41,29 @@ class AstroprintCloud():
 		self.statePayload = None
 		user = self.plugin.user
 		if user:
-			self._logger.info("User %s logged to AstroPrint" % user['name'])
+			self._logger.info("Found stored AstroPrint User: %s" % user['name'])
+			self.refresh()
 			self.getUserInfo()
 			self.connectBoxrouter()
 		else:
-			self._logger.info("No user logged to AstroPrint")
+			self._logger.info("No stored AstroPrint user")
 
 
 	def tokenIsExpired(self):
-		return self.plugin.user['expires'] - round(time.time()) < 60
+		return (self.plugin.user['expires'] - int(time.time()) < 60)
 
 	def getToken(self):
-		with self.getTokenLock:
-			if not self.tokenIsExpired():
-				return self.plugin.user['token']
+		if self.tokenIsExpired():
+			with self.getTokenRefreshLock:
+				# We need to check again because there could be calls that were waiting on the lock for an active refresh.
+				# These calls should not have to refresh again as the token would be valid
+				if self.tokenIsExpired():
+					self.refresh()
 
-			else:
-				return self.refresh()
+			return self.getToken()
+
+		else:
+			return self.plugin.user['token']
 
 	def refresh(self):
 		try:
@@ -77,21 +79,21 @@ class AstroprintCloud():
 			data = r.json()
 			self.plugin.user['token'] = data['access_token']
 			self.plugin.user['refresh_token'] = data['refresh_token']
-			self.plugin.user['last_request'] = round(time.time())
-			self.plugin.user['expires'] = round(self.plugin.user['last_request'] + data['expires_in'])
+			self.plugin.user['last_request'] = int(time.time())
+			self.plugin.user['expires'] = self.plugin.user['last_request'] + data['expires_in']
 			self.db.saveUser(self.plugin.user)
-			return self.plugin.user['token']
+
 		except requests.exceptions.HTTPError as err:
 			if err.response.status_code == 400 or err.response.status_code == 401:
+				self._logger.error("Unable to refresh token with error [%d]" % err.response.status_code)
 				self.plugin.send_event("logOut")
-				self.unautorizedHandler()
-			pass
+				self.unauthorizedHandler()
+
 		except requests.exceptions.RequestException as e:
 			self._logger.error(e)
-			pass
 
 	def loginAstroPrint(self, code, url, apAccessKey):
-		self._logger.info("Loging AstroPrint")
+		self._logger.info("Logging into AstroPrint")
 		try:
 			r = requests.post(
 				"%s/token" % (self.apiHost),
@@ -108,9 +110,9 @@ class AstroprintCloud():
 			self.plugin.user = {}
 			self.plugin.user['token'] = data['access_token']
 			self.plugin.user['refresh_token'] = data['refresh_token']
-			self.plugin.user['last_request'] = round(time.time())
+			self.plugin.user['last_request'] = int(time.time())
 			self.plugin.user['accessKey'] = apAccessKey
-			self.plugin.user['expires'] = round(self.plugin.user['last_request'] + data['expires_in'])
+			self.plugin.user['expires'] = self.plugin.user['last_request'] + data['expires_in']
 			return self.getUserInfo(True)
 
 		except requests.exceptions.HTTPError as err:
@@ -126,8 +128,10 @@ class AstroprintCloud():
 			token = self.getToken()
 			r = requests.get(
 				"%s/accounts/me" % (self.apiHost),
-				headers={'Content-Type': 'application/x-www-form-urlencoded',
-						'authorization': ("bearer %s" %token) }
+				headers={
+					'Content-Type': 'application/x-www-form-urlencoded',
+					'authorization': "bearer %s" % token
+				}
 			)
 			r.raise_for_status()
 			data = r.json()
@@ -137,14 +141,13 @@ class AstroprintCloud():
 			self.plugin.sendSocketInfo()
 			if saveUser:
 				self.db.saveUser(self.plugin.user)
-				user = {'name': self.plugin.user['name'], 'email': self.plugin.user['email']}
-				self._logger.info("%s logged to AstroPrint" % self.plugin.user['name'])
+				self._logger.info("AstroPrint User %s logged in and saved" % self.plugin.user['name'])
 				self.connectBoxrouter()
-				return jsonify(user), 200, {'ContentType':'application/json'}
+				return jsonify({'name': self.plugin.user['name'], 'email': self.plugin.user['email']}), 200, {'ContentType':'application/json'}
 
 		except requests.exceptions.HTTPError as err:
 			if (err.response.status_code == 401):
-				self.unautorizedHandler()
+				self.unauthorizedHandler()
 			if saveUser:
 				return jsonify(json.loads(err.response.text)), err.response.status_code, {'ContentType':'application/json'}
 		except requests.exceptions.RequestException:
@@ -152,10 +155,10 @@ class AstroprintCloud():
 				return jsonify({'error': "Internal server error"}), 500, {'ContentType':'application/json'}
 
 	def logoutAstroPrint(self):
-		self.unautorizedHandler(False)
+		self.unauthorizedHandler(False)
 		return jsonify({"Success" : True }), 200, {'ContentType':'application/json'}
 
-	def unautorizedHandler (self, expired = True):
+	def unauthorizedHandler (self, expired = True):
 		if(expired):
 			self._logger.warning("Unautorized token, AstroPrint user logged out.")
 		self.db.deleteUser()
@@ -187,8 +190,10 @@ class AstroprintCloud():
 			r = requests.post(
 				"%s/print-jobs" % (self.apiHost),
 				json = data,
-				headers={'Content-Type': 'application/x-www-form-urlencoded',
-						'authorization': ("bearer %s" %token)},
+				headers={
+					'Content-Type': 'application/x-www-form-urlencoded',
+					'authorization': "bearer %s" % token
+				},
 				stream=True
 			)
 
@@ -197,7 +202,7 @@ class AstroprintCloud():
 
 		except requests.exceptions.HTTPError as err:
 			if (err.response.status_code == 401):
-				self.unautorizedHandler()
+				self.unauthorizedHandler()
 			self._logger.error("Failed to send print_job request: %s" % err.response.text)
 		except requests.exceptions.RequestException as e:
 			self._logger.error("Failed to send print_job request: %s" % e)
@@ -213,14 +218,16 @@ class AstroprintCloud():
 			requests.patch(
 				"%s/print-jobs/%s" % (self.apiHost, self.currentlyPrinting),
 				json = data,
-				headers={'Content-Type': 'application/x-www-form-urlencoded',
-						'authorization': ("bearer %s" %token)},
+				headers={
+					'Content-Type': 'application/x-www-form-urlencoded',
+					'authorization': "bearer %s" % token
+				},
 				stream=True
 			)
 
 		except requests.exceptions.HTTPError as err:
 			if (err.response.status_code == 401):
-				self.unautorizedHandler()
+				self.unauthorizedHandler()
 			self._logger.error("Failed to send print_job request: %s" % err.response.text)
 		except requests.exceptions.RequestException as e:
 			self._logger.error("Failed to send print_job request: %s" % e)
@@ -276,9 +283,11 @@ class AstroprintCloud():
 			token = self.getToken()
 			r = requests.get(
 				"%s/printfiles/%s" % (self.apiHost, printFileId),
-				headers={'Content-Type': 'application/x-www-form-urlencoded',
-						'authorization': ("bearer %s" %token) },
-						stream=True
+				headers={
+					'Content-Type': 'application/x-www-form-urlencoded',
+					'authorization': "bearer %s" % token
+				},
+				stream=True
 			)
 			printFile = r.json()
 			r.raise_for_status()
@@ -300,7 +309,7 @@ class AstroprintCloud():
 			}
 			self.bm.triggerEvent('onDownload', payload)
 			if (err.response.status_code == 401):
-				self.unautorizedHandler()
+				self.unauthorizedHandler()
 			return None
 		except requests.exceptions.RequestException:
 			payload = {
@@ -317,9 +326,11 @@ class AstroprintCloud():
 			token = self.getToken()
 			r = requests.get(
 				"%s/printfiles/%s/download?download_info=true" % (self.apiHost, printFile['id']),
-				headers={'Content-Type': 'application/x-www-form-urlencoded',
-						'authorization': ("bearer %s" %token) },
-						stream=True
+				headers={
+					'Content-Type': 'application/x-www-form-urlencoded',
+					'authorization': "bearer %s" % token
+					},
+					stream=True
 			)
 			downloadInfo = r.json()
 			printFile['download_url'] = downloadInfo['download_url']
@@ -336,7 +347,7 @@ class AstroprintCloud():
 			}
 			self.bm.triggerEvent('onDownload', payload)
 			if (err.response.status_code == 401):
-				self.unautorizedHandler()
+				self.unauthorizedHandler()
 			return None
 		except requests.exceptions.RequestException:
 
@@ -407,8 +418,10 @@ class AstroprintCloud():
 			token = self.getToken()
 			r = requests.get(
 				"%s/designs" % (self.apiHost),
-				headers={'Content-Type': 'application/x-www-form-urlencoded',
-						'authorization': ("bearer %s" %token) }
+				headers={
+					'Content-Type': 'application/x-www-form-urlencoded',
+					'authorization': "bearer %s" % token
+				}
 			)
 			r.raise_for_status()
 			data = r.json()
@@ -416,7 +429,7 @@ class AstroprintCloud():
 
 		except requests.exceptions.HTTPError as err:
 			if (err.response.status_code == 401):
-				self.unautorizedHandler()
+				self.unauthorizedHandler()
 			return jsonify({'error': "Unauthorized user"}), err.response.status_code, {'ContentType':'application/json'}
 		except requests.exceptions.RequestException:
 			return jsonify({'error': "Internal server error"}), 500, {'ContentType':'application/json'}
@@ -426,8 +439,10 @@ class AstroprintCloud():
 			token = self.getToken()
 			r = requests.get(
 				"%s/designs/%s/download" % (self.apiHost, designId),
-				headers={'Content-Type': 'application/x-www-form-urlencoded',
-						'authorization': ("bearer %s" %token) }
+				headers={
+					'Content-Type': 'application/x-www-form-urlencoded',
+					'authorization': "bearer %s" % token
+				}
 			)
 			r.raise_for_status()
 			data = r.json()
@@ -436,7 +451,7 @@ class AstroprintCloud():
 			return jsonify({"Success" : True }), 200, {'ContentType':'application/json'}
 		except requests.exceptions.HTTPError as err:
 			if (err.response.status_code == 401):
-				self.unautorizedHandler()
+				self.unauthorizedHandler()
 			return jsonify({'error': "Unauthorized user"}), err.response.status_code, {'ContentType':'application/json'}
 		except requests.exceptions.RequestException:
 			return jsonify({'error': "Internal server error"}), 500, {'ContentType':'application/json'}
@@ -447,8 +462,10 @@ class AstroprintCloud():
 				token = self.getToken()
 				r = requests.get(
 					"%s/designs/%s/printfiles" % (self.apiHost, designId),
-					headers={'Content-Type': 'application/x-www-form-urlencoded',
-							'authorization': ("bearer %s" %token) }
+					headers={
+						'Content-Type': 'application/x-www-form-urlencoded',
+						'authorization': "bearer %s" % token
+					}
 				)
 				r.raise_for_status()
 				data = r.json()
@@ -456,7 +473,7 @@ class AstroprintCloud():
 
 			except requests.exceptions.HTTPError as err:
 				if (err.response.status_code == 401):
-					self.unautorizedHandler()
+					self.unauthorizedHandler()
 				return jsonify({'error': "Unauthorized user"}), err.response.status_code, {'ContentType':'application/json'}
 			except requests.exceptions.RequestException:
 				return jsonify({'error': "Internal server error"}), 500, {'ContentType':'application/json'}
@@ -465,8 +482,10 @@ class AstroprintCloud():
 				token = self.getToken()
 				r = requests.get(
 					"%s/printfiles?design_id=null" % (self.apiHost),
-					headers={'Content-Type': 'application/x-www-form-urlencoded',
-							'authorization': ("bearer %s" %token) }
+					headers={
+						'Content-Type': 'application/x-www-form-urlencoded',
+						'authorization': "bearer %s" % token
+					}
 				)
 				r.raise_for_status()
 				data = r.json()
@@ -474,7 +493,7 @@ class AstroprintCloud():
 
 			except requests.exceptions.HTTPError as err:
 				if (err.response.status_code == 401):
-					self.unautorizedHandler()
+					self.unauthorizedHandler()
 				return jsonify({'error': "Unauthorized user"}), err.response.status_code, {'ContentType':'application/json'}
 			except requests.exceptions.RequestException:
 				return jsonify({'error': "Internal server error"}), 500, {'ContentType':'application/json'}
@@ -498,8 +517,10 @@ class AstroprintCloud():
 			token = self.getToken()
 			r = requests.post(
 				"%s/timelapse" % self.apiHost,
-				headers={'Content-Type': 'application/x-www-form-urlencoded',
-						'authorization': ("bearer %s" %token) },
+				headers={
+					'Content-Type': 'application/x-www-form-urlencoded',
+					'authorization': "bearer %s" % token
+				},
 				stream=True, timeout= (10.0, 60.0),
 				data = data
 			)
@@ -533,8 +554,10 @@ class AstroprintCloud():
 				r = requests.post(
 					"%s/timelapse/%s/image" % (self.apiHost, print_id),
 					data= m,
-					headers= {'Content-Type': m.content_type,
-					'authorization': ("bearer %s" %token) }
+					headers= {
+						'Content-Type': m.content_type,
+						'authorization': "bearer %s" % token
+					}
 				)
 				m = None #Free the memory?
 				status_code = r.status_code
@@ -562,7 +585,7 @@ class AstroprintCloud():
 
 		except requests.exceptions.HTTPError as err:
 			if (err.response.status_code == 401):
-				self.unautorizedHandler()
+				self.unauthorizedHandler()
 			return jsonify({'error': "Unauthorized user"}), err.response.status_code, {'ContentType':'application/json'}
 		except requests.exceptions.RequestException:
 
@@ -580,7 +603,7 @@ class AstroprintCloud():
 
 		except requests.exceptions.HTTPError as err:
 			if (err.response.status_code == 401):
-				self.unautorizedHandler()
+				self.unauthorizedHandler()
 			return jsonify({'error': "Unauthorized user"}), err.response.status_code, {'ContentType':'application/json'}
 		except requests.exceptions.RequestException:
 			return jsonify({'error': "Internal server error"}), 500, {'ContentType':'application/json'}
@@ -597,21 +620,22 @@ class AstroprintCloud():
 
 		except requests.exceptions.HTTPError as err:
 			if (err.response.status_code == 401):
-				self.unautorizedHandler()
+				self.unauthorizedHandler()
 			return jsonify({'error': "Unauthorized user"}), err.response.status_code, {'ContentType':'application/json'}
 		except requests.exceptions.RequestException:
 			return jsonify({'error': "Internal server error"}), 500, {'ContentType':'application/json'}
 
 	def updateBoxrouterData(self, data):
 		try:
-
 			token = self.getToken()
 
 			r = requests.patch(
 				"%s/devices/%s/update-boxrouter-data" % (self.apiHost, self.bm.boxId),
-				headers={'Content-Type': 'application/json',
-				'authorization': ("bearer %s" %token) },
-				data=json.dumps(data),
+				headers={
+					'Content-Type': 'application/json',
+					'authorization': "bearer %s" % token
+				},
+				data=json.dumps(data)
 			)
 
 			r.raise_for_status()
@@ -620,7 +644,7 @@ class AstroprintCloud():
 
 		except requests.exceptions.HTTPError as err:
 			if (err.response.status_code == 401):
-				self.unautorizedHandler()
+				self.unauthorizedHandler()
 			return jsonify({'error': "Unauthorized user"}), err.response.status_code, {'ContentType':'application/json'}
 		except requests.exceptions.RequestException:
 			return jsonify({'error': "Internal server error"}), 500, {'ContentType':'application/json'}
