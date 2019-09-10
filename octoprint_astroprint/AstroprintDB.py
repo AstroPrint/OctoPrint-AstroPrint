@@ -37,8 +37,16 @@ class AstroprintDB():
 					self.user = user['user']
 					self.user['email'] = decrypt(self.user['email'])
 					self.user['accessKey'] = decrypt(self.user['accessKey'])
+
+		except IOError, e:
+			if e.errno == 2:
+				self._logger.warn("No user yaml found")
+			else:
+				self._logger.error("IOError error loading %s:" % self.infoUser, exc_info= True)
+
 		except:
-			self._logger.info("There was an error loading %s:" % self.infoUser, exc_info= True)
+			self._logger.error("There was an error loading %s:" % self.infoUser, exc_info= True)
+
 		self.plugin.user = self.user
 
 	def deleteUser(self):
@@ -50,8 +58,16 @@ class AstroprintDB():
 				printFiles = yaml.safe_load(f)
 				if printFiles:
 					self.printFiles = printFiles
+
+		except IOError, e:
+			if e.errno == 2:
+				self._logger.warn("No print files yaml found")
+			else:
+				self._logger.error("IOError error loading %s:" % self.infoPrintFiles, exc_info= True)
+
 		except:
 			self._logger.info("There was an error loading %s:" % self.infoPrintFiles, exc_info= True)
+
 		self.plugin.printFiles = self.printFiles
 
 	def savePrintFiles(self, printFiles):

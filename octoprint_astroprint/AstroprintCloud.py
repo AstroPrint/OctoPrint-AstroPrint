@@ -42,6 +42,7 @@ class AstroprintCloud():
 		user = self.plugin.user
 		if user:
 			self._logger.info("Found stored AstroPrint User: %s" % user['name'])
+			self.refresh()
 			self.getUserInfo()
 			self.connectBoxrouter()
 		else:
@@ -49,7 +50,7 @@ class AstroprintCloud():
 
 
 	def tokenIsExpired(self):
-		return self.plugin.user['expires'] - int(time.time()) < 60
+		return (self.plugin.user['expires'] - int(time.time()) < 60)
 
 	def getToken(self):
 		if self.tokenIsExpired():
