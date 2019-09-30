@@ -84,8 +84,12 @@ class PrinterListener(PrinterCallback):
 			if 'bed' in data:
 				payload['bed'] = { 'actual': data['bed']['actual'], 'target': data['bed']['target'] }
 
-			if 'tool0' in data:
-				payload['tool0'] = { 'actual': data['tool0']['actual'], 'target': data['tool0']['target'] }
+			dataProfile = self._plugin._printer_profile_manager.get_current_or_default()
+			extruder_count = dataProfile['extruder']['count']
+			for i in range(extruder_count):
+				if 'tool'+str(i) in data:
+					payload['tool'+str(i)] = { 'actual': data['tool'+str(i)]['actual'], 'target': data['tool'+str(i)]['target'] }
+
 			self._router.broadcastEvent('temp_update', payload)
 
 	def on_printer_send_current_data(self, data):
