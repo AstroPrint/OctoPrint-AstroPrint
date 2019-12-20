@@ -374,7 +374,8 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 		return self.astroprintCloud.loginAstroPrint(
             request.json['code'],
             request.json['url'],
-            request.json['ap_access_key']
+            request.json['ap_access_key'],
+			request.json['box_id']
         )
 
 	@octoprint.plugin.BlueprintPlugin.route("/logout", methods=["POST"])

@@ -27,7 +27,6 @@ $(function () {
         self.description = ko.observable("");
         self.access_key = ko.observable("");
         self.boxName = ko.observable(astroprint_variables.boxName);
-        self.boxId = ko.observable(astroprint_variables.boxId);
         self.printerModel = ko.observable(astroprint_variables.printerModel)
         self.cacheBoxName = ko.observable(self.boxName());
 
@@ -703,7 +702,6 @@ $(function () {
               currentUrl = encodeURI(currentUrl);
               var url = astroprint_variables.appSite + "/authorize" +
                   "?client_id=" + astroprint_variables.appId +
-                  "&box_id=" +
                   "&redirect_uri=" + currentUrl +
                   "&scope=" + encodeURI("profile:read project:read design:read design:download print-file:read print-file:download print-job:read device:connect device:update")+
                   "&state="+ap_access_key+
@@ -727,7 +725,9 @@ $(function () {
                 data: JSON.stringify({
                   code: accessCode,
                   url: currentUrl,
-                  ap_access_key: apAccessKey
+                  ap_access_key: apAccessKey,
+                  ap_box_id : astroprint_variables.boxId,
+                  box_id : astroprint_variables.boxId
                 }),
                 dataType: "json",
                 success: function (success) {
