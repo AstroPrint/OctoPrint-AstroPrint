@@ -159,10 +159,10 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 
 	def get_settings_defaults(self):
 
-		appSite ="https://cloud.astroprint.com"
+		appSite ="https://cloud.astroprint.net"
 		appId="c4f4a98519194176842567680239a4c3"
-		apiHost="https://api.astroprint.com/v2"
-		webSocket="wss://boxrouter.astroprint.com"
+		apiHost="https://api.astroprint.net/v2"
+		webSocket="wss://boxrouter.astroprint.net"
 		product_variant_id = "9e33c7a4303348e0b08714066bcc2750"
 		boxName = socket.gethostname()
 
@@ -553,7 +553,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 				'paused': self._printer.is_paused(),
 				'camera': True, #self.cameraManager.cameraActive,
 				'remotePrint': True,
-				'capabilities': ['remotePrint', 'multiExtruders', 'allowPrintFile'] + self.cameraManager.capabilities
+				'capabilities': ['remotePrint', 'multiExtruders', 'allowPrintFile', 'acceptPrintJobId'] + self.cameraManager.capabilities
 			}),
 			mimetype= 'application/json'
 		)

@@ -39,6 +39,7 @@ class AstroprintCloud():
 		self.plugin.cameraManager.astroprintCloud = self
 		self.plugin.get_printer_listener().astroprintCloud = self
 		self.statePayload = None
+		self.printJobData = None
 		user = self.plugin.user
 		if user:
 			self._logger.info("Found stored AstroPrint User: %s" % user['name'])
@@ -172,7 +173,17 @@ class AstroprintCloud():
 		print_file_id = print_file.printFileId if print_file else None
 		print_file_name = print_file.printFileName if print_file else name
 
-		self.startPrintJob(print_file_id, print_file_name)
+		#DANIEL AL SER DE CLOUD PODRÍA ANTES ASEGURARME QUE EL PRINTFILE ID COINCIDE CON EL REQUESTED, SI NO PONER PRINT JOB A NULL
+		#TO DO AQUI TENGO MIRAR SI HAY PRINTJOBID, HACER UN UPDATE EN LUGAR DE POST Y PONER EL PRINT JOB A NULL
+		if self.printJobData:
+			if self.printJobData['print_file'] == print_file_id:
+				self.currentlyPrinting = self.printJobData['printJobId']
+				self.updatePrintJob("started")
+			else:
+				self.printJobData = None
+				self.startPrintJob(print_file_id, print_file_name)
+		else:
+			self.startPrintJob(print_file_id, print_file_name)
 
 	def startPrintJob(self, print_file_id= None, print_file_name= None):
 		try:
@@ -207,7 +218,7 @@ class AstroprintCloud():
 		except requests.exceptions.RequestException as e:
 			self._logger.error("Failed to send print_job request: %s" % e)
 
-	def updatePrintJob(self, status, totalConsumedFilament):
+	def updatePrintJob(self, status, totalConsumedFilament = None):
 		try:
 			token = self.getToken()
 			data = {'status': status}
@@ -262,15 +273,18 @@ class AstroprintCloud():
 			self.statePayload = payload
 
 
-	def printFile(self, printFileId, printNow = False):
+	def printFile(self, printFileId, printJobData = None, printNow = False):
 		printFile = self.db.getPrintFileById(printFileId)
+		#DANIEL AQUÍ GUARDAR/BORRAR EL PRINT JOB
+		if printNow:
+			self.printJobData = printJobData
 		if printFile and printNow:
 			self.printFileIsDownloaded(printFile)
 			return "print"
 		else:
 			printFile = self.addPrintfileDownloadUrl(self.getPrintFileInfoForDownload(printFileId))
-			printFile['printNow'] = printNow
 			if printFile:
+				printFile['printNow'] = printNow
 				if not self.downloadmanager.isDownloading(printFileId):
 					self.downloadmanager.startDownload(printFile)
 				return "download"
@@ -405,12 +419,16 @@ class AstroprintCloud():
 	def printFileIsDownloaded(self, printFile):
 		if self._printer.is_printing():
 			isBeingPrinted = False
+			#DANIEL AQUI TENGO QUE PONER A NULL EL PRINT JOBID
+			self.printJobData = None
 		else:
 			self._printer.select_file(self._file_manager.path_on_disk(FileDestinations.LOCAL, printFile.printFileName), False, True)
 			if self._printer.is_printing():
 				isBeingPrinted = True
 			else:
+				#DANIEL AQUI TENGO QUE PONER A NULL EL PRINT JOBID
 				isBeingPrinted = False
+				self.printJobData = None
 		self.bm.triggerEvent('onDownloadComplete', {"id": printFile.printFileId, "isBeingPrinted": isBeingPrinted})
 
 	def getDesigns(self):
