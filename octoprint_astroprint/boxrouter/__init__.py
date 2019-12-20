@@ -153,7 +153,6 @@ class AstroprintBoxRouter(object):
 		self._pendingClientRequests = {}
 		self._retries = 0
 		self._retryTimer = None
-		self._boxId = None
 		self.ws = None
 		self._silentReconnect = False
 		self.status = self.STATUS_DISCONNECTED
@@ -182,25 +181,6 @@ class AstroprintBoxRouter(object):
 		#make sure we destroy the singleton
 		global _instance
 		_instance = None
-
-	@property
-	def boxId(self):
-		if not self._boxId:
-			import os
-
-			boxIdFile = "%s/box-id" % os.path.dirname(self._settings._configfile)
-
-			if os.path.exists(boxIdFile):
-				with open(boxIdFile, 'r') as f:
-					self._boxId = f.read().strip()
-
-			if not self._boxId:
-				self._boxId = uuid.uuid4().hex
-
-				with open(boxIdFile, 'w') as f:
-					f.write(self._boxId)
-
-		return self._boxId
 
 	def boxrouter_connect(self):
 		if not self.connected:
@@ -414,7 +394,7 @@ class AstroprintBoxRouter(object):
 			 	'type': 'auth',
 			 	'data': {
 			 		'silentReconnect': self._silentReconnect,
-			 		'boxId': self.boxId,
+			 		'boxId': self.plugin.boxId,
 			 		'variantId': self._settings.get(["product_variant_id"]),
 			 		'boxName': boxName,
 			 		'swVersion': "OctoPrint Plugin - v%s.%s(%s)" % (mayor, minor, build),

@@ -206,7 +206,7 @@ class PrinterCommandHandler(object):
 		done(None)
 
 	def cancel(self, data, clientId, done):
-		data = {'print_job_id': self.plugin.astroprintCloud.currentlyPrinting}
+		data = {'print_job_id': self.plugin.astroprintCloud.currentPrintingJob}
 		self._printer.cancel_print()
 		done(None)
 

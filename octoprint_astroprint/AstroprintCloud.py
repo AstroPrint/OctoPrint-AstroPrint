@@ -24,7 +24,7 @@ class AstroprintCloud():
 	def __init__(self, plugin):
 		self.plugin = None
 		self.appId = None
-		self.currentlyPrinting = None
+		self.currentPrintingJob = None
 		self.getTokenRefreshLock = Lock()
 
 		self.plugin = plugin
@@ -163,7 +163,7 @@ class AstroprintCloud():
 		if(expired):
 			self._logger.warning("Unautorized token, AstroPrint user logged out.")
 		self.db.deleteUser()
-		self.currentlyPrinting = None
+		self.currentPrintingJob = None
 		self.disconnectBoxrouter()
 		self.plugin.astroPrintUserLoggedOut()
 
@@ -177,7 +177,7 @@ class AstroprintCloud():
 		#TO DO AQUI TENGO MIRAR SI HAY PRINTJOBID, HACER UN UPDATE EN LUGAR DE POST Y PONER EL PRINT JOB A NULL
 		if self.printJobData:
 			if self.printJobData['print_file'] == print_file_id:
-				self.currentlyPrinting = self.printJobData['printJobId']
+				self.currentPrintingJob = self.printJobData['printJobId']
 				self.updatePrintJob("started")
 			else:
 				self.printJobData = None
@@ -189,7 +189,7 @@ class AstroprintCloud():
 		try:
 			token = self.getToken()
 			data = {
-					"box_id": self.bm.boxId,
+					"box_id": self.plugin.boxId,
 					"product_variant_id": self.plugin.get_settings().get(["product_variant_id"]),
 					"name": print_file_name,
 					}
@@ -209,7 +209,7 @@ class AstroprintCloud():
 			)
 
 			data = r.json()
-			self.currentlyPrinting = data['id']
+			self.currentPrintingJob = data['id']
 
 		except requests.exceptions.HTTPError as err:
 			if (err.response.status_code == 401):
@@ -227,7 +227,7 @@ class AstroprintCloud():
 				data['material_used'] = totalConsumedFilament
 
 			requests.patch(
-				"%s/print-jobs/%s" % (self.apiHost, self.currentlyPrinting),
+				"%s/print-jobs/%s" % (self.apiHost, self.currentPrintingJob),
 				json = data,
 				headers={
 					'Content-Type': 'application/x-www-form-urlencoded',
@@ -303,8 +303,8 @@ class AstroprintCloud():
 				},
 				stream=True
 			)
-			printFile = r.json()
 			r.raise_for_status()
+			printFile = r.json()
 			if printFile['format'] == 'gcode' :
 				return printFile
 			else:
@@ -528,8 +528,8 @@ class AstroprintCloud():
 		if astroprint_print_file:
 			data['print_file_id'] = astroprint_print_file.printFileId
 
-		if self.currentlyPrinting:
-			data['print_job_id'] = self.currentlyPrinting
+		if self.currentPrintingJob:
+			data['print_job_id'] = self.currentPrintingJob
 
 		try:
 			token = self.getToken()
@@ -648,7 +648,7 @@ class AstroprintCloud():
 			token = self.getToken()
 
 			r = requests.patch(
-				"%s/devices/%s/update-boxrouter-data" % (self.apiHost, self.bm.boxId),
+				"%s/devices/%s/update-boxrouter-data" % (self.apiHost, self.plugin.boxId),
 				headers={
 					'Content-Type': 'application/json',
 					'authorization': "bearer %s" % token
