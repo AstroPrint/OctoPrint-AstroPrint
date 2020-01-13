@@ -28,6 +28,7 @@ class AstroprintCloud():
 		self.getTokenRefreshLock = Lock()
 
 		self.plugin = plugin
+		self.boxId = self.plugin.boxId
 		self.apiHost = plugin.get_settings().get(["apiHost"])
 		self.appId = plugin.get_settings().get(["appId"])
 		self.db = self.plugin.db
@@ -65,6 +66,15 @@ class AstroprintCloud():
 
 		else:
 			return self.plugin.user['token']
+
+	def getTokenRequestHeaders(self, contentType = 'application/x-www-form-urlencoded'):
+		token = self.getToken()
+		headers = {
+				'Content-Type': contentType,
+				'authorization': "bearer %s" % token
+			}
+
+		return headers
 
 	def refresh(self):
 		try:
@@ -128,13 +138,10 @@ class AstroprintCloud():
 	def getUserInfo(self, saveUser = False):
 		self._logger.info("Getting AstroPrint user info")
 		try:
-			token = self.getToken()
+			tokenHeaders = self.getTokenRequestHeaders('application/x-www-form-urlencoded')
 			r = requests.get(
 				"%s/accounts/me" % (self.apiHost),
-				headers={
-					'Content-Type': 'application/x-www-form-urlencoded',
-					'authorization': "bearer %s" % token
-				}
+				headers = tokenHeaders
 			)
 			r.raise_for_status()
 			data = r.json()
@@ -175,11 +182,9 @@ class AstroprintCloud():
 		print_file_id = print_file.printFileId if print_file else None
 		print_file_name = print_file.printFileName if print_file else name
 
-		#DANIEL AL SER DE CLOUD PODRÍA ANTES ASEGURARME QUE EL PRINTFILE ID COINCIDE CON EL REQUESTED, SI NO PONER PRINT JOB A NULL
-		#TO DO AQUI TENGO MIRAR SI HAY PRINTJOBID, HACER UN UPDATE EN LUGAR DE POST Y PONER EL PRINT JOB A NULL
 		if self.printJobData:
 			if self.printJobData['print_file'] == print_file_id:
-				self.currentPrintingJob = self.printJobData['printJobId']
+				self.currentPrintingJob = self.printJobData['print_job_id']
 				self.updatePrintJob("started")
 			else:
 				self.printJobData = None
@@ -189,7 +194,7 @@ class AstroprintCloud():
 
 	def startPrintJob(self, print_file_id= None, print_file_name= None):
 		try:
-			token = self.getToken()
+			tokenHeaders = self.getTokenRequestHeaders('application/x-www-form-urlencoded')
 			data = {
 					"box_id": self.plugin.boxId,
 					"product_variant_id": self.plugin.get_settings().get(["product_variant_id"]),
@@ -203,10 +208,7 @@ class AstroprintCloud():
 			r = requests.post(
 				"%s/print-jobs" % (self.apiHost),
 				json = data,
-				headers={
-					'Content-Type': 'application/x-www-form-urlencoded',
-					'authorization': "bearer %s" % token
-				},
+				headers = tokenHeaders,
 				stream=True
 			)
 
@@ -222,7 +224,7 @@ class AstroprintCloud():
 
 	def updatePrintJob(self, status, totalConsumedFilament = None):
 		try:
-			token = self.getToken()
+			tokenHeaders = self.getTokenRequestHeaders('application/x-www-form-urlencoded')
 			data = {'status': status}
 
 			if totalConsumedFilament:
@@ -231,10 +233,7 @@ class AstroprintCloud():
 			requests.patch(
 				"%s/print-jobs/%s" % (self.apiHost, self.currentPrintingJob),
 				json = data,
-				headers={
-					'Content-Type': 'application/x-www-form-urlencoded',
-					'authorization': "bearer %s" % token
-				},
+				headers = tokenHeaders,
 				stream=True
 			)
 
@@ -277,7 +276,6 @@ class AstroprintCloud():
 
 	def printFile(self, printFileId, printJobData = None, printNow = False):
 		printFile = self.db.getPrintFileById(printFileId)
-		#DANIEL AQUÍ GUARDAR/BORRAR EL PRINT JOB
 		if printNow:
 			self.printJobData = printJobData
 		if printFile and printNow:
@@ -296,13 +294,10 @@ class AstroprintCloud():
 		self._currentDownlading = printFileId
 		self._downloading= True
 		try:
-			token = self.getToken()
+			tokenHeaders = self.getTokenRequestHeaders()
 			r = requests.get(
 				"%s/printfiles/%s" % (self.apiHost, printFileId),
-				headers={
-					'Content-Type': 'application/x-www-form-urlencoded',
-					'authorization': "bearer %s" % token
-				},
+				headers= tokenHeaders,
 				stream=True
 			)
 			r.raise_for_status()
@@ -319,7 +314,7 @@ class AstroprintCloud():
 
 		except requests.exceptions.HTTPError as err:
 			payload = {
-				"id" : printFile['id'],
+				"id" :printFileId,
 				"type" : "error",
 				"reason" : err.response.text
 			}
@@ -339,14 +334,11 @@ class AstroprintCloud():
 		if not printFile:
 			return None
 		try:
-			token = self.getToken()
+			tokenHeaders = self.getTokenRequestHeaders()
 			r = requests.get(
 				"%s/printfiles/%s/download?download_info=true" % (self.apiHost, printFile['id']),
-				headers={
-					'Content-Type': 'application/x-www-form-urlencoded',
-					'authorization': "bearer %s" % token
-					},
-					stream=True
+				headers = tokenHeaders,
+				stream=True
 			)
 			downloadInfo = r.json()
 			printFile['download_url'] = downloadInfo['download_url']
@@ -421,27 +413,22 @@ class AstroprintCloud():
 	def printFileIsDownloaded(self, printFile):
 		if self._printer.is_printing():
 			isBeingPrinted = False
-			#DANIEL AQUI TENGO QUE PONER A NULL EL PRINT JOBID
 			self.printJobData = None
 		else:
 			self._printer.select_file(self._file_manager.path_on_disk(FileDestinations.LOCAL, printFile.printFileName), False, True)
 			if self._printer.is_printing():
 				isBeingPrinted = True
 			else:
-				#DANIEL AQUI TENGO QUE PONER A NULL EL PRINT JOBID
 				isBeingPrinted = False
 				self.printJobData = None
 		self.bm.triggerEvent('onDownloadComplete', {"id": printFile.printFileId, "isBeingPrinted": isBeingPrinted})
 
 	def getDesigns(self):
 		try:
-			token = self.getToken()
+			tokenHeaders = self.getTokenRequestHeaders()
 			r = requests.get(
 				"%s/designs" % (self.apiHost),
-				headers={
-					'Content-Type': 'application/x-www-form-urlencoded',
-					'authorization': "bearer %s" % token
-				}
+				headers = tokenHeaders
 			)
 			r.raise_for_status()
 			data = r.json()
@@ -456,13 +443,10 @@ class AstroprintCloud():
 
 	def getDesignDownloadUrl(self, designId, name):
 		try:
-			token = self.getToken()
+			tokenHeaders = self.getTokenRequestHeaders()
 			r = requests.get(
 				"%s/designs/%s/download" % (self.apiHost, designId),
-				headers={
-					'Content-Type': 'application/x-www-form-urlencoded',
-					'authorization': "bearer %s" % token
-				}
+				headers = tokenHeaders
 			)
 			r.raise_for_status()
 			data = r.json()
@@ -477,15 +461,12 @@ class AstroprintCloud():
 			return jsonify({'error': "Internal server error"}), 500, {'ContentType':'application/json'}
 
 	def getPrintFiles(self, designId):
+		tokenHeaders = self.getTokenRequestHeaders()
 		if designId:
 			try:
-				token = self.getToken()
 				r = requests.get(
 					"%s/designs/%s/printfiles" % (self.apiHost, designId),
-					headers={
-						'Content-Type': 'application/x-www-form-urlencoded',
-						'authorization': "bearer %s" % token
-					}
+					headers = tokenHeaders
 				)
 				r.raise_for_status()
 				data = r.json()
@@ -499,13 +480,9 @@ class AstroprintCloud():
 				return jsonify({'error': "Internal server error"}), 500, {'ContentType':'application/json'}
 		else:
 			try:
-				token = self.getToken()
 				r = requests.get(
 					"%s/printfiles?design_id=null" % (self.apiHost),
-					headers={
-						'Content-Type': 'application/x-www-form-urlencoded',
-						'authorization': "bearer %s" % token
-					}
+					headers = tokenHeaders
 				)
 				r.raise_for_status()
 				data = r.json()
@@ -534,13 +511,10 @@ class AstroprintCloud():
 			data['print_job_id'] = self.currentPrintingJob
 
 		try:
-			token = self.getToken()
+			tokenHeaders = self.getTokenRequestHeaders()
 			r = requests.post(
 				"%s/timelapse" % self.apiHost,
-				headers={
-					'Content-Type': 'application/x-www-form-urlencoded',
-					'authorization': "bearer %s" % token
-				},
+				headers = tokenHeaders,
 				stream=True, timeout= (10.0, 60.0),
 				data = data
 			)
@@ -569,15 +543,12 @@ class AstroprintCloud():
 
 	def uploadImageFile(self, print_id, imageBuf):
 			try:
-				token = self.getToken()
 				m = MultipartEncoder(fields=[('file',('snapshot.jpg', imageBuf))])
+				tokenHeaders = self.getTokenRequestHeaders(m.content_type)
 				r = requests.post(
 					"%s/timelapse/%s/image" % (self.apiHost, print_id),
 					data= m,
-					headers= {
-						'Content-Type': m.content_type,
-						'authorization': "bearer %s" % token
-					}
+					headers= tokenHeaders
 				)
 				m = None #Free the memory?
 				status_code = r.status_code
@@ -647,14 +618,12 @@ class AstroprintCloud():
 
 	def updateBoxrouterData(self, data):
 		try:
-			token = self.getToken()
+
+			tokenHeaders = self.getTokenRequestHeaders('application/json')
 
 			r = requests.patch(
 				"%s/devices/%s/update-boxrouter-data" % (self.apiHost, self.plugin.boxId),
-				headers={
-					'Content-Type': 'application/json',
-					'authorization': "bearer %s" % token
-				},
+				headers = tokenHeaders,
 				data=json.dumps(data)
 			)
 

@@ -122,7 +122,6 @@ class RequestHandler(object):
 	def print_file(self, data, clientId, done):
 		print_file_id = data['printFileId']
 
-		#DANIEL AQUI OBTENEGO ID DE PRINTJOB Y DE PRINTFILE Y LO MANDO A CLOUD CLASS
 		if 'printJobId' in data :
 			print_job_data = {'print_job_id' : data['printJobId'], 'print_file' : print_file_id}
 		else :
@@ -134,7 +133,6 @@ class RequestHandler(object):
 				"progress": 0
 			}
 		done(state)
-		# DANIEL AQUI LO MANDO
 		self.astroprintCloud.printFile(print_file_id, print_job_data, True)
 
 	def cancel_download(self, data, clientId, done):
