@@ -20,6 +20,10 @@ class AstroprintDB():
 		self.user = {}
 		self.getUser()
 
+		self.infoGroupId = plugin.get_plugin_data_folder() + "/info_group.yaml"
+		self.groupId = None
+		self.getGroupId()
+
 	def saveUser(self, user):
 		self.user = copy.copy(user)
 		if user:
@@ -28,6 +32,14 @@ class AstroprintDB():
 		with open(self.infoUser, "wb") as infoFile:
 			yaml.safe_dump({"user" : user}, infoFile, default_flow_style=False, indent="    ", allow_unicode=True)
 		self.plugin.user = self.user
+
+	def saveGroupId(self, groupId):
+		self.groupId = groupId
+		if groupId:
+			groupId = encrypt(groupId)
+		with open(self.infoGroupId, "wb") as infoFile:
+			yaml.safe_dump({"groupId" : groupId}, infoFile, default_flow_style=False, indent="    ", allow_unicode=True)
+		self.plugin.groupId = self.groupId
 
 	def getUser(self):
 		try:
@@ -49,8 +61,29 @@ class AstroprintDB():
 
 		self.plugin.user = self.user
 
+	def getGroupId(self):
+		try:
+			with open(self.infoGroupId, "r") as f:
+				infoGroup = yaml.safe_load(f)
+				if infoGroup and infoGroup['groupId']:
+					self.groupId = decrypt(infoGroup['groupId'])
+
+		except IOError, e:
+			if e.errno == 2:
+				self._logger.warn("No group info yaml found")
+			else:
+				self._logger.error("IOError error loading %s:" % self.groupId, exc_info= True)
+
+		except:
+			self._logger.error("There was an error loading %s:" % self.groupId, exc_info= True)
+
+		self.plugin.groupId = self.groupId
+
 	def deleteUser(self):
 		self.saveUser(None)
+
+	def deleteGroupId(self):
+		self.saveGroupId(None)
 
 	def getPrintFiles(self):
 		try:

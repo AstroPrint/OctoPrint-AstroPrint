@@ -119,6 +119,11 @@ class RequestHandler(object):
 		threading.Timer(1, self.astroprintCloud.unauthorizedHandler, [False]).start()
 		done(None)
 
+	def notifyfleet(self, data, clientId, done):
+		self._logger.info("Box has been joined to a fleet group")
+		self.astroprintCloud.getFleetInfo()
+		done(None)
+
 	def print_file(self, data, clientId, done):
 		print_file_id = data['printFileId']
 

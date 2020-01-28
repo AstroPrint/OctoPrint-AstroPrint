@@ -83,6 +83,9 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 		self.cameraManager = None
 		self.materialCounter= None
 		self._printerListener = None
+		self.onFleet = False
+		self.groupId = None
+		self.orgId = None
 		self._boxId = None
 
 		def logOutHandler(sender, **kwargs):
@@ -129,6 +132,8 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 
 		self.cameraManager = cameraManager(self)
 		self.astroprintCloud = AstroprintCloud(self)
+		if self.user:
+				self.astroprintCloud.connectBoxrouter()
 		self.cameraManager.astroprintCloud = self.astroprintCloud
 		self.materialCounter = MaterialCounter(self)
 
@@ -181,12 +186,12 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 
 	def get_settings_defaults(self):
 
-		##appSite ="https://cloud.astroprint.com"
-		##appId="c4f4a98519194176842567680239a4c3"
-		##apiHost="https://api.astroprint.com/v2"
-		##webSocket="wss://boxrouter.astroprint.com"
-		##product_variant_id = "9e33c7a4303348e0b08714066bcc2750"
-		##boxName = socket.gethostname()
+		#appSite ="https://cloud.astroprint.com"
+		#appId="c4f4a98519194176842567680239a4c3"
+		#apiHost="https://api.astroprint.com/v2"
+		#webSocket="wss://boxrouter.astroprint.com"
+		#product_variant_id = "9e33c7a4303348e0b08714066bcc2750"
+		#boxName = socket.gethostname()
 
 		appSite ="http://cloud.astroprint.test"
 		appId="c4f4a98519194176842567680239a4c3"

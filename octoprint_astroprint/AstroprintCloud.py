@@ -44,9 +44,8 @@ class AstroprintCloud():
 		user = self.plugin.user
 		if user:
 			self._logger.info("Found stored AstroPrint User: %s" % user['name'])
-			self.refresh()
 			self.getUserInfo()
-			self.connectBoxrouter()
+			self.getFleetInfo()
 		else:
 			self._logger.info("No stored AstroPrint user")
 
@@ -73,6 +72,9 @@ class AstroprintCloud():
 				'Content-Type': contentType,
 				'authorization': "bearer %s" % token
 			}
+		if(self.plugin.onFleet):
+			headers['X-Org-Id'] = self.plugin.orgId
+			headers['X-Group-Id'] = self.plugin.groupId
 
 		return headers
 
@@ -126,6 +128,7 @@ class AstroprintCloud():
 			self.plugin.user['last_request'] = int(time.time())
 			self.plugin.user['accessKey'] = apAccessKey
 			self.plugin.user['expires'] = self.plugin.user['last_request'] + data['expires_in']
+			self.getFleetInfo()
 			return self.getUserInfo(True)
 
 		except requests.exceptions.HTTPError as err:
@@ -164,14 +167,54 @@ class AstroprintCloud():
 			if saveUser:
 				return jsonify({'error': "Internal server error"}), 500, {'ContentType':'application/json'}
 
+	def getFleetInfo(self):
+		try:
+			tokenHeaders = self.getTokenRequestHeaders('application/x-www-form-urlencoded')
+			r = requests.get(
+				"%s/devices/%s/fleet" % (self.apiHost, self.boxId),
+				headers = tokenHeaders
+			)
+			r.raise_for_status()
+			data = r.json()
+			if self.plugin.groupId != data['group_id']:
+				self._logger.info("Box group id updated")
+				self.db.saveGroupId(data['group_id'])
+			self.plugin.orgId = data['organization_id']
+			self.plugin.groupId = data['group_id']
+			self.plugin.onFleet = (self.plugin.orgId and self.plugin.groupId)
+
+
+		except requests.exceptions.HTTPError as err:
+			if (err.response.status_code == 401 or self.plugin.groupId):
+				self._logger.warning(err.response.status_code)
+				self.unauthorizedHandler(True, self.plugin.groupId)
+		except requests.exceptions.RequestException as e:
+			self._logger.error(e)
+
+	def updateFleetInfo(self, groupId = None):
+		if self.plugin.groupId != groupId:
+			if groupId:
+				self.getFleetInfo()
+			else:
+				self.removeFleetInfo()
+
+	def removeFleetInfo(self):
+		self.plugin.orgId = None
+		self.plugin.groupId = None
+		self.plugin.onFleet = False
+		self.db.deleteGroupId()
+
 	def logoutAstroPrint(self):
 		self.unauthorizedHandler(False)
 		return jsonify({"Success" : True }), 200, {'ContentType':'application/json'}
 
-	def unauthorizedHandler (self, expired = True):
-		if(expired):
+	def unauthorizedHandler (self, expired = True, groupChange = None):
+		if(groupChange):
+			self._logger.warning("Unautorized user, group has changed and user does not have permission, AstroPrint user logged out.")
+		elif(expired):
 			self._logger.warning("Unautorized token, AstroPrint user logged out.")
 		self.db.deleteUser()
+		self.removeFleetInfo()
 		self.currentPrintingJob = None
 		self.disconnectBoxrouter()
 		self.plugin.astroPrintUserLoggedOut()
