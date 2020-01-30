@@ -116,6 +116,7 @@ class RequestHandler(object):
 		done(None)
 
 	def signoff(self, data, clientId, done):
+		self._logger.info('Remote signoff requested.')
 		threading.Timer(1, self.astroprintCloud.unauthorizedHandler, [False]).start()
 		done(None)
 

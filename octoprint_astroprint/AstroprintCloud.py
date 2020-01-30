@@ -185,8 +185,9 @@ class AstroprintCloud():
 
 
 		except requests.exceptions.HTTPError as err:
-			if (err.response.status_code == 401 or self.plugin.groupId):
-				self._logger.warning(err.response.status_code)
+			self._logger.warning(err.response.status_code)
+			if (err.response.status_code == 401 or (err.response.status_code == 404 and self.plugin.groupId)):
+				self._logger.info("Box is not longer in a fleet group where user has permission")
 				self.unauthorizedHandler(True, self.plugin.groupId)
 		except requests.exceptions.RequestException as e:
 			self._logger.error(e)
