@@ -182,10 +182,10 @@ $(function () {
              self.currentPrintFilePage(self.totalPrintFilePage() - 1);
          }
 
-        self.designsRetrieved = ko.observable("charging") //values: charging, done, error
-        self.printFilesRetrieved = ko.observable("charging") //values: charging, done, error
+        self.designsRetrieved = ko.observable("loading") //values: loading, done, error
+        self.printFilesRetrieved = ko.observable("loading") //values: loading, done, error
         self.currentUrl = window.location.href.split('?')[0];
-        self.cam_status = ko.observable('charging') //null while refreshing state
+        self.cam_status = ko.observable('loading') //null while refreshing state
         self.can_print = ko.observable(false)
         self.downloading = ko.observable(false)
         self.downloadDialog = ko.observable(new DownloadDialog) //even if serrver side can support multiple downloads, we will restric client side to just one
@@ -283,7 +283,7 @@ $(function () {
             self.id = id;
             self.name = name;
             self.printerCount = printerCount
-            self.charging = ko.observable(true);
+            self.loading = ko.observable(true);
             self.manufacturerModels = ko.observable()
             self.getModels = function(){
                 if(!self.manufacturerModels() && self.printerCount > 0){
@@ -301,7 +301,7 @@ $(function () {
                                     new PrinterModel(model.id, model.name, model.printer_count)
                                 );
                             }
-                            self.charging(false)
+                            self.loading(false)
                             self.manufacturerModels(manufacturerModels);
                         },
                         error: function () {
@@ -493,7 +493,7 @@ $(function () {
             self.printFiles = ko.observableArray([]);
             self.allow_download = ko.observable(allow_download);
             self.expanded = ko.observable(false);
-            self.charginPrintfiles = ko.observable(false);
+            self.loadingPrintfiles = ko.observable(false);
             self.downloading = ko.observable(false); //values: false, 'downloading', 'error',
         }
 
@@ -808,7 +808,7 @@ $(function () {
 
 
         self.getDesigns = function (refresh = true) {
-            self.designsRetrieved("charging");
+            self.designsRetrieved("loading");
             $.ajax({
                 type: "GET",
                 contentType: "application/json; charset=utf-8",
@@ -864,9 +864,9 @@ $(function () {
                 if (design.expanded()) {
                     design.expanded(false);
                 } else {
-                    if (!design.charginPrintfiles()) {
+                    if (!design.loadingPrintfiles()) {
                         if (design.printFiles().length == 0) {
-                            design.charginPrintfiles(true);
+                            design.loadingPrintfiles(true);
                             $.ajax({
                                 type: "GET",
                                 contentType: "application/json; charset=utf-8",
@@ -884,14 +884,14 @@ $(function () {
                                     }
                                     design.printFilesCount(printFiles.length);
                                     design.printFiles(printFiles);
-                                    design.charginPrintfiles(false);
+                                    design.loadingPrintfiles(false);
                                     design.expanded(true);
                                 },
                                 error: function (data) {
                                     if (data.status == 401) {
                                         self.error401handling();
                                     } else {
-                                        design.charginPrintfiles(false);
+                                        design.loadingPrintfiles(false);
                                         new PNotify({
                                             title: gettext("Error retrieving Print Files"),
                                             text: gettext("There was an error retrieving print files, please try again later."),
@@ -910,7 +910,7 @@ $(function () {
         }
 
         self.unlinkedPrintFiles = function (refresh = true) {
-            self.printFilesRetrieved("charging");
+            self.printFilesRetrieved("loading");
             $.ajax({
                 type: "GET",
                 contentType: "application/json; charset=utf-8",
@@ -1073,7 +1073,7 @@ $(function () {
 
         self.scanForCamera = function () {
             if (!self.cam_status()) {//loading could be confused when camera is active
-                self.cam_status('charging');
+                self.cam_status('loading');
             }
             $.ajax({
                 type: "GET",
