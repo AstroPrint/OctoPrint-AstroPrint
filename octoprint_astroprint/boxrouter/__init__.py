@@ -372,16 +372,14 @@ class AstroprintBoxRouter(object):
 				self.close()
 				if 'should_retry' in data and data['should_retry']:
 					self._doRetry()
-				# else:
-				# 	Why is this needed?
-				# 	self.plugin.astroprintCloud.unauthorizedHandler()
+				if 'type' in data and data['type'] == 'unable_to_authenticate':
+					self._logger.info("Unable to authenticate user in fleet box. Logout")
+					self.plugin.astroprintCloud.unauthorizedHandler()
 
 			elif 'success' in data:
 				self._logger.info("Boxrouter connected to astroprint service")
 				if 'groupId' in data:
-					self.plugin.astroprintCloud.updateFleetInfo(data['groupId'])
-				else:
-					self.plugin.astroprintCloud.updateFleetInfo()
+					self.plugin.astroprintCloud.updateFleetInfo(data['orgId'], data['groupId'])
 				self.authenticated = True
 				self._retries = 0
 				self._retryTimer = None
