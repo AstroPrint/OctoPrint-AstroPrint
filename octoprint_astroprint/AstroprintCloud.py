@@ -114,7 +114,7 @@ class AstroprintCloud():
 				data = {
 					"client_id": self.appId,
 					"access_key" : apAccessKey,
-					"grant_type": "astroprint_access_key",
+					"grant_type": "controller_authorization_code",
 					"code": code,
 					"redirect_uri": url,
 					"box_id" : boxId

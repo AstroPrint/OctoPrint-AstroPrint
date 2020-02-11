@@ -198,10 +198,10 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 				config = yaml.safe_load(f)
 				if config:
 					appSite = config['appSite']
-					appId="c4f4a98519194176842567680239a4c3"
-					apiHost="http://api.astroprint.test/v2"
-					webSocket="ws://boxrouter.astroprint.test:8085"
-					product_variant_id = "6675ba84f09d46fdb8a9078e3ea9ee0f"
+					appId = config['appId']
+					apiHost = config['apiHost']
+					webSocket = config['webSocket']
+					product_variant_id = config['product_variant_id']
 		except IOError, e:
 			if e.errno != 2:
 				self._logger.error("IOError error loading config.yalm", exc_info= True)
