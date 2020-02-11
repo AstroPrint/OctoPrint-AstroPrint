@@ -186,19 +186,28 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 
 	def get_settings_defaults(self):
 
-		#appSite ="https://cloud.astroprint.net"
-		#appId="c4f4a98519194176842567680239a4c3"
-		#apiHost="https://api.astroprint.net/v2"
-		#webSocket="wss://boxrouter.astroprint.net"
-		#product_variant_id = "9e33c7a4303348e0b08714066bcc2750"
-		#boxName = socket.gethostname()
-
-		appSite ="http://cloud.astroprint.test"
+		appSite ="https://cloud.astroprint.com"
 		appId="c4f4a98519194176842567680239a4c3"
-		apiHost="http://api.astroprint.test/v2"
-		webSocket="ws://boxrouter.astroprint.test:8085"
-		product_variant_id = "6675ba84f09d46fdb8a9078e3ea9ee0f"
+		apiHost="https://api.astroprint.com/v2"
+		webSocket="wss://boxrouter.astroprint.com"
+		product_variant_id = "9e33c7a4303348e0b08714066bcc2750"
 		boxName = socket.gethostname()
+
+		try:
+			with open(self.get_plugin_data_folder() + "/config.yaml", "r") as f:
+				config = yaml.safe_load(f)
+				if config:
+					appSite = config['appSite']
+					appId="c4f4a98519194176842567680239a4c3"
+					apiHost="http://api.astroprint.test/v2"
+					webSocket="ws://boxrouter.astroprint.test:8085"
+					product_variant_id = "6675ba84f09d46fdb8a9078e3ea9ee0f"
+		except IOError, e:
+			if e.errno != 2:
+				self._logger.error("IOError error loading config.yalm", exc_info= True)
+
+		except:
+			self._logger.error("There was an error loading config.yalm", exc_info= True)
 
 
 		return dict(
