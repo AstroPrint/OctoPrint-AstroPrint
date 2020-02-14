@@ -72,9 +72,9 @@ class AstroprintCloud():
 				'Content-Type': contentType,
 				'authorization': "bearer %s" % token
 			}
-		if(self.plugin.onFleet):
-			headers['X-Org-Id'] = self.plugin.orgId
-			headers['X-Group-Id'] = self.plugin.groupId
+		if(self.plugin.user['groupId']):
+			headers['X-Org-Id'] = self.plugin.user['orgId']
+			headers['X-Group-Id'] = self.plugin.user['groupId']
 
 		return headers
 
@@ -179,7 +179,7 @@ class AstroprintCloud():
 			)
 			r.raise_for_status()
 			data = r.json()
-			if self.plugin.groupId != data['group_id']:
+			if self.plugin.user['groupId'] != data['group_id']:
 				self._logger.info("Box group id updated")
 				self.plugin.user['orgId'] = data['organization_id']
 				self.plugin.user['groupId'] =  data['group_id']
@@ -187,7 +187,7 @@ class AstroprintCloud():
 
 		except requests.exceptions.HTTPError as err:
 			self._logger.warning(err.response.status_code)
-			if (err.response.status_code == 401 or (err.response.status_code == 404 and self.plugin.groupId)):
+			if (err.response.status_code == 401 or (err.response.status_code == 404 and self.plugin.user['groupId'])):
 				self._logger.info("Box is in a fleet group where user does not has permission, logout")
 				self.unauthorizedHandler()
 		except requests.exceptions.RequestException as e:

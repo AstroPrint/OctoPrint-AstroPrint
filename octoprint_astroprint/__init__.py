@@ -83,7 +83,6 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 		self.cameraManager = None
 		self.materialCounter= None
 		self._printerListener = None
-		self.onFleet = False
 		self.groupId = None
 		self.orgId = None
 		self._boxId = None
