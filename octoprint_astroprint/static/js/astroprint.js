@@ -743,7 +743,7 @@ $(function () {
                     var text;
                     if (error.status && error.status == 403){
                         title = gettext("Login falied: Forbidden")
-                        text = gettext("Octoprint admin user must be logged to link Astroprint account.")
+                        text = gettext(error.responseJSON.error_description)
                     } else if ( error.responseJSON.error ) {
                         title =  gettext("Login falied: " + error.responseJSON.error)
                         text = gettext(error.responseJSON.error_description)
