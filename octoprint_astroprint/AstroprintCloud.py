@@ -375,9 +375,9 @@ class AstroprintCloud():
 				headers = tokenHeaders,
 				stream=True
 			)
+			r.raise_for_status()
 			downloadInfo = r.json()
 			printFile['download_url'] = downloadInfo['download_url']
-			r.raise_for_status()
 
 			return printFile
 
