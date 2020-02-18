@@ -12,6 +12,8 @@ import socket
 import os
 import yaml
 import re
+import uuid
+
 
 from .AstroprintCloud import AstroprintCloud
 from .AstroprintDB import AstroprintDB
@@ -81,6 +83,9 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 		self.cameraManager = None
 		self.materialCounter= None
 		self._printerListener = None
+		self.groupId = None
+		self.orgId = None
+		self._boxId = None
 
 		def logOutHandler(sender, **kwargs):
 			self.onLogout()
@@ -96,6 +101,25 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 		user_logged_in.connect(logInHandler)
 		user_logged_out.connect(logOutHandler)
 
+	@property
+	def boxId(self):
+		if not self._boxId:
+			import os
+
+			boxIdFile = "%s/box-id" % os.path.dirname(self._settings._configfile)
+
+			if os.path.exists(boxIdFile):
+				with open(boxIdFile, 'r') as f:
+					self._boxId = f.read().strip()
+
+			if not self._boxId:
+				self._boxId = uuid.uuid4().hex
+
+				with open(boxIdFile, 'w') as f:
+					f.write(self._boxId)
+
+		return self._boxId
+
 	def on_after_startup(self):
 		self.register_printer_listener()
 		self.db = AstroprintDB(self)
@@ -107,6 +131,8 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 
 		self.cameraManager = cameraManager(self)
 		self.astroprintCloud = AstroprintCloud(self)
+		if self.user:
+			self.astroprintCloud.connectBoxrouter()
 		self.cameraManager.astroprintCloud = self.astroprintCloud
 		self.materialCounter = MaterialCounter(self)
 
@@ -166,6 +192,22 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 		product_variant_id = "9e33c7a4303348e0b08714066bcc2750"
 		boxName = socket.gethostname()
 
+		try:
+			with open(self.get_plugin_data_folder() + "/config.yaml", "r") as f:
+				config = yaml.safe_load(f)
+				if config:
+					appSite = config['appSite']
+					appId = config['appId']
+					apiHost = config['apiHost']
+					webSocket = config['webSocket']
+					product_variant_id = config['product_variant_id']
+		except IOError, e:
+			if e.errno != 2:
+				self._logger.error("IOError error loading config.yalm", exc_info= True)
+
+		except:
+			self._logger.error("There was an error loading config.yalm", exc_info= True)
+
 
 		return dict(
 			#AstroPrintEndPoint
@@ -189,6 +231,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 					appId = self._settings.get(["appId"]),
 					appiHost = self._settings.get(["apiHost"]),
 					boxName = self._settings.get(["boxName"]),
+					boxId = self.boxId,
 					printerModel = json.dumps(self._settings.get(["printerModel"])) if self._settings.get(["printerModel"])['id'] else "null",
 					filament = json.dumps(self._settings.get(["filament"])) if self._settings.get(["filament"])['name'] else "null",
 					user = json.dumps({'name': self.user['name'], 'email': self.user['email']}, cls=JsonEncoder, indent=4) if self.user else None ,
@@ -285,16 +328,16 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 
 		elif event == Events.PRINT_CANCELLED or event == Events.PRINT_FAILED:
 			self.send_event("canPrint", True)
-			if self.user and self.astroprintCloud.currentlyPrinting:
+			if self.user and self.astroprintCloud.currentPrintingJob:
 				self.astroprintCloud.updatePrintJob("failed", self.materialCounter.totalConsumedFilament)
-			self.astroprintCloud.currentlyPrinting = None
+			self.astroprintCloud.currentPrintingJob = None
 			self.cameraManager.stop_timelapse()
 			self._analyzed_job_layers = None
 
 		elif event == Events.PRINT_DONE:
-			if self.user and self.astroprintCloud.currentlyPrinting:
+			if self.user and self.astroprintCloud.currentPrintingJob:
 				self.astroprintCloud.updatePrintJob("success", self.materialCounter.totalConsumedFilament)
-			self.astroprintCloud.currentlyPrinting = None
+			self.astroprintCloud.currentPrintingJob = None
 			self.cameraManager.stop_timelapse()
 			self.send_event("canPrint", True)
 
@@ -344,7 +387,8 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 		return self.astroprintCloud.loginAstroPrint(
             request.json['code'],
             request.json['url'],
-            request.json['ap_access_key']
+            request.json['ap_access_key'],
+			request.json['box_id']
         )
 
 	@octoprint.plugin.BlueprintPlugin.route("/logout", methods=["POST"])
@@ -502,7 +546,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 		if not self.astroprintCloud or not self.astroprintCloud.bm:
 			abort(503)
 		return Response(json.dumps({
-			'id': self.astroprintCloud.bm.boxId,
+			'id': self.boxId,
 			'name': self._settings.get(["boxName"]),
 			'version': self._plugin_version,
 			'firstRun': True if self._settings.global_get_boolean(["server", "firstRun"]) else None,
@@ -542,7 +586,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 
 		return Response(
 			json.dumps({
-				'id': self.astroprintCloud.bm.boxId,
+				'id': self.boxId,
 				'name': self._settings.get(["boxName"]),
 				'printing': self._printer.is_printing(),
 				'fileName': fileName,
@@ -553,7 +597,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 				'paused': self._printer.is_paused(),
 				'camera': True, #self.cameraManager.cameraActive,
 				'remotePrint': True,
-				'capabilities': ['remotePrint', 'multiExtruders', 'allowPrintFile'] + self.cameraManager.capabilities
+				'capabilities': ['remotePrint', 'multiExtruders', 'allowPrintFile', 'acceptPrintJobId'] + self.cameraManager.capabilities
 			}),
 			mimetype= 'application/json'
 		)

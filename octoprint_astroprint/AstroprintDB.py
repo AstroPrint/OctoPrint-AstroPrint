@@ -23,8 +23,10 @@ class AstroprintDB():
 	def saveUser(self, user):
 		self.user = copy.copy(user)
 		if user:
-			user['email'] = encrypt(user['email'])
+			user['email'] = encrypt(user['email']) if user['email'] else None
 			user['accessKey'] = encrypt(user['accessKey'])
+			user['orgId'] = encrypt(user['orgId']) if user['orgId'] else None
+			user['groupId'] = encrypt(user['groupId']) if user['groupId'] else None
 		with open(self.infoUser, "wb") as infoFile:
 			yaml.safe_dump({"user" : user}, infoFile, default_flow_style=False, indent="    ", allow_unicode=True)
 		self.plugin.user = self.user
@@ -34,9 +36,17 @@ class AstroprintDB():
 			with open(self.infoUser, "r") as f:
 				user = yaml.safe_load(f)
 				if user and user['user']:
+					orgId = None
+					groupId = None
+					if 'orgId' in user:
+						orgId = user['orgId']
+					if 'groupId' in user:
+						groupId = user['groupId']
 					self.user = user['user']
 					self.user['email'] = decrypt(self.user['email'])
 					self.user['accessKey'] = decrypt(self.user['accessKey'])
+					self.user['orgId'] = decrypt(orgId) if orgId else None
+					self.user['groupId'] = decrypt(groupId) if groupId else None
 
 		except IOError, e:
 			if e.errno == 2:

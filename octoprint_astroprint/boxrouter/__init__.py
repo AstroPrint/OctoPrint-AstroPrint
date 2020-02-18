@@ -153,13 +153,11 @@ class AstroprintBoxRouter(object):
 		self._pendingClientRequests = {}
 		self._retries = 0
 		self._retryTimer = None
-		self._boxId = None
 		self.ws = None
 		self._silentReconnect = False
 		self.status = self.STATUS_DISCONNECTED
 		self.connected = False
 		self.authenticated = False
-		self.astroprintCloud = plugin.astroprintCloud
 		self.plugin = plugin
 		self.watcherRegistered = False
 		self._printerListener = None
@@ -183,31 +181,14 @@ class AstroprintBoxRouter(object):
 		global _instance
 		_instance = None
 
-	@property
-	def boxId(self):
-		if not self._boxId:
-			import os
-
-			boxIdFile = "%s/box-id" % os.path.dirname(self._settings._configfile)
-
-			if os.path.exists(boxIdFile):
-				with open(boxIdFile, 'r') as f:
-					self._boxId = f.read().strip()
-
-			if not self._boxId:
-				self._boxId = uuid.uuid4().hex
-
-				with open(boxIdFile, 'w') as f:
-					f.write(self._boxId)
-
-		return self._boxId
-
 	def boxrouter_connect(self):
 		if not self.connected:
 			if self.plugin.user:
 				self._publicKey = self.plugin.user['id']
 				self._privateKey = self.plugin.user['accessKey']
-				if self._publicKey and self._privateKey:
+				self._accessKey = self.plugin.astroprintCloud.getToken()
+				##if self._publicKey and self._privateKey:
+				if self._accessKey:
 					self.status = self.STATUS_CONNECTING
 					self.plugin.send_event("boxrouterStatus", self.STATUS_CONNECTING)
 
@@ -391,12 +372,14 @@ class AstroprintBoxRouter(object):
 				self.close()
 				if 'should_retry' in data and data['should_retry']:
 					self._doRetry()
-				# else:
-				# 	Why is this needed?
-				# 	self.plugin.astroprintCloud.unauthorizedHandler()
+				if 'type' in data and data['type'] == 'unable_to_authenticate':
+					self._logger.info("Unable to authenticate user in fleet box. Logout")
+					self.plugin.astroprintCloud.unauthorizedHandler()
 
 			elif 'success' in data:
 				self._logger.info("Boxrouter connected to astroprint service")
+				if 'groupId' in data:
+					self.plugin.astroprintCloud.updateFleetInfo(data['orgId'], data['groupId'])
 				self.authenticated = True
 				self._retries = 0
 				self._retryTimer = None
@@ -414,14 +397,15 @@ class AstroprintBoxRouter(object):
 			 	'type': 'auth',
 			 	'data': {
 			 		'silentReconnect': self._silentReconnect,
-			 		'boxId': self.boxId,
+			 		'boxId': self.plugin.boxId,
 			 		'variantId': self._settings.get(["product_variant_id"]),
 			 		'boxName': boxName,
 			 		'swVersion': "OctoPrint Plugin - v%s.%s(%s)" % (mayor, minor, build),
 			 		'platform': platform,
 			 		'localIpAddress': localIpAddress,
-			 		'publicKey': self._publicKey,
-			 		'privateKey': self._privateKey,
+					'accessToken' : self._accessKey,
+			 		#'publicKey': self._publicKey,
+			 		#'privateKey': self._privateKey,
 					'printerModel': self._settings.get(["printerModel"]) if self._settings.get(['printerModel'])['id'] else None
 			 	}
 			}

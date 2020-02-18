@@ -3,6 +3,7 @@
     appSite : '{{ plugin_astroprint_appSite|escape }}',
     appId : '{{ plugin_astroprint_appId|escape }}',
     boxName : '{{plugin_astroprint_boxName|escape}}',
+    boxId : '{{plugin_astroprint_boxId|escape}}',
     printerModel : {{plugin_astroprint_printerModel}},
     filament : {{plugin_astroprint_filament}}
   }
@@ -85,9 +86,9 @@
             <div class="container" style="width: auto;">
                 <a class="brand" href="{{ plugin_astroprint_appSite|escape }}"><span class="favicon-rocketImageContainer"><div class="favicon-rocket"></div></span> <span class="astroprint-nav-title">AstroPrint</span></a>
                 <span class="camera-options" data-bind="click:scanForCamera"><a title="Scan for camera">
-                    <span data-bind="if: (cam_status() == 'charging')"><i class="icon-refresh icon-spin"></i></span>
+                    <span data-bind="if: (cam_status() == 'loading')"><i class="icon-refresh icon-spin"></i></span>
                     <span class="remove-opt" data-bind="ifnot: cam_status"><i  class="icon-remove"></i></span>
-                    <span class="camera-opt" data-bind="if: (!cam_status() &&  cam_status() != 'charging')"><i class="icon-facetime-video"></i></span>
+                    <span class="camera-opt" data-bind="if: (!cam_status() &&  cam_status() != 'loading')"><i class="icon-facetime-video"></i></span>
                 </a></span>
                 <span class="mobile-options" data-bind="ifnot: settings.settings.api.allowCrossOrigin, click:checkApiOption" >
                 <a title="Cross Origin Resource Access is disabled. The AstroPrint iOS mobile app won't find your printer in the local network. Click to fix." href="#">
@@ -115,7 +116,7 @@
             </div>
         </div>
     </div>
-    <div data-bind="if: ((!cam_status() && cam_status() != 'charging') || !settings.settings.api.allowCrossOrigin())">
+    <div data-bind="if: ((!cam_status() && cam_status() != 'loading') || !settings.settings.api.allowCrossOrigin())">
         <div class="warn-box" >
             <div data-bind="if: !cam_status(), click:scanForCamera" class="camera-options">
                 <a href="#" title="Scan for camera">
@@ -211,12 +212,12 @@
                                         <div data-bind="if: printFilesCount" class="printFilesCount"><span data-bind="text: printFilesCount"></span> Print Files</div>
                                     </div>
                                     <div class="span1 sections-design-row" data-bind="click: $root.getPrintFiles">
-                                        <span data-bind="if: charginPrintfiles">
+                                        <span data-bind="if: loadingPrintfiles">
                                             <span class="center-button">
                                                 <i class="icon-refresh icon-spin"></i>
                                             </span>
                                         </span>
-                                        <span data-bind="if: (!charginPrintfiles() && (printFilesCount() > 0))">
+                                        <span data-bind="if: (!loadingPrintfiles() && (printFilesCount() > 0))">
                                             <span data-bind="ifnot: expanded">
                                                 <span class="center-button">
                                                     <i class="icon-angle-down" aria-hidden="true"></i>
@@ -324,7 +325,7 @@
                     </div>
                 </div>
 
-                <div data-bind="if: (designsRetrieved() == 'charging')">
+                <div data-bind="if: (designsRetrieved() == 'loading')">
                     <div class="designs-loading row">
                         <div>
                             <p>Retrieving Designs...</p>
@@ -438,7 +439,7 @@
                         </ul>
                     </div>
                 </div>
-                <div data-bind="if: (printFilesRetrieved() == 'charging')">
+                <div data-bind="if: (printFilesRetrieved() == 'loading')">
                     <div class="designs-loading row">
                         <div>
                             <p>Retrieving PrintFiles...</p>

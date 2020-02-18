@@ -26,6 +26,8 @@ class PrinterListener(PrinterCallback):
 		self._timePercentPreviuosLayers = None
 		self.last_layer_time_percent = None
 		self._last_time_send = None
+		self._printStartedAt = None
+
 
 	def addWatcher(self, socket):
 		self._router = socket

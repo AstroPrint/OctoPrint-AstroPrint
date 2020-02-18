@@ -15,14 +15,14 @@
     <div data-bind="if: astroprintUser()">
         <h3>Camera</h3>
         <div class="control-group">
-            <div class="control-group" data-bind="if: (cam_status() && cam_status()!= 'charging')">
+            <div class="control-group" data-bind="if: (cam_status() && cam_status()!= 'loading')">
                 <i class="blink icon-circle"></i> Camera connected
             </div>
             <div class="control-group" data-bind="ifnot: cam_status">
                 <div class="no-camera"><i class="icon-circle"></i> Camera not connected</div>
                 <div class="scan-camera-button" data-bind="click : scanForCamera"><i class="icon-facetime-video"></i>Scan for Camera</div>
             </div>
-            <div class="control-group" data-bind="if: (cam_status() == 'charging')">
+            <div class="control-group" data-bind="if: (cam_status() == 'loading')">
                 <span><i class="icon-spinner icon-spin"></i></span>
             </div>
         </div>
@@ -100,10 +100,10 @@
                     <select data-bind="options: manufacturesList, optionsText: 'name', optionsCaption : 'Select Manufacturer',  value: selectedManufactured, event: {change: selectManufacturer}">
                     </select>
                     <div data-bind="if : selectedManufactured()">
-                        <div data-bind="if : selectedManufactured().charging()">
+                        <div data-bind="if : selectedManufactured().loading()">
                             charguing...
                         </div>
-                        <div data-bind="ifnot : selectedManufactured().charging()">
+                        <div data-bind="ifnot : selectedManufactured().loading()">
                             <select data-bind="options: selectedManufactured().manufacturerModels(), optionsText: 'name', optionsCaption : 'Select Model',  value: selectedManufacturedModel, event: {change: selectManufacturerModel}">
                             </select>
                         </div>

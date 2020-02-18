@@ -47,7 +47,7 @@ class RequestHandler(object):
 			'filament' : self._settings.get(["filament"]),
 			'printCapture': self.cameraManager.timelapseInfo,
 			'profile': profile,
-			'capabilities': ['remotePrint', 'multiExtruders', 'allowPrintFile'],
+			'capabilities': ['remotePrint', 'multiExtruders', 'allowPrintFile', 'acceptPrintJobId'],
 			'tool' : self.plugin.currentTool()
 		}
 
@@ -116,18 +116,30 @@ class RequestHandler(object):
 		done(None)
 
 	def signoff(self, data, clientId, done):
+		self._logger.info('Remote signoff requested.')
 		threading.Timer(1, self.astroprintCloud.unauthorizedHandler, [False]).start()
+		done(None)
+
+	def notifyfleet(self, data, clientId, done):
+		self._logger.info("Box has been joined to a fleet group")
+		self.astroprintCloud.getFleetInfo()
 		done(None)
 
 	def print_file(self, data, clientId, done):
 		print_file_id = data['printFileId']
+
+		if 'printJobId' in data :
+			print_job_data = {'print_job_id' : data['printJobId'], 'print_file' : print_file_id}
+		else :
+			print_job_data = None
+
 		state = {
 				"type": "progress",
 				"id": print_file_id,
 				"progress": 0
 			}
 		done(state)
-		self.astroprintCloud.printFile(print_file_id, True)
+		self.astroprintCloud.printFile(print_file_id, print_job_data, True)
 
 	def cancel_download(self, data, clientId, done):
 		print_file_id = data['printFileId']
@@ -198,7 +210,7 @@ class PrinterCommandHandler(object):
 		done(None)
 
 	def cancel(self, data, clientId, done):
-		data = {'print_job_id': self.plugin.astroprintCloud.currentlyPrinting}
+		data = {'print_job_id': self.plugin.astroprintCloud.currentPrintingJob}
 		self._printer.cancel_print()
 		done(None)
 
