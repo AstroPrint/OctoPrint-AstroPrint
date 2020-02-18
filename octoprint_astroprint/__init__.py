@@ -132,7 +132,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 		self.cameraManager = cameraManager(self)
 		self.astroprintCloud = AstroprintCloud(self)
 		if self.user:
-				self.astroprintCloud.connectBoxrouter()
+			self.astroprintCloud.connectBoxrouter()
 		self.cameraManager.astroprintCloud = self.astroprintCloud
 		self.materialCounter = MaterialCounter(self)
 
