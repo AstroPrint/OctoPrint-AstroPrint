@@ -203,10 +203,10 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 					product_variant_id = config['product_variant_id']
 		except IOError, e:
 			if e.errno != 2:
-				self._logger.error("IOError error loading config.yalm", exc_info= True)
+				self._logger.error("IOError error loading config.yaml", exc_info= True)
 
 		except:
-			self._logger.error("There was an error loading config.yalm", exc_info= True)
+			self._logger.error("There was an error loading config.yaml", exc_info= True)
 
 
 		return dict(

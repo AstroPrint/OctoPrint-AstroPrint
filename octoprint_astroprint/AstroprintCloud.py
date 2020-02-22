@@ -43,7 +43,7 @@ class AstroprintCloud():
 		self.printJobData = None
 		user = self.plugin.user
 		if user:
-			self._logger.info("Found stored AstroPrint User: %s" % user['name'])
+			self._logger.info("Found stored AstroPrint User [%s]" % user['name'])
 			self.getUserInfo()
 			self.getFleetInfo()
 		else:
@@ -103,11 +103,10 @@ class AstroprintCloud():
 				self.unauthorizedHandler()
 
 		except requests.exceptions.RequestException as e:
-			self._logger.error(e)
+			self._logger.error(e, exc_info=True)
 
 	def loginAstroPrint(self, code, url, apAccessKey, boxId = None):
-		self._logger.info("Logging into AstroPrint")
-		self._logger.info(boxId)
+		self._logger.info("Logging into AstroPrint with boxId: %s" % boxId)
 		try:
 			r = requests.post(
 				"%s/token" % (self.apiHost),
@@ -135,10 +134,10 @@ class AstroprintCloud():
 			return self.getUserInfo(True)
 
 		except requests.exceptions.HTTPError as err:
-			self._logger.error(err.response.text)
+			self._logger.error("Error while logging into AstroPrint: %s" % err.response.text)
 			return jsonify(json.loads(err.response.text)), err.response.status_code, {'ContentType':'application/json'}
 		except requests.exceptions.RequestException as e:
-			self._logger.error(e)
+			self._logger.error(e, exc_info=True)
 			return jsonify({'error': "Internal server error"}), 500, {'ContentType':'application/json'}
 
 	def getUserInfo(self, saveUser = False):
@@ -157,7 +156,7 @@ class AstroprintCloud():
 			self.plugin.sendSocketInfo()
 			if saveUser:
 				self.db.saveUser(self.plugin.user)
-				self._logger.info("AstroPrint User %s logged in and saved" % self.plugin.user['name'])
+				self._logger.info("AstroPrint User [%s] logged in and saved" % self.plugin.user['name'])
 				self.connectBoxrouter()
 				return jsonify({'name': self.plugin.user['name'], 'email': self.plugin.user['email']}), 200, {'ContentType':'application/json'}
 
@@ -186,12 +185,14 @@ class AstroprintCloud():
 				self.db.saveUser(self.plugin.user)
 
 		except requests.exceptions.HTTPError as err:
-			self._logger.warning(err.response.status_code)
 			if (err.response.status_code == 401 or (err.response.status_code == 404 and self.plugin.user['groupId'])):
 				self._logger.info("Box is in a fleet group where user does not has permission, logout")
 				self.unauthorizedHandler()
+			else:
+				self._logger.error("getFleetInfo failed with error %d" % err.response.status_code)
+
 		except requests.exceptions.RequestException as e:
-			self._logger.error(e)
+			self._logger.error(e, exc_info=True)
 
 	def updateFleetInfo(self, orgId, groupId):
 		if self.plugin.user['groupId'] != groupId:

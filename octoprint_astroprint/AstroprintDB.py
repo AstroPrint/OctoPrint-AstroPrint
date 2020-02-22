@@ -71,7 +71,7 @@ class AstroprintDB():
 
 		except IOError, e:
 			if e.errno == 2:
-				self._logger.warn("No print files yaml found")
+				self._logger.info("No print files yaml found")
 			else:
 				self._logger.error("IOError error loading %s:" % self.infoPrintFiles, exc_info= True)
 
