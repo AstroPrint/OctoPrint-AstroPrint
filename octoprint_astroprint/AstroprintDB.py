@@ -1,7 +1,7 @@
 # coding=utf-8
 __author__ = "AstroPrint Product Team <product@astroprint.com>"
 __license__ = "GNU Affero General Public License http://www.gnu.org/licenses/agpl.html"
-__copyright__ = "Copyright (C) 2017-2019 3DaGoGo, Inc - Released under terms of the AGPLv3 License"
+__copyright__ = "Copyright (C) 2017-2020 3DaGoGo, Inc - Released under terms of the AGPLv3 License"
 
 import os
 import yaml
@@ -10,13 +10,15 @@ import copy
 class AstroprintDB():
 
 	def __init__(self, plugin):
+		dataFolder = plugin.get_plugin_data_folder()
+
 		self.plugin = plugin
 		self._logger = plugin.get_logger()
-		self.infoPrintFiles = plugin.get_plugin_data_folder() + "/print_files.yaml"
+		self.infoPrintFiles = os.path.join(dataFolder,"print_files.yaml")
 		self.printFiles = {}
 		self.getPrintFiles()
 
-		self.infoUser = plugin.get_plugin_data_folder() + "/user.yaml"
+		self.infoUser = os.path.join(dataFolder,"user.yaml")
 		self.user = {}
 		self.getUser()
 
@@ -27,8 +29,10 @@ class AstroprintDB():
 			user['accessKey'] = encrypt(user['accessKey'])
 			user['orgId'] = encrypt(user['orgId']) if user['orgId'] else None
 			user['groupId'] = encrypt(user['groupId']) if user['groupId'] else None
+
 		with open(self.infoUser, "wb") as infoFile:
 			yaml.safe_dump({"user" : user}, infoFile, default_flow_style=False, indent="    ", allow_unicode=True)
+
 		self.plugin.user = self.user
 
 	def getUser(self):

@@ -1,7 +1,7 @@
 # coding=utf-8
 __author__ = "AstroPrint Product Team <product@astroprint.com>"
 __license__ = "GNU Affero General Public License http://www.gnu.org/licenses/agpl.html"
-__copyright__ = "Copyright (C) 2017-2019 3DaGoGo, Inc - Released under terms of the AGPLv3 License"
+__copyright__ = "Copyright (C) 2017-2020 3DaGoGo, Inc - Released under terms of the AGPLv3 License"
 
 from flask import request, make_response, jsonify
 import time
@@ -27,10 +27,12 @@ class AstroprintCloud():
 		self.currentPrintingJob = None
 		self.getTokenRefreshLock = Lock()
 
+		settings = plugin.get_settings()
+
 		self.plugin = plugin
 		self.boxId = self.plugin.boxId
-		self.apiHost = plugin.get_settings().get(["apiHost"])
-		self.appId = plugin.get_settings().get(["appId"])
+		self.apiHost = settings.get(["apiHost"])
+		self.appId = settings.get(["appId"])
 		self.db = self.plugin.db
 		self.bm = boxrouterManager(self.plugin)
 		self.downloadmanager = DownloadManager(self)
@@ -104,6 +106,8 @@ class AstroprintCloud():
 				self._logger.error("Unable to refresh token with error [%d]" % err.response.status_code)
 				self.plugin.send_event("logOut")
 				self.unauthorizedHandler()
+			else:
+				self._logger.error(err, exc_info=True)
 
 		except requests.exceptions.RequestException as e:
 			self._logger.error(e, exc_info=True)
@@ -139,6 +143,7 @@ class AstroprintCloud():
 		except requests.exceptions.HTTPError as err:
 			self._logger.error("Error while logging into AstroPrint: %s" % err.response.text)
 			return jsonify(json.loads(err.response.text)), err.response.status_code, {'ContentType':'application/json'}
+
 		except requests.exceptions.RequestException as e:
 			self._logger.error(e, exc_info=True)
 			return jsonify({'error': "Internal server error"}), 500, {'ContentType':'application/json'}
@@ -166,9 +171,13 @@ class AstroprintCloud():
 		except requests.exceptions.HTTPError as err:
 			if (err.response.status_code == 401):
 				self.unauthorizedHandler()
+			else:
+				self._logger.error(err, exc_info=True)
+
 			if saveUser:
 				return jsonify(json.loads(err.response.text)), err.response.status_code, {'ContentType':'application/json'}
-		except requests.exceptions.RequestException:
+		except requests.exceptions.RequestException as e:
+			self._logger.error(e, exc_info=True)
 			if saveUser:
 				return jsonify({'error': "Internal server error"}), 500, {'ContentType':'application/json'}
 
