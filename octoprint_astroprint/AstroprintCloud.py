@@ -41,11 +41,14 @@ class AstroprintCloud():
 		self.plugin.get_printer_listener().astroprintCloud = self
 		self.statePayload = None
 		self.printJobData = None
-		user = self.plugin.user
-		if user:
-			self._logger.info("Found stored AstroPrint User [%s]" % user['name'])
+		if self.plugin.user:
+			self._logger.info("Found stored AstroPrint User [%s]" % self.plugin.user['name'])
 			self.getUserInfo()
-			self.getFleetInfo()
+
+			# We need to check again because the user variable might have been set to None as a consequence
+			# of a invalid refresh token when executing getUserInfo
+			if self.plugin.user:
+				self.getFleetInfo()
 		else:
 			self._logger.info("No stored AstroPrint user")
 
