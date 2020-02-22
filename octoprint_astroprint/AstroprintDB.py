@@ -23,6 +23,7 @@ class AstroprintDB():
 		self.getUser()
 
 	def saveUser(self, user):
+		# Copy the user object as we need the member unencrypted and the encryption operation below will modify the original object
 		self.user = copy.copy(user)
 		if user:
 			user['email'] = encrypt(user['email']) if user['email'] else None
@@ -52,14 +53,14 @@ class AstroprintDB():
 					self.user['orgId'] = decrypt(orgId) if orgId else None
 					self.user['groupId'] = decrypt(groupId) if groupId else None
 
-		except IOError, e:
+		except IOError as e:
 			if e.errno == 2:
-				self._logger.warn("No user yaml found")
+				self._logger.info("No user yaml: %s" % self.infoUser)
 			else:
-				self._logger.error("IOError error loading %s:" % self.infoUser, exc_info= True)
+				self._logger.error("IOError error loading %s" % self.infoUser, exc_info= True)
 
 		except:
-			self._logger.error("There was an error loading %s:" % self.infoUser, exc_info= True)
+			self._logger.error("There was an error loading %s" % self.infoUser, exc_info= True)
 
 		self.plugin.user = self.user
 
@@ -73,14 +74,14 @@ class AstroprintDB():
 				if printFiles:
 					self.printFiles = printFiles
 
-		except IOError, e:
+		except IOError as e:
 			if e.errno == 2:
-				self._logger.info("No print files yaml found")
+				self._logger.info("No print files yaml: %s" % self.infoPrintFiles)
 			else:
-				self._logger.error("IOError error loading %s:" % self.infoPrintFiles, exc_info= True)
+				self._logger.error("IOError error loading %s" % self.infoPrintFiles, exc_info= True)
 
 		except:
-			self._logger.info("There was an error loading %s:" % self.infoPrintFiles, exc_info= True)
+			self._logger.info("There was an error loading %s" % self.infoPrintFiles, exc_info= True)
 
 		self.plugin.printFiles = self.printFiles
 

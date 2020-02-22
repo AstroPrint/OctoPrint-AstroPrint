@@ -198,7 +198,7 @@ class AstroprintCloud():
 
 		except requests.exceptions.HTTPError as err:
 			if (err.response.status_code == 401 or (err.response.status_code == 404 and self.plugin.user['groupId'])):
-				self._logger.info("Box is in a fleet group where user does not has permission, logout")
+				self._logger.info("Box belongs to a fleet & group where the user does not have permissions. Logging out")
 				self.unauthorizedHandler()
 			else:
 				self._logger.error("getFleetInfo failed with error %d" % err.response.status_code)
