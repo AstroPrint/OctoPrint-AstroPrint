@@ -184,6 +184,7 @@ class AstroprintBoxRouter(object):
 	def boxrouter_connect(self):
 		if not self.connected:
 			if self.plugin.user:
+				self._logger.info("Connecting to Box Router as [%s - %s]" % (self._settings.get(["boxName"]), self.plugin.boxId))
 				self._publicKey = self.plugin.user['id']
 				self._privateKey = self.plugin.user['accessKey']
 				self._accessKey = self.plugin.astroprintCloud.getToken()

@@ -294,7 +294,6 @@ class AstroprintCloud():
 
 	def connectBoxrouter(self):
 		if self.plugin.user and "accessKey" in self.plugin.user and "id" in self.plugin.user:
-			self._logger.info("Connecting Box Router")
 			self.bm.boxrouter_connect()
 			#let the singleton be recreated again, so new credentials are taken into use
 			global _instance

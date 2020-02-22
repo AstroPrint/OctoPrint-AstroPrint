@@ -106,7 +106,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 		if not self._boxId:
 			import os
 
-			boxIdFile = "%s/box-id" % os.path.dirname(self._settings._configfile)
+			boxIdFile = os.path.join(os.path.dirname(self._settings._configfile), "box-id")
 
 			if os.path.exists(boxIdFile):
 				with open(boxIdFile, 'r') as f:
@@ -388,11 +388,11 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 	@admin_permission.require(403)
 	def login(self):
 		return self.astroprintCloud.loginAstroPrint(
-            request.json['code'],
-            request.json['url'],
-            request.json['ap_access_key'],
+			request.json['code'],
+			request.json['url'],
+			request.json['ap_access_key'],
 			request.json['box_id']
-        )
+    )
 
 	@octoprint.plugin.BlueprintPlugin.route("/logout", methods=["POST"])
 	@admin_permission.require(403)
