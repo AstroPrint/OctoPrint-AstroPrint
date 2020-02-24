@@ -112,8 +112,8 @@ class AstroprintCloud():
 		except requests.exceptions.RequestException as e:
 			self._logger.error(e, exc_info=True)
 
-	def loginAstroPrint(self, code, url, apAccessKey, boxId = None):
-		self._logger.info("Logging into AstroPrint with boxId: %s" % boxId)
+	def loginAstroPrint(self, code, url, apAccessKey):
+		self._logger.info("Logging into AstroPrint with boxId: %s" % self.boxId)
 		try:
 			r = requests.post(
 				"%s/token" % (self.apiHost),
@@ -123,7 +123,7 @@ class AstroprintCloud():
 					"grant_type": "controller_authorization_code",
 					"code": code,
 					"redirect_uri": url,
-					"box_id" : boxId
+					"box_id" : self.boxId
 					},
 			)
 			r.raise_for_status()

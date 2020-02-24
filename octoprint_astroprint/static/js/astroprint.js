@@ -723,9 +723,7 @@ $(function () {
                 data: JSON.stringify({
                   code: accessCode,
                   url: currentUrl,
-                  ap_access_key: apAccessKey,
-                  ap_box_id : astroprint_variables.boxId,
-                  box_id : astroprint_variables.boxId
+                  ap_access_key: apAccessKey
                 }),
                 dataType: "json",
                 success: function (success) {
@@ -744,13 +742,14 @@ $(function () {
                     if (error.status && error.status == 403){
                         title = gettext("Login failed: Forbidden")
                         text = gettext(error.responseJSON.error_description)
-                    } else if ( error.responseJSON.error ) {
+                    } else if ( error.responseJSON && error.responseJSON.error ) {
                         title =  gettext("Login failed: " + error.responseJSON.error)
                         text = gettext(error.responseJSON.error_description)
                     } else {
-                        title =  gettext("Login failed")
+                        title = gettext("Login failed (" + error.status + ")")
                         text = gettext("There was an error linking your Astroprint account, please try again later.")
                     }
+
                     new PNotify({
                         title: title,
                         text: text,
