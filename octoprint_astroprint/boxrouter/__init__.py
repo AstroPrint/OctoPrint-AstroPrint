@@ -184,6 +184,7 @@ class AstroprintBoxRouter(object):
 	def boxrouter_connect(self):
 		if not self.connected:
 			if self.plugin.user:
+				self._logger.info("Connecting to Box Router as [%s - %s]" % (self._settings.get(["boxName"]), self.plugin.boxId))
 				self._publicKey = self.plugin.user['id']
 				self._privateKey = self.plugin.user['accessKey']
 				self._accessKey = self.plugin.astroprintCloud.getToken()
@@ -365,19 +366,23 @@ class AstroprintBoxRouter(object):
 	def processAuthenticate(self, data):
 		if data:
 			self._silentReconnect = False
-			if 'error' in data:
-				self._logger.warn(data['message'] if 'message' in data else 'Unkonwn authentication error')
+			if 'error' in data and data['error']:
+				self._logger.warn("Box Router Authentication Error: %s" % data['message'] if 'message' in data else 'Unkonwn authentication error')
 				self.status = self.STATUS_ERROR
 				self.plugin.send_event("boxrouterStatus", self.STATUS_ERROR)
 				self.close()
-				if 'should_retry' in data and data['should_retry']:
+				errorType = data['type'] if 'type' in data else None
+
+				if errorType == 'box_id_in_use':
+					self._logger.warn("Box Router is reporting that the box id [%s] is in use by another box. Is this image a clone of another? consider deleting the file at %s" % (self.plugin.boxId, os.path.join(os.path.dirname(self._settings._configfile), "box-id")))
+				elif 'should_retry' in data and data['should_retry']:
 					self._doRetry()
-				if 'type' in data and data['type'] == 'unable_to_authenticate':
-					self._logger.info("Unable to authenticate user in fleet box. Logout")
+				elif errorType == 'unable_to_authenticate':
+					self._logger.info("Box Router unable to authenticate user. No retries, logging out")
 					self.plugin.astroprintCloud.unauthorizedHandler()
 
-			elif 'success' in data:
-				self._logger.info("Boxrouter connected to astroprint service")
+			elif 'success' in data and data['success']:
+				self._logger.info("Box Router connected to astroprint service")
 				if 'groupId' in data:
 					self.plugin.astroprintCloud.updateFleetInfo(data['orgId'], data['groupId'])
 				self.authenticated = True

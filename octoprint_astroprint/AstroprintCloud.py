@@ -1,7 +1,7 @@
 # coding=utf-8
 __author__ = "AstroPrint Product Team <product@astroprint.com>"
 __license__ = "GNU Affero General Public License http://www.gnu.org/licenses/agpl.html"
-__copyright__ = "Copyright (C) 2017-2019 3DaGoGo, Inc - Released under terms of the AGPLv3 License"
+__copyright__ = "Copyright (C) 2017-2020 3DaGoGo, Inc - Released under terms of the AGPLv3 License"
 
 from flask import request, make_response, jsonify
 import time
@@ -27,10 +27,12 @@ class AstroprintCloud():
 		self.currentPrintingJob = None
 		self.getTokenRefreshLock = Lock()
 
+		settings = plugin.get_settings()
+
 		self.plugin = plugin
 		self.boxId = self.plugin.boxId
-		self.apiHost = plugin.get_settings().get(["apiHost"])
-		self.appId = plugin.get_settings().get(["appId"])
+		self.apiHost = settings.get(["apiHost"])
+		self.appId = settings.get(["appId"])
 		self.db = self.plugin.db
 		self.bm = boxrouterManager(self.plugin)
 		self.downloadmanager = DownloadManager(self)
@@ -41,11 +43,14 @@ class AstroprintCloud():
 		self.plugin.get_printer_listener().astroprintCloud = self
 		self.statePayload = None
 		self.printJobData = None
-		user = self.plugin.user
-		if user:
-			self._logger.info("Found stored AstroPrint User: %s" % user['name'])
+		if self.plugin.user:
+			self._logger.info("Found stored AstroPrint User [%s]" % self.plugin.user['name'])
 			self.getUserInfo()
-			self.getFleetInfo()
+
+			# We need to check again because the user variable might have been set to None as a consequence
+			# of a invalid refresh token when executing getUserInfo
+			if self.plugin.user:
+				self.getFleetInfo()
 		else:
 			self._logger.info("No stored AstroPrint user")
 
@@ -101,13 +106,14 @@ class AstroprintCloud():
 				self._logger.error("Unable to refresh token with error [%d]" % err.response.status_code)
 				self.plugin.send_event("logOut")
 				self.unauthorizedHandler()
+			else:
+				self._logger.error(err, exc_info=True)
 
 		except requests.exceptions.RequestException as e:
-			self._logger.error(e)
+			self._logger.error(e, exc_info=True)
 
-	def loginAstroPrint(self, code, url, apAccessKey, boxId = None):
-		self._logger.info("Logging into AstroPrint")
-		self._logger.info(boxId)
+	def loginAstroPrint(self, code, url, apAccessKey):
+		self._logger.info("Logging into AstroPrint with boxId: %s" % self.boxId)
 		try:
 			r = requests.post(
 				"%s/token" % (self.apiHost),
@@ -117,7 +123,7 @@ class AstroprintCloud():
 					"grant_type": "controller_authorization_code",
 					"code": code,
 					"redirect_uri": url,
-					"box_id" : boxId
+					"box_id" : self.boxId
 					},
 			)
 			r.raise_for_status()
@@ -135,10 +141,11 @@ class AstroprintCloud():
 			return self.getUserInfo(True)
 
 		except requests.exceptions.HTTPError as err:
-			self._logger.error(err.response.text)
+			self._logger.error("Error while logging into AstroPrint: %s" % err.response.text)
 			return jsonify(json.loads(err.response.text)), err.response.status_code, {'ContentType':'application/json'}
+
 		except requests.exceptions.RequestException as e:
-			self._logger.error(e)
+			self._logger.error(e, exc_info=True)
 			return jsonify({'error': "Internal server error"}), 500, {'ContentType':'application/json'}
 
 	def getUserInfo(self, saveUser = False):
@@ -157,16 +164,20 @@ class AstroprintCloud():
 			self.plugin.sendSocketInfo()
 			if saveUser:
 				self.db.saveUser(self.plugin.user)
-				self._logger.info("AstroPrint User %s logged in and saved" % self.plugin.user['name'])
+				self._logger.info("AstroPrint User [%s] logged in and saved" % self.plugin.user['name'])
 				self.connectBoxrouter()
 				return jsonify({'name': self.plugin.user['name'], 'email': self.plugin.user['email']}), 200, {'ContentType':'application/json'}
 
 		except requests.exceptions.HTTPError as err:
 			if (err.response.status_code == 401):
 				self.unauthorizedHandler()
+			else:
+				self._logger.error(err, exc_info=True)
+
 			if saveUser:
 				return jsonify(json.loads(err.response.text)), err.response.status_code, {'ContentType':'application/json'}
-		except requests.exceptions.RequestException:
+		except requests.exceptions.RequestException as e:
+			self._logger.error(e, exc_info=True)
 			if saveUser:
 				return jsonify({'error': "Internal server error"}), 500, {'ContentType':'application/json'}
 
@@ -186,12 +197,14 @@ class AstroprintCloud():
 				self.db.saveUser(self.plugin.user)
 
 		except requests.exceptions.HTTPError as err:
-			self._logger.warning(err.response.status_code)
 			if (err.response.status_code == 401 or (err.response.status_code == 404 and self.plugin.user['groupId'])):
-				self._logger.info("Box is in a fleet group where user does not has permission, logout")
+				self._logger.info("Box belongs to a fleet & group where the user does not have permissions. Logging out")
 				self.unauthorizedHandler()
+			else:
+				self._logger.error("getFleetInfo failed with error %d" % err.response.status_code)
+
 		except requests.exceptions.RequestException as e:
-			self._logger.error(e)
+			self._logger.error(e, exc_info=True)
 
 	def updateFleetInfo(self, orgId, groupId):
 		if self.plugin.user['groupId'] != groupId:
@@ -281,7 +294,6 @@ class AstroprintCloud():
 
 	def connectBoxrouter(self):
 		if self.plugin.user and "accessKey" in self.plugin.user and "id" in self.plugin.user:
-			self._logger.info("Connecting Box Router")
 			self.bm.boxrouter_connect()
 			#let the singleton be recreated again, so new credentials are taken into use
 			global _instance

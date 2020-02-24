@@ -3,7 +3,7 @@ from __future__ import absolute_import
 
 __author__ = "AstroPrint Product Team <product@astroprint.com>"
 __license__ = "GNU Affero General Public License http://www.gnu.org/licenses/agpl.html"
-__copyright__ = "Copyright (C) 2017-2019 3DaGoGo, Inc - Released under terms of the AGPLv3 License"
+__copyright__ = "Copyright (C) 2017-2020 3DaGoGo, Inc - Released under terms of the AGPLv3 License"
 
 import octoprint.plugin
 import json
@@ -106,7 +106,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 		if not self._boxId:
 			import os
 
-			boxIdFile = "%s/box-id" % os.path.dirname(self._settings._configfile)
+			boxIdFile = os.path.join(os.path.dirname(self._settings._configfile), "box-id")
 
 			if os.path.exists(boxIdFile):
 				with open(boxIdFile, 'r') as f:
@@ -123,14 +123,18 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 	def on_after_startup(self):
 		self.register_printer_listener()
 		self.db = AstroprintDB(self)
-		if os.path.isfile(self.get_plugin_data_folder() + "/octoprint_astroprint.db"):
+
+		## Move old mysql database data to new yaml file for logged users
+		oldDbFile = os.path.join(self.get_plugin_data_folder(),"octoprint_astroprint.db")
+		if os.path.isfile(oldDbFile):
 			sqlitledb = SqliteDB(self)
 			self.db.saveUser(sqlitledb.getUser())
 			self.db.savePrintFiles(sqlitledb.getPrintFiles())
-			os.remove(self.get_plugin_data_folder() + "/octoprint_astroprint.db")
+			os.remove(oldDbFile)
 
 		self.cameraManager = cameraManager(self)
 		self.astroprintCloud = AstroprintCloud(self)
+
 		if self.user:
 			self.astroprintCloud.connectBoxrouter()
 		self.cameraManager.astroprintCloud = self.astroprintCloud
@@ -193,7 +197,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 		boxName = socket.gethostname()
 
 		try:
-			with open(self.get_plugin_data_folder() + "/config.yaml", "r") as f:
+			with open(os.path.join(self.get_plugin_data_folder(), "config.yaml"), "r") as f:
 				config = yaml.safe_load(f)
 				if config:
 					appSite = config['appSite']
@@ -201,13 +205,12 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 					apiHost = config['apiHost']
 					webSocket = config['webSocket']
 					product_variant_id = config['product_variant_id']
-		except IOError, e:
+		except IOError as e:
 			if e.errno != 2:
-				self._logger.error("IOError error loading config.yalm", exc_info= True)
+				self._logger.error("IOError error loading config.yaml", exc_info= True)
 
 		except:
-			self._logger.error("There was an error loading config.yalm", exc_info= True)
-
+			self._logger.error("There was an error loading config.yaml", exc_info= True)
 
 		return dict(
 			#AstroPrintEndPoint
@@ -385,11 +388,10 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 	@admin_permission.require(403)
 	def login(self):
 		return self.astroprintCloud.loginAstroPrint(
-            request.json['code'],
-            request.json['url'],
-            request.json['ap_access_key'],
-			request.json['box_id']
-        )
+			request.json['code'],
+			request.json['url'],
+			request.json['ap_access_key']
+    )
 
 	@octoprint.plugin.BlueprintPlugin.route("/logout", methods=["POST"])
 	@admin_permission.require(403)

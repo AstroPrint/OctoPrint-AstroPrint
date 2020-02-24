@@ -239,14 +239,14 @@ $(function () {
                     if (self.progress() == 100) {
                         if (self.file.format) {
                             new PNotify({
-                                title: gettext("File Downloaded"),
-                                text: gettext("Your AstroPrint Cloud print file:" + self.name() + ", was added to your files."),
+                                title: "File Downloaded",
+                                text: "Your AstroPrint Cloud print file:" + self.name() + ", was added to your files.",
                                 type: "success"
                             });
                         } else {
                             new PNotify({
-                                title: gettext("File Downloaded"),
-                                text: gettext("Your AstroPrint Cloud design:" + self.name() + ", was added to your files."),
+                                title: "File Downloaded",
+                                text: "Your AstroPrint Cloud design:" + self.name() + ", was added to your files.",
                                 type: "success"
                             });
                         }
@@ -306,8 +306,8 @@ $(function () {
                         },
                         error: function () {
                             new PNotify({
-                                title: gettext("Error retrievind manufacturers models"),
-                                text: gettext("There was an error retrieving AstroPrint models, please try again later."),
+                                title: "Error retrievind manufacturers models",
+                                text: "There was an error retrieving AstroPrint models, please try again later.",
                                 type: "error"
                             });
                         },
@@ -347,8 +347,8 @@ $(function () {
                 },
                 error: function () {
                     new PNotify({
-                        title: gettext("Error retrievind manufacturers information"),
-                        text: gettext("There was an error retrieving AstroPrint manufacturers, please try again later."),
+                        title: "Error retrievind manufacturers information",
+                        text: "There was an error retrieving AstroPrint manufacturers, please try again later.",
                         type: "error"
                     });
                 },
@@ -592,16 +592,16 @@ $(function () {
             switch (state){
                 case "error":
                     new PNotify({
-                        title: gettext("Boxrouter error"),
-                        text: gettext("There was an error connecting your boxrouter to AstroPrint, please try again later."),
+                        title: "Boxrouter error",
+                        text: "There was an error connecting your boxrouter to AstroPrint, please try again later.",
                         type: "error"
                     });
                 case "connected":
                     self.changingname(false)
                     self.changeNameDialog.modal('hide')
                     new PNotify({
-                        title: gettext("AstroPrint Boxrouter Connected"),
-                        text: gettext("Your octopi is connected to Astroprint cloud"),
+                        title: "AstroPrint Boxrouter Connected",
+                        text: "Your octopi is connected to Astroprint cloud",
                         type: "success"
                     });
             }
@@ -686,8 +686,8 @@ $(function () {
         self.changeCameraStatus = function (data) {
             self.cam_status(data)
             new PNotify({
-                title: gettext(data ? "Camera detected" : "Lost camera connection"),
-                text: gettext(data ? "Your Octoprint camera is connected with AstroPrint" : "AstroPrint has lost connection with the camera"),
+                title: data ? "Camera detected" : "Lost camera connection",
+                text: data ? "Your Octoprint camera is connected with AstroPrint" : "AstroPrint has lost connection with the camera",
                 type: data ? "success" : "error"
             });
         }
@@ -707,8 +707,8 @@ $(function () {
               location.href = url;
             } else {
                 new PNotify({
-                    title: gettext("Missing Access Key"),
-                    text: gettext("Access Key is missing, please provide a valid one"),
+                    title: "Missing Access Key",
+                    text: "Access Key is missing, please provide a valid one",
                     type: "error"
                 });
             }
@@ -723,9 +723,7 @@ $(function () {
                 data: JSON.stringify({
                   code: accessCode,
                   url: currentUrl,
-                  ap_access_key: apAccessKey,
-                  ap_box_id : astroprint_variables.boxId,
-                  box_id : astroprint_variables.boxId
+                  ap_access_key: apAccessKey
                 }),
                 dataType: "json",
                 success: function (success) {
@@ -733,8 +731,8 @@ $(function () {
                     self.getDesigns(false);
                     self.unlinkedPrintFiles(false);
                     new PNotify({
-                        title: gettext("AstroPrint Login successful"),
-                        text: gettext("You are now logged to Astroprint as " + self.astroprintUser().email),
+                        title: "AstroPrint Login successful",
+                        text: "You are now logged to Astroprint as " + self.astroprintUser().email,
                         type: "success"
                     });
                 },
@@ -742,15 +740,16 @@ $(function () {
                     var title;
                     var text;
                     if (error.status && error.status == 403){
-                        title = gettext("Login falied: Forbidden")
-                        text = gettext(error.responseJSON.error_description)
-                    } else if ( error.responseJSON.error ) {
-                        title =  gettext("Login falied: " + error.responseJSON.error)
-                        text = gettext(error.responseJSON.error_description)
+                        title = "Login failed: Forbidden"
+                        text = error.responseJSON.error_description
+                    } else if ( error.responseJSON && error.responseJSON.error ) {
+                        title =  "Login failed: " + error.responseJSON.error
+                        text = error.responseJSON.error_description
                     } else {
-                        title =  gettext("Login falied")
-                        text = gettext("There was an error linking your Astroprint account, please try again later.")
+                        title = "Login failed (" + error.status + ")"
+                        text = "There was an error linking your Astroprint account, please try again later."
                     }
+
                     new PNotify({
                         title: title,
                         text: text,
@@ -763,14 +762,14 @@ $(function () {
         self.logOutAstroPrint = function () {
             self.logOut().then(function (success) {
                 new PNotify({
-                    title: gettext("AstroPrint Logout successful"),
-                    text: gettext("You are now logged out of AstroPrint"),
+                    title: "AstroPrint Logout successful",
+                    text: "You are now logged out of AstroPrint",
                     type: "success"
                 });
             }, function (error) {
                 new PNotify({
-                    title: gettext("AstroPrint Logout failed"),
-                    text: gettext("There was an error logging out of AstroPrint."),
+                    title: "AstroPrint Logout failed",
+                    text: "There was an error logging out of AstroPrint.",
                     type: "error"
                 });
             });
@@ -780,8 +779,8 @@ $(function () {
         self.error401handling = function () {
             self.astroprintUser(false);
             new PNotify({
-                title: gettext("AstroPrint session expired"),
-                text: gettext("Your AstroPrint session has expired, please log again."),
+                title: "AstroPrint session expired",
+                text: "Your AstroPrint session has expired, please log again.",
                 type: "error"
             });
         }
@@ -824,8 +823,8 @@ $(function () {
                     self.designList(designs);
                     var notify = function () {
                         new PNotify({
-                            title: gettext("AstroPrint Designs Retrieved"),
-                            text: gettext("Your designs and print files from AstroPrint have been refreshed"),
+                            title: "AstroPrint Designs Retrieved",
+                            text: "Your designs and print files from AstroPrint have been refreshed",
                             type: "success"
                         });
                     }
@@ -849,8 +848,8 @@ $(function () {
                     } else {
                         self.designsRetrieved("error");
                         new PNotify({
-                            title: gettext("Error retrievind designs"),
-                            text: gettext("There was an error retrieving AstroPrint desings, please try again later."),
+                            title: "Error retrievind designs",
+                            text: "There was an error retrieving AstroPrint desings, please try again later.",
                             type: "error"
                         });
                     }
@@ -893,8 +892,8 @@ $(function () {
                                     } else {
                                         design.loadingPrintfiles(false);
                                         new PNotify({
-                                            title: gettext("Error retrieving Print Files"),
-                                            text: gettext("There was an error retrieving print files, please try again later."),
+                                            title: "Error retrieving Print Files",
+                                            text: "There was an error retrieving print files, please try again later.",
                                             type: "error"
                                         });
                                     }
@@ -926,8 +925,8 @@ $(function () {
                     self.printFileList(printFiles);
                     var notify = function () {
                         new PNotify({
-                            title: gettext("AstroPrint PrintFiles Retrieved"),
-                            text: gettext("Your designs and print files from AstroPrint have been refreshed"),
+                            title: "AstroPrint PrintFiles Retrieved",
+                            text: "Your designs and print files from AstroPrint have been refreshed",
                             type: "success"
                         });
                     }
@@ -951,8 +950,8 @@ $(function () {
                     } else {
                         self.designsRetrieved("error");
                         new PNotify({
-                            title: gettext("Error retrievind printFiles"),
-                            text: gettext("There was an error retrieving AstroPrint printFiles, please try again later."),
+                            title: "Error retrievind printFiles",
+                            text: "There was an error retrieving AstroPrint printFiles, please try again later.",
                             type: "error"
                         });
                     }
@@ -999,8 +998,8 @@ $(function () {
                                     text = error.responseText;
                                 }
                                 new PNotify({
-                                    title: gettext(title),
-                                    text: gettext(text),
+                                    title: title,
+                                    text: text,
                                     type: "error"
                                 });
                             }
@@ -1009,8 +1008,8 @@ $(function () {
                 }
             } else {
                 new PNotify({
-                    title: gettext("Please log in"),
-                    text: gettext("You must be logged onto your OctoPrint Account to be able to download designs."),
+                    title: "Please log in",
+                    text: "You must be logged onto your OctoPrint Account to be able to download designs.",
                     type: "info"
                 });
             }
@@ -1053,8 +1052,8 @@ $(function () {
                                     text = error.responseText;
                                 }
                                 new PNotify({
-                                    title: gettext(title),
-                                    text: gettext(text),
+                                    title: title,
+                                    text: text,
                                     type: "error"
                                 });
                             }
@@ -1064,8 +1063,8 @@ $(function () {
                 }
             } else {
                 new PNotify({
-                    title: gettext("Please log in"),
-                    text: gettext("You must be logged on your OctoPrint Account to be able to download print files."),
+                    title: "Please log in",
+                    text: "You must be logged on your OctoPrint Account to be able to download print files.",
                     type: "info"
                 });
             }
