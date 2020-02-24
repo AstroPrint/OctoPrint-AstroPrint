@@ -121,30 +121,24 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 		return self._boxId
 
 	def on_after_startup(self):
-		try:
-			self.register_printer_listener()
-			self.db = AstroprintDB(self)
+		self.register_printer_listener()
+		self.db = AstroprintDB(self)
 
-			## Move old mysql database data to new yaml file for logged users
-			oldDbFile = os.path.join(self.get_plugin_data_folder(),"octoprint_astroprint.db")
-			if os.path.isfile(oldDbFile):
-				sqlitledb = SqliteDB(self)
-				self.db.saveUser(sqlitledb.getUser())
-				self.db.savePrintFiles(sqlitledb.getPrintFiles())
-				os.remove(oldDbFile)
+		## Move old mysql database data to new yaml file for logged users
+		oldDbFile = os.path.join(self.get_plugin_data_folder(),"octoprint_astroprint.db")
+		if os.path.isfile(oldDbFile):
+			sqlitledb = SqliteDB(self)
+			self.db.saveUser(sqlitledb.getUser())
+			self.db.savePrintFiles(sqlitledb.getPrintFiles())
+			os.remove(oldDbFile)
 
-			self.cameraManager = cameraManager(self)
-			self.astroprintCloud = AstroprintCloud(self)
+		self.cameraManager = cameraManager(self)
+		self.astroprintCloud = AstroprintCloud(self)
 
-			if self.user:
-				self.astroprintCloud.connectBoxrouter()
-			self.cameraManager.astroprintCloud = self.astroprintCloud
-			self.materialCounter = MaterialCounter(self)
-
-		except Exception as e:
-			#intersect the error in case the plugin framework ignores it
-			self._logger.error(e, exc_info=True)
-			raise e
+		if self.user:
+			self.astroprintCloud.connectBoxrouter()
+		self.cameraManager.astroprintCloud = self.astroprintCloud
+		self.materialCounter = MaterialCounter(self)
 
 	def onLogout(self):
 		self.send_event("userLoggedOut", True)
