@@ -742,13 +742,13 @@ $(function () {
                     var title;
                     var text;
                     if (error.status && error.status == 403){
-                        title = gettext("Login falied: Forbidden")
+                        title = gettext("Login failed: Forbidden")
                         text = gettext(error.responseJSON.error_description)
                     } else if ( error.responseJSON.error ) {
-                        title =  gettext("Login falied: " + error.responseJSON.error)
+                        title =  gettext("Login failed: " + error.responseJSON.error)
                         text = gettext(error.responseJSON.error_description)
                     } else {
-                        title =  gettext("Login falied")
+                        title =  gettext("Login failed")
                         text = gettext("There was an error linking your Astroprint account, please try again later.")
                     }
                     new PNotify({
