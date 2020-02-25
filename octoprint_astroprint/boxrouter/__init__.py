@@ -187,9 +187,9 @@ class AstroprintBoxRouter(object):
 				self._logger.info("Connecting to Box Router as [%s - %s]" % (self._settings.get(["boxName"]), self.plugin.boxId))
 				self._publicKey = self.plugin.user['id']
 				self._privateKey = self.plugin.user['accessKey']
-				self._accessKey = self.plugin.astroprintCloud.getToken()
+				accessKey = self.plugin.astroprintCloud.getToken()
 				##if self._publicKey and self._privateKey:
-				if self._accessKey:
+				if accessKey:
 					self.status = self.STATUS_CONNECTING
 					self.plugin.send_event("boxrouterStatus", self.STATUS_CONNECTING)
 
@@ -408,7 +408,7 @@ class AstroprintBoxRouter(object):
 			 		'swVersion': "OctoPrint Plugin - v%s.%s(%s)" % (mayor, minor, build),
 			 		'platform': platform,
 			 		'localIpAddress': localIpAddress,
-					'accessToken' : self._accessKey,
+					'accessToken' : self.plugin.astroprintCloud.getToken(),
 			 		#'publicKey': self._publicKey,
 			 		#'privateKey': self._privateKey,
 					'printerModel': self._settings.get(["printerModel"]) if self._settings.get(['printerModel'])['id'] else None

@@ -45,6 +45,7 @@ class AstroprintCloud():
 		self.printJobData = None
 		if self.plugin.user:
 			self._logger.info("Found stored AstroPrint User [%s]" % self.plugin.user['name'])
+			self.refresh()
 			self.getUserInfo()
 
 			# We need to check again because the user variable might have been set to None as a consequence
@@ -100,6 +101,7 @@ class AstroprintCloud():
 			self.plugin.user['last_request'] = int(time.time())
 			self.plugin.user['expires'] = self.plugin.user['last_request'] + data['expires_in']
 			self.db.saveUser(self.plugin.user)
+			self._logger.info("Astroprint Token refreshed")
 
 		except requests.exceptions.HTTPError as err:
 			if err.response.status_code == 400 or err.response.status_code == 401:
