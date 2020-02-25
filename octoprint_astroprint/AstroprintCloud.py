@@ -46,11 +46,11 @@ class AstroprintCloud():
 		if self.plugin.user:
 			self._logger.info("Found stored AstroPrint User [%s]" % self.plugin.user['name'])
 			self.refresh()
-			self.getUserInfo()
 
 			# We need to check again because the user variable might have been set to None as a consequence
-			# of a invalid refresh token when executing getUserInfo
+			# of a invalid refresh token.
 			if self.plugin.user:
+				self.getUserInfo()
 				self.getFleetInfo()
 		else:
 			self._logger.info("No stored AstroPrint user")
