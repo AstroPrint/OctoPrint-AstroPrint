@@ -39,7 +39,7 @@ class RequestHandler(object):
 		}
 
 		state = {
-			'printing': self._printer.is_printing(),
+			'printing': self._printer.is_printing() or self._printer.is_paused(),
 			'heatingUp': self.plugin.printerIsHeating(),
 			'operational': self._printer.is_operational(),
 			'paused': self._printer.is_paused(),
