@@ -350,7 +350,8 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 				self.astroprintCloud.printStarted(payload['name'], payload['path'])
 
 			self.materialCounter.startPrint()
-			self._printerListener.startPrint(payload['file'])
+			file = self._file_manager.path_on_disk(FileDestinations.LOCAL, payload['path'])
+			self._printerListener.startPrint(file)
 		if  event in printEvents:
 			self.sendSocketInfo()
 			if self.user and self.astroprintCloud:
