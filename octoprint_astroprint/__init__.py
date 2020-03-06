@@ -4,6 +4,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 __author__ = "AstroPrint Product Team <product@astroprint.com>"
 __license__ = "GNU Affero General Public License http://www.gnu.org/licenses/agpl.html"
 __copyright__ = "Copyright (C) 2017-2020 3DaGoGo, Inc - Released under terms of the AGPLv3 License"
+__plugin_pythoncompat__ = ">=2.7,<4"
 
 import octoprint.plugin
 import json
