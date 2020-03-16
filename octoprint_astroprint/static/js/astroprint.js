@@ -331,7 +331,7 @@ $(function () {
         self.changingPrinter = ko.observable(false)
 
         self.getManufacturers = function () {
-            $.ajax({
+            return $.ajax({
                 type: "GET",
                 contentType: "application/json; charset=utf-8",
                 url: PLUGIN_BASEURL + "astroprint/manufactures",
@@ -656,22 +656,27 @@ $(function () {
                 success: function (data) {
                     if (data.user) {
                         self.astroprintUser(data.user)
-                        self.getDesigns(false);
-                        self.getManufacturers();
-                        self.unlinkedPrintFiles(false);
+                        Promise.all([self.getDesigns(false),self.getDesigns(false),  self.unlinkedPrintFiles(false)]).then( function (){
+                            if (!astroPrintPluginStarted) {
+                                self.showAstroPrintPages()
+                            }
+                        })
                     } else {
                         self.astroprintUser(false)
                         if (code && state) {
-                            self.loginAstroprint(code, state);
+                            self.loginAstroprint(code, state).then( function () {
+                                if (!astroPrintPluginStarted) {
+                                    self.showAstroPrintPages()
+                                }
+                            })
                         }
                     }
-                    window.history.replaceState({}, document.title, "/");
+                    if (code && state) {
+                        window.history.replaceState({}, document.title, "/");
+                    }
                     self.cam_status(data.connected)
                     self.can_print(data.can_print)
                     self.boxrouter_status(data.boxrouter_status)
-                    if (!astroPrintPluginStarted) {
-                        self.showAstroPrintPages()
-                    }
                 },
                 error: function (data) {
                     console.error(data)
@@ -720,7 +725,7 @@ $(function () {
 
         self.loginAstroprint = function (accessCode, apAccessKey) {
             var currentUrl = window.location.href.split('?')[0];
-            $.ajax({
+            return $.ajax({
                 type: "POST",
                 contentType: "application/json; charset=utf-8",
                 url: PLUGIN_BASEURL + "astroprint/login",
