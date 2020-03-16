@@ -656,7 +656,7 @@ $(function () {
                 success: function (data) {
                     if (data.user) {
                         self.astroprintUser(data.user)
-                        Promise.all([self.getDesigns(false),self.getDesigns(false),  self.unlinkedPrintFiles(false)]).then( function (){
+                        Promise.all([self.getDesigns(false), self.unlinkedPrintFiles(false),  self.unlinkedPrintFiles(false)]).then( function (){
                             if (!astroPrintPluginStarted) {
                                 self.showAstroPrintPages()
                             }
@@ -669,6 +669,8 @@ $(function () {
                                     self.showAstroPrintPages()
                                 }
                             })
+                        } else {
+                            self.showAstroPrintPages()
                         }
                     }
                     if (code && state) {
