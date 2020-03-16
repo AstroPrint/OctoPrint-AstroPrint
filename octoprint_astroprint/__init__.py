@@ -24,16 +24,17 @@ from .materialcounter import MaterialCounter
 from .printerlistener import PrinterListener
 
 from octoprint.server.util.flask import restricted_access
-from octoprint.server import admin_permission
+import octoprint.access.groups as groups
+admin_permission = groups.GroupPermission(groups.ADMIN_GROUP)
 from octoprint.settings import valid_boolean_trues
-from octoprint.users import SessionUser
+from octoprint.access.users import SessionUser
 from octoprint.filemanager.destinations import FileDestinations
 from octoprint.events import Events
 
 from watchdog.observers import Observer
 
 from flask import request, Blueprint, make_response, jsonify, Response, abort
-from flask.ext.login import user_logged_in, user_logged_out
+from flask_login import user_logged_in, user_logged_out
 
 
 NO_CONTENT = ("", 204)
