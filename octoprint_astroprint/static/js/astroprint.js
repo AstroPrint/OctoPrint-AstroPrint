@@ -3,7 +3,7 @@
  *
  * Author: AstroPrint Product Team
  * License: AGPLv3
- * Copyright: 2017 3DaGoGo Inc.
+ * Copyright: 2017-2020 3DaGoGo Inc.
  */
 
 var astroPrintPluginStarted = false;
@@ -221,12 +221,12 @@ $(function () {
                         url: PLUGIN_BASEURL + "astroprint/canceldownload",
                         data: JSON.stringify({ 'id': self.id() }),
                         dataType: "json",
-                        success: function (success) {
+                        success: function () {
                             self.downloading(false);
                             self.file.downloading(false);
                             self.progress(0);
                         },
-                        error: function (error) {
+                        error: function () {
                             console.error("Download couldn´t be canceled");
                         }
                     });
@@ -1154,7 +1154,7 @@ $(function () {
 
 
         self.onStartupComplete = function () {
-            setTimeout(self.checkIsLoggedOnConnect(), 1000);
+            setTimeout(self.checkIsLoggedOnConnect(), 100);
         }
 
         self.moveToApi = function (){
