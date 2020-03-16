@@ -1116,7 +1116,7 @@ $(function () {
                 } else {
                     self.showAstroPrintPages();
                 }
-            }, 100);
+            }, 500);
         };
 
         self.checkApiOption = function () {
