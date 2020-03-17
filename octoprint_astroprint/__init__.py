@@ -24,9 +24,9 @@ from .materialcounter import MaterialCounter
 from .printerlistener import PrinterListener
 
 from octoprint.server.util.flask import restricted_access
-import octoprint.access.groups as groups
 from octoprint.server import admin_permission
 #When admin_permission is completly deprecated in future verions, use instead:
+#import octoprint.access.groups as groups
 #admin_permission = groups.GroupPermission(groups.ADMIN_GROUP)
 from octoprint.settings import valid_boolean_trues
 from octoprint.access.users import SessionUser
