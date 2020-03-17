@@ -3,7 +3,7 @@
  *
  * Author: AstroPrint Product Team
  * License: AGPLv3
- * Copyright: 2017 3DaGoGo Inc.
+ * Copyright: 2017-2020 3DaGoGo Inc.
  */
 
 var astroPrintPluginStarted = false;
@@ -221,12 +221,12 @@ $(function () {
                         url: PLUGIN_BASEURL + "astroprint/canceldownload",
                         data: JSON.stringify({ 'id': self.id() }),
                         dataType: "json",
-                        success: function (success) {
+                        success: function () {
                             self.downloading(false);
                             self.file.downloading(false);
                             self.progress(0);
                         },
-                        error: function (error) {
+                        error: function () {
                             console.error("Download couldn´t be canceled");
                         }
                     });
@@ -331,7 +331,7 @@ $(function () {
         self.changingPrinter = ko.observable(false)
 
         self.getManufacturers = function () {
-            $.ajax({
+            return $.ajax({
                 type: "GET",
                 contentType: "application/json; charset=utf-8",
                 url: PLUGIN_BASEURL + "astroprint/manufactures",
@@ -656,18 +656,29 @@ $(function () {
                 success: function (data) {
                     if (data.user) {
                         self.astroprintUser(data.user)
-                        self.getDesigns(false);
-                        self.getManufacturers();
-                        self.unlinkedPrintFiles(false);
+                        Promise.all([self.getDesigns(false), self.unlinkedPrintFiles(false),  self.unlinkedPrintFiles(false)]).then( function (){
+                            if (!astroPrintPluginStarted) {
+                                self.showAstroPrintPages()
+                            }
+                        })
                     } else {
                         self.astroprintUser(false)
+                        if (code && state) {
+                            self.loginAstroprint(code, state).then( function () {
+                                if (!astroPrintPluginStarted) {
+                                    self.showAstroPrintPages()
+                                }
+                            })
+                        } else {
+                            self.showAstroPrintPages()
+                        }
+                    }
+                    if (code && state) {
+                        window.history.replaceState({}, document.title, "/");
                     }
                     self.cam_status(data.connected)
                     self.can_print(data.can_print)
                     self.boxrouter_status(data.boxrouter_status)
-                    if (!astroPrintPluginStarted) {
-                        self.showAstroPrintPages()
-                    }
                 },
                 error: function (data) {
                     console.error(data)
@@ -716,7 +727,7 @@ $(function () {
 
         self.loginAstroprint = function (accessCode, apAccessKey) {
             var currentUrl = window.location.href.split('?')[0];
-            $.ajax({
+            return $.ajax({
                 type: "POST",
                 contentType: "application/json; charset=utf-8",
                 url: PLUGIN_BASEURL + "astroprint/login",
@@ -728,13 +739,13 @@ $(function () {
                 dataType: "json",
                 success: function (success) {
                     self.astroprintUser(success);
-                    self.getDesigns(false);
-                    self.unlinkedPrintFiles(false);
-                    new PNotify({
-                        title: "AstroPrint Login successful",
-                        text: "You are now logged to Astroprint as " + self.astroprintUser().email,
-                        type: "success"
-                    });
+                    Promise.all([self.getDesigns(false), self.unlinkedPrintFiles(false)]).then(function (){
+                        new PNotify({
+                            title: "AstroPrint Login successful",
+                            text: "You are now logged to Astroprint as " + self.astroprintUser().email,
+                            type: "success"
+                        });
+                      });
                 },
                 error: function (error) {
                     var title;
@@ -760,13 +771,13 @@ $(function () {
         }
 
         self.logOutAstroPrint = function () {
-            self.logOut().then(function (success) {
+            self.logOut().then(function () {
                 new PNotify({
                     title: "AstroPrint Logout successful",
                     text: "You are now logged out of AstroPrint",
                     type: "success"
                 });
-            }, function (error) {
+            }, function () {
                 new PNotify({
                     title: "AstroPrint Logout failed",
                     text: "There was an error logging out of AstroPrint.",
@@ -808,7 +819,7 @@ $(function () {
 
         self.getDesigns = function (refresh = true) {
             self.designsRetrieved("loading");
-            $.ajax({
+            return $.ajax({
                 type: "GET",
                 contentType: "application/json; charset=utf-8",
                 url: PLUGIN_BASEURL + "astroprint/designs",
@@ -866,7 +877,7 @@ $(function () {
                     if (!design.loadingPrintfiles()) {
                         if (design.printFiles().length == 0) {
                             design.loadingPrintfiles(true);
-                            $.ajax({
+                            return $.ajax({
                                 type: "GET",
                                 contentType: "application/json; charset=utf-8",
                                 url: PLUGIN_BASEURL + "astroprint/printfiles",
@@ -910,7 +921,7 @@ $(function () {
 
         self.unlinkedPrintFiles = function (refresh = true) {
             self.printFilesRetrieved("loading");
-            $.ajax({
+            return $.ajax({
                 type: "GET",
                 contentType: "application/json; charset=utf-8",
                 url: PLUGIN_BASEURL + "astroprint/printfiles",
@@ -1147,10 +1158,7 @@ $(function () {
         //Log in before startupComplete saves some time
         var code = self._getUrlParameter("code");
         var state = self._getUrlParameter("state");
-        if (code && state) {
-            self.loginAstroprint(code, state);
-            window.history.replaceState({}, document.title, "/");
-        }
+
 
         self.onStartupComplete = function () {
             setTimeout(self.checkIsLoggedOnConnect(), 1000);

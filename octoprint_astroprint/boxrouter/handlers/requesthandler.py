@@ -1,7 +1,9 @@
 # coding=utf-8
+from __future__ import absolute_import,   unicode_literals
+
 __author__ = "AstroPrint Product Team <product@astroprint.com>"
 __license__ = 'GNU Affero General Public License http://www.gnu.org/licenses/agpl.html'
-__copyright__ = "Copyright (C) 2017-2019 3DaGoGo, Inc - Released under terms of the AGPLv3 License"
+__copyright__ = "Copyright (C) 2017-2020 3DaGoGo, Inc - Released under terms of the AGPLv3 License"
 
 import base64
 import threading
@@ -39,7 +41,7 @@ class RequestHandler(object):
 		}
 
 		state = {
-			'printing': self._printer.is_printing(),
+			'printing': self._printer.is_printing() or self._printer.is_paused(),
 			'heatingUp': self.plugin.printerIsHeating(),
 			'operational': self._printer.is_operational(),
 			'paused': self._printer.is_paused(),

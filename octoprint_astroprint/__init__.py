@@ -1,5 +1,5 @@
 # coding=utf-8
-from __future__ import absolute_import
+from __future__ import absolute_import,   unicode_literals
 
 __author__ = "AstroPrint Product Team <product@astroprint.com>"
 __license__ = "GNU Affero General Public License http://www.gnu.org/licenses/agpl.html"
@@ -25,15 +25,21 @@ from .printerlistener import PrinterListener
 
 from octoprint.server.util.flask import restricted_access
 from octoprint.server import admin_permission
+#When admin_permission is completly deprecated in future verions, use instead:
+#import octoprint.access.groups as groups
+#admin_permission = groups.GroupPermission(groups.ADMIN_GROUP)
 from octoprint.settings import valid_boolean_trues
+
 from octoprint.users import SessionUser
+#When SessionUser from octoprint.users is completly deprecated in future verions, use instead:
+#from octoprint.access.users import SessionUser
 from octoprint.filemanager.destinations import FileDestinations
 from octoprint.events import Events
 
 from watchdog.observers import Observer
 
 from flask import request, Blueprint, make_response, jsonify, Response, abort
-from flask.ext.login import user_logged_in, user_logged_out
+from flask_login import user_logged_in, user_logged_out
 
 
 NO_CONTENT = ("", 204)
@@ -350,7 +356,8 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 				self.astroprintCloud.printStarted(payload['name'], payload['path'])
 
 			self.materialCounter.startPrint()
-			self._printerListener.startPrint(payload['file'])
+			file = self._file_manager.path_on_disk(FileDestinations.LOCAL, payload['path'])
+			self._printerListener.startPrint(file)
 		if  event in printEvents:
 			self.sendSocketInfo()
 			if self.user and self.astroprintCloud:
@@ -640,6 +647,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 # ("OctoPrint-PluginSkeleton"), you may define that here. Same goes for the other metadata derived from setup.py that
 # can be overwritten via __plugin_xyz__ control properties. See the documentation for that.
 __plugin_name__ = "AstroPrint"
+__plugin_pythoncompat__ = ">=2.7,<4"
 
 def __plugin_load__():
 	global __plugin_implementation__

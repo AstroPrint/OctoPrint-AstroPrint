@@ -101,7 +101,7 @@
                     </select>
                     <div data-bind="if : selectedManufactured()">
                         <div data-bind="if : selectedManufactured().loading()">
-                            charguing...
+                            Loading...
                         </div>
                         <div data-bind="ifnot : selectedManufactured().loading()">
                             <select data-bind="options: selectedManufactured().manufacturerModels(), optionsText: 'name', optionsCaption : 'Select Model',  value: selectedManufacturedModel, event: {change: selectManufacturerModel}">
