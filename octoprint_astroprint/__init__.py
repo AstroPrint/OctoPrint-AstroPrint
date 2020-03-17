@@ -29,7 +29,10 @@ from octoprint.server import admin_permission
 #import octoprint.access.groups as groups
 #admin_permission = groups.GroupPermission(groups.ADMIN_GROUP)
 from octoprint.settings import valid_boolean_trues
-from octoprint.access.users import SessionUser
+
+from octoprint.users import SessionUser
+#When SessionUser from octoprint.users is completly deprecated in future verions, use instead:
+#from octoprint.access.users import SessionUser
 from octoprint.filemanager.destinations import FileDestinations
 from octoprint.events import Events
 
