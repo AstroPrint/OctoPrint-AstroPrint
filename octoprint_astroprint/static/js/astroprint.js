@@ -1116,7 +1116,7 @@ $(function () {
                 } else {
                     self.showAstroPrintPages();
                 }
-            }, 500);
+            }, 100);
         };
 
         self.checkApiOption = function () {
@@ -1161,7 +1161,7 @@ $(function () {
 
 
         self.onStartupComplete = function () {
-            setTimeout(self.checkIsLoggedOnConnect(), 100);
+            setTimeout(self.checkIsLoggedOnConnect(), 1000);
         }
 
         self.moveToApi = function (){
