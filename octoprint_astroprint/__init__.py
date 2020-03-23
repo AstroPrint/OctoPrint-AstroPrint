@@ -482,7 +482,6 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 		except Exception as e:
 			self._logger.error(e, exc_info=True)
 			raise e
-			return jsonify({'error': "Internal server error"}), 500, {'ContentType':'application/json'}
 
 	@octoprint.plugin.BlueprintPlugin.route("/changename", methods=["POST"])
 	@admin_permission.require(403)
