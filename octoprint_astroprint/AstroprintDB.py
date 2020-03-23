@@ -21,7 +21,7 @@ class AstroprintDB():
 		self.getPrintFiles()
 
 		self.infoUser = os.path.join(dataFolder,"user.yaml")
-		self.user = {}
+		self.user = None
 		self.getUser()
 
 	def saveUser(self, user):

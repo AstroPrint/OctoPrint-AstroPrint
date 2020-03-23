@@ -82,7 +82,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 	##~~ SettingsPlugin mixin
 
 	def initialize(self):
-		self.user = {}
+		self.user = None
 		self.designs = None
 		self.db = None
 		self.astroprintCloud = None
@@ -471,12 +471,17 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 	@octoprint.plugin.BlueprintPlugin.route("/initialstate", methods=["GET"])
 	@admin_permission.require(403)
 	def initialstate(self):
-		return jsonify({
-					"user" : {"name" : self.user['name'], "email" : self.user['email']} if self.user else False,
-					"connected" : True if self.cameraManager.cameraActive else False,
+		try:
+			return jsonify({
+					"user" : {"name" : self.user['name'], "email" : self.user['email']} if self.user else None,
+					"connected" : self.cameraManager.cameraActive if self.cameraManager else None,
 					"can_print" : True if self._printer.is_operational() and not (self._printer.is_paused() or self._printer.is_printing()) else False,
 					"boxrouter_status" : self.astroprintCloud.bm.status if self.astroprintCloud and self.astroprintCloud.bm else "disconnected"
 					}), 200, {'ContentType':'application/json'}
+
+		except Exception as e:
+			self._logger.error(e, exc_info=True)
+			raise e
 
 	@octoprint.plugin.BlueprintPlugin.route("/changename", methods=["POST"])
 	@admin_permission.require(403)
