@@ -222,7 +222,7 @@ class PrinterCommandHandler(object):
 		if pic is not None:
 			done({
 				'success': True,
-				'image_data': base64.b64encode(pic)
+				'image_data': base64.b64encode(pic).decode()
 			})
 		else:
 			done({
