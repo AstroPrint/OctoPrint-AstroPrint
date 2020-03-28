@@ -8,6 +8,7 @@ __copyright__ = "Copyright (C) 2017-2020 3DaGoGo, Inc - Released under terms of 
 import os
 import yaml
 import copy
+import codecs
 
 class AstroprintDB():
 
@@ -33,8 +34,8 @@ class AstroprintDB():
 			user['orgId'] = encrypt(user['orgId']) if user['orgId'] else None
 			user['groupId'] = encrypt(user['groupId']) if user['groupId'] else None
 
-		with open(self.infoUser, "wb") as infoFile:
-			yaml.safe_dump({"user" : user}, infoFile, default_flow_style=False, indent="    ", allow_unicode=True)
+		with open(self.infoUser, "w") as infoFile:
+			yaml.safe_dump({"user" : user}, infoFile, default_flow_style=False, indent=4, allow_unicode=True)
 
 		self.plugin.user = self.user
 
@@ -128,7 +129,7 @@ class AstroprintPrintFile():
 		self.renderedImage = renderedImage
 
 def encrypt(s):
-    return s.encode('rot-13')
+    return codecs.encode(s, 'rot-13')
 
 def decrypt(s):
-    return s.encode('rot-13')
+    return codecs.encode(s, 'rot-13')
