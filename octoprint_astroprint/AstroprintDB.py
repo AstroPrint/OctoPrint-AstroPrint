@@ -90,8 +90,8 @@ class AstroprintDB():
 
 	def savePrintFiles(self, printFiles):
 		self.printFiles = printFiles
-		with open(self.infoPrintFiles, "wb") as infoFile:
-			yaml.safe_dump(printFiles, infoFile, default_flow_style=False, indent="    ", allow_unicode=True)
+		with open(self.infoPrintFiles, "w") as infoFile:
+			yaml.safe_dump(printFiles, infoFile, default_flow_style=False, indent=4, allow_unicode=True)
 		self.plugin.printFiles = self.printFiles
 
 	def savePrintFile(self, printFile):
