@@ -97,7 +97,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 			self.onLogout()
 
 		def logInHandler(sender, **kwargs):
-			for key, value in kwargs.iteritems():
+			for key, value in kwargs.items():
 				if isinstance(value, SessionUser):
 					self.onLogin()
 
