@@ -9,7 +9,11 @@ import requests
 import threading
 import os
 
-from Queue import Queue
+## Python2/3 compatibile import
+try: 
+	from Queue import Queue
+except ImportError:
+	import queue import Queue
 
 from flask import request
 
