@@ -13,7 +13,7 @@ import os
 try: 
 	from Queue import Queue
 except ImportError:
-	import queue import Queue
+	from queue import Queue
 
 from flask import request
 
