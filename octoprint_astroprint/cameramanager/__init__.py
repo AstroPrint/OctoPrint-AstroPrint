@@ -10,7 +10,12 @@ import requests
 import traceback
 import warnings
 
-from StringIO import StringIO
+## Python2/3 compatibile import
+try:
+	from StringIO import StringIO 
+except ImportError:
+	from io import StringIO
+
 from threading import Event
 
 
