@@ -708,11 +708,10 @@ $(function () {
             if (ap_access_key){
               var currentUrl = window.location.href.split('?')[0];
               currentUrl = window.location.href.split('#')[0];
-              currentUrl = encodeURI(currentUrl);
-              var url = astroprint_variables.appSite + "/authorize" +
-                  "?client_id=" + astroprint_variables.appId +
-                  "&redirect_uri=" + currentUrl +
-                  "&scope=" + encodeURI("profile:read project:read design:read design:download print-file:read print-file:download print-job:read device:connect device:update device:read")+
+              var url = astroprint_variables.appSite + "/authorize?" +
+                  "client_id=" + astroprint_variables.appId +
+                  "&redirect_uri=" + encodeURIComponent(currentUrl) +
+                  "&scope=" + encodeURIComponent("profile:read project:read design:read design:download print-file:read print-file:download print-job:read device:connect device:update device:read") +
                   "&state="+ap_access_key+
                   "&response_type=code";
               location.href = url;
