@@ -706,9 +706,10 @@ $(function () {
         self.authorizeAstroprint = function () {
             var ap_access_key = self.access_key()
             if (ap_access_key){
-              var url = astroprint_variables.appSite + "/authorize?" +
+                var currentUrl = window.location.href.split('?')[0]
+                var url = astroprint_variables.appSite + "/authorize?" +
                   "client_id=" + astroprint_variables.appId +
-                  "&redirect_uri=" + encodeURIComponent(window.location.href) +
+                  "&redirect_uri=" + encodeURIComponent(currentUrl) +
                   "&scope=" + encodeURIComponent("profile:read project:read design:read design:download print-file:read print-file:download print-job:read device:connect device:update device:read") +
                   "&state="+ap_access_key+
                   "&response_type=code";
