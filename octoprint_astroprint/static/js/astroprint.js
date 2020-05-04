@@ -706,7 +706,7 @@ $(function () {
         self.authorizeAstroprint = function () {
             var ap_access_key = self.access_key()
             if (ap_access_key){
-                var currentUrl = window.location.href.split('?')[0]
+                var currentUrl = window.location.href.split('#')[0].split('?')[0];
                 var url = astroprint_variables.appSite + "/authorize?" +
                   "client_id=" + astroprint_variables.appId +
                   "&redirect_uri=" + encodeURIComponent(currentUrl) +
@@ -724,7 +724,7 @@ $(function () {
         }
 
         self.loginAstroprint = function (accessCode, apAccessKey) {
-            var currentUrl = window.location.href.split('?')[0];
+            var currentUrl = window.location.href.split('#')[0].split('?')[0];
             return $.ajax({
                 type: "POST",
                 contentType: "application/json; charset=utf-8",
