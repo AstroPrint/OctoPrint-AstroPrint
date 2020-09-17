@@ -310,10 +310,11 @@ class AstroprintCloud():
 		self.bm.boxrouter_disconnect()
 
 	def sendCurrentData(self):
-
+		printer = self.plugin.get_printer()
 		payload = {
-			'operational': self.plugin.get_printer().is_operational(),
-			'printing': self.plugin.get_printer().is_paused() or self.plugin._printer.is_printing(),
+			'operational': printer.is_operational(),
+			'printing': printer.is_paused() or printer.is_printing(),
+			'ready_to_print': printer.is_operational() and not printer.is_printing() and not printer.is_paused() and self.plugin.isBedClear,
 			'paused': self.plugin.get_printer().is_paused(),
 			'camera': True, #self.plugin.cameraManager.cameraActive
 			'heatingUp': self.plugin.printerIsHeating(),
