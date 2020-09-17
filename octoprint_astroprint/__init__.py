@@ -92,6 +92,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 		self.groupId = None
 		self.orgId = None
 		self._boxId = None
+		self._bed_clear = True
 
 		def logOutHandler(sender, **kwargs):
 			self.onLogout()
@@ -125,6 +126,16 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 					f.write(self._boxId)
 
 		return self._boxId
+
+	@property
+	def capabilities(self):
+		capabilities = ['remotePrint',     	# Indicates whether this device supports starting a print job remotely
+						'multiExtruders',  	# Support for multiple extruders
+						'allowPrintFile',  	# Support for printing a printfile not belonging to any design
+						'acceptPrintJobId', # Accept created print job from cloud,
+						'cleanState'		# Support bed not clean state
+						]
+		return capabilities
 
 	def on_after_startup(self):
 		self.register_printer_listener()
@@ -164,6 +175,19 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 	def get_printer(self):
 		return self._printer
 
+	@property
+	def isBedClear(self, clear):
+		return self._bed_clear
+
+	def set_bed_clear(self, clear)
+		if clear != self._bed_clear:
+		self._bed_clear = clear
+		self._settings.set(['bed_clear'], name)
+		self._settings.save()
+		self.send_event("bedClear", clear)
+		##if(cloud, etc): #send
+		##	TODO
+
 	def get_printer_listener(self):
 		return self._printerListener
 
@@ -195,6 +219,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 
 	def get_settings_defaults(self):
 
+		bed_clear = True
 		appSite ="https://cloud.astroprint.com"
 		appId="c4f4a98519194176842567680239a4c3"
 		apiHost="https://api.astroprint.com/v2"
@@ -351,6 +376,8 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 			self.send_event("canPrint", True)
 
 		elif event == Events.PRINT_STARTED:
+			self.set_bed_clear(False)
+			self.send_event("bedClear", False)
 			self.send_event("canPrint", False)
 			if self.user:
 				self.astroprintCloud.printStarted(payload['name'], payload['path'])
@@ -608,10 +635,12 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 				'filament' : self._settings.get(["filament"]),
 				'material': None,
 				'operational': self._printer.is_operational(),
+				'ready_to_print': self._printer.is_operational() and not self._printer.is_printing() and not self._printer.is_paused() and self.isBedClear,
 				'paused': self._printer.is_paused(),
 				'camera': True, #self.cameraManager.cameraActive,
 				'remotePrint': True,
-				'capabilities': ['remotePrint', 'multiExtruders', 'allowPrintFile', 'acceptPrintJobId'] + self.cameraManager.capabilities
+				'capabilities': self.capabilities
+								+ self.cameraManager.capabilities
 			}),
 			mimetype= 'application/json'
 		)
