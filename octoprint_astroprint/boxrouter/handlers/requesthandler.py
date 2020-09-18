@@ -88,9 +88,6 @@ class RequestHandler(object):
 	def printerCommand(self, data, clientId, done):
 		self._handleCommandGroup(PrinterCommandHandler, data, clientId, done, self.plugin)
 
-	def set_bed_clear(self, clear, _, done):
-		self.plugin.set_bed_clear(clear)
-		done(None)
 
 	def printCapture(self, data, clientId, done):
 		freq = data['freq']
@@ -234,3 +231,7 @@ class PrinterCommandHandler(object):
 				'success': False,
 				'image_data': ''
 			})
+
+	def set_bed_clear(self, clear, _, done):
+		self.plugin.set_bed_clear(clear)
+		done(None)
