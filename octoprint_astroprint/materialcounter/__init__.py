@@ -51,7 +51,7 @@ class MaterialCounter(object):
 			return consumedFilament
 
 		else:
-			return self._consumedFilament
+			return { k: max(v,0) for k, v in self._consumedFilament.items() } #It can be negative because of retraction but we can't "consume" negative filament
 
 	@property
 	def totalConsumedFilament(self):
@@ -122,14 +122,14 @@ class MaterialCounter(object):
 					#reportExtrusion
 					length = float(match.group(1))
 					if self._extrusionMode == self.EXTRUSION_MODE_RELATIVE:
-						if length > 0: #never report retractions
-							self._consumedFilament[self._activeTool] += length
+						#if length > 0: #never report retractions
+						self._consumedFilament[self._activeTool] += length
 
 					else: # EXTRUSION_MODE_ABSOLUTE
 						tool = self._activeTool
 
-						if length > self._lastExtrusion[tool]: #never report retractions
-							self._lastExtrusion[tool] = length
+						#if length > self._lastExtrusion[tool]: #never report retractions
+						self._lastExtrusion[tool] = length
 
 				except ValueError:
 					pass
@@ -151,8 +151,3 @@ class MaterialCounter(object):
 	# In Marlin G91 and G90 also change the relative nature of extrusion
 	_gcode_G90 = _gcode_M82 #Set Absolute
 	_gcode_G91 = _gcode_M83 #Set Relative
-
-
-
-
-
