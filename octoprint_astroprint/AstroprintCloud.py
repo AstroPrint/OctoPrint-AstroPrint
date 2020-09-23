@@ -45,6 +45,7 @@ class AstroprintCloud():
 		self.plugin.get_printer_listener().astroprintCloud = self
 		self.statePayload = None
 		self.printJobData = None
+		self._logger.info("CLEANBED: [%s]" % self.plugin.isBedClear)
 		if self.plugin.user:
 			self._logger.info("Found stored AstroPrint User [%s]" % self.plugin.user['name'])
 			self.refresh()
@@ -314,7 +315,7 @@ class AstroprintCloud():
 		payload = {
 			'operational': printer.is_operational(),
 			'printing': printer.is_paused() or printer.is_printing(),
-			'ready_to_print': printer.is_operational() and not printer.is_printing() and not printer.is_paused() and self.plugin.isBedClear,
+			'ready_to_print': self.plugin.isBedClear and printer.is_operational() and not printer.is_printing() and not printer.is_paused(),
 			'paused': self.plugin.get_printer().is_paused(),
 			'camera': True, #self.plugin.cameraManager.cameraActive
 			'heatingUp': self.plugin.printerIsHeating(),

@@ -92,7 +92,10 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 		self.groupId = None
 		self.orgId = None
 		self._boxId = None
-		self._bed_clear = self._settings.get(['clearBed'])
+		if self._settings.get(['clearBed']) == False:
+			self._bed_clear = self._settings.get(['clearBed'])
+		else :
+			self._bed_clear = True
 
 		def logOutHandler(sender, **kwargs):
 			self.onLogout()
@@ -184,7 +187,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 			self._bed_clear = clear
 			self._settings.set(['bedClear'], clear)
 			self._settings.save()
-			self.send_event("bedClear", clear)
+			self.send_event("bedclear", clear)
 			if sendUpdate and self.astroprintCloud and self.astroprintCloud.bm:
 				self.astroprintCloud.sendCurrentData()
 
@@ -353,12 +356,6 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 
 		elif event in cameraFailEvents:
 			self.cameraManager.cameraError()
-
-		elif event == Events.PRINTER_STATE_CHANGED:
-			self._logger.info("PRINTER_STATE_CHANGED")
-			self._logger.info(payload)
-			self._logger.info(payload['state_id'])
-			self._logger.info(payload['state_string'])
 
 		elif event == Events.FILE_REMOVED:
 			if payload['storage'] == 'local':
@@ -641,13 +638,13 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 			json.dumps({
 				'id': self.boxId,
 				'name': self._settings.get(["boxName"]),
-				'printing': self._printer.is_printing(),
+				'printing': self._printer.is_printing() or self._printer.is_paused(),
 				'fileName': fileName,
 				'printerModel': self._settings.get(["printerModel"]) if self._settings.get(['printerModel'])['id']  else None,
 				'filament' : self._settings.get(["filament"]),
 				'material': None,
 				'operational': self._printer.is_operational(),
-				'ready_to_print': self._printer.is_operational() and not self._printer.is_printing() and not self._printer.is_paused() and self.isBedClear,
+				'ready_to_print': self.isBedClear and self._printer.is_operational() and not (self._printer.is_printing() or self._printer.is_paused()),
 				'paused': self._printer.is_paused(),
 				'camera': True, #self.cameraManager.cameraActive,
 				'remotePrint': True,

@@ -44,7 +44,7 @@ class RequestHandler(object):
 			'printing': self._printer.is_printing() or self._printer.is_paused(),
 			'heatingUp': self.plugin.printerIsHeating(),
 			'operational': self._printer.is_operational(),
-			'ready_to_print': self._printer.is_operational() and not self._printer.is_printing() and not self._printer.is_paused() and self.plugin.isBedClear,
+			'ready_to_print': self.plugin.isBedClear and self._printer.is_operational() and not (self._printer.is_printing() or self._printer.is_paused()),
 			'paused': self._printer.is_paused(),
 			'camera': True, #self.cameraManager.cameraActive,
 			'filament' : self._settings.get(["filament"]),

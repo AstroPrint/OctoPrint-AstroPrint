@@ -30,6 +30,30 @@ $(function () {
         self.printerModel = ko.observable(astroprint_variables.printerModel)
         self.cacheBoxName = ko.observable(self.boxName());
 
+
+        //Clear bed
+        self.clearBed = ko.observable(astroprint_variables.clearBed);
+        self.clearingBed = ko.observable(false);
+        self.clearBedDialog = $("#clearBedModal");
+        self.setbedclear = function () {
+            self.clearingBed = ko.observable(true)
+            $.ajax({
+                type: "POST",
+                contentType: "application/json; charset=utf-8",
+                url: PLUGIN_BASEURL + "astroprint/clearbed",
+                dataType: "json",
+                success: function () {
+                    console.log("success clearing bed")
+                    self.clearingBed = ko.observable(false)
+                    self.clearBedDialog.modal('hide')
+                },
+                error: function () {
+                    self.clearingBed = ko.observable(false)
+                    console.error("Error cleaning bed");
+                },
+            });
+        }
+
         //filter Designs
         self.filteredDesigns = ko.computed(function () {
             if (!self.filter()) {
@@ -575,6 +599,9 @@ $(function () {
                             self.userLoggedOut(logOutTries);
                         }
                         break;
+                    case "bedclear":
+                        self.clearBed(message.data)
+                        break;
                     case "astroPrintUserLoggedOut":
                         if(self.astroprintUser()){
                             self.astroprintUser(false);
@@ -1026,6 +1053,14 @@ $(function () {
 
         self.printPrintFile = function (printFile)
         {
+            if (!self.clearBed()){
+                new PNotify({
+                    title: "Confirm that print platform is clean",
+                    text: "The controller can’t start a new print job until you confirm that the platform is clean.",
+                    type: "error"
+                });
+                return
+            }
             self.downloadPrintFile(printFile, true)
         }
 
