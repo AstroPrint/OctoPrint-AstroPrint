@@ -43,7 +43,6 @@ $(function () {
                 url: PLUGIN_BASEURL + "astroprint/clearbed",
                 dataType: "json",
                 success: function () {
-                    console.log("success clearing bed")
                     self.clearingBed = ko.observable(false)
                     self.clearBedDialog.modal('hide')
                 },
