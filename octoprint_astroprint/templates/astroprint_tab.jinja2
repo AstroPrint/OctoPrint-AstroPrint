@@ -119,14 +119,11 @@
     </div>
     <div data-bind="if: (!clearBed())">
         <div class="warn-box">
-            <div class="column medium-12 large-9 bold">
+            <div class="column medium-12 bold">
                 <h4>
-                    <i  class="fa icon-black fa-info-circle"></i>
-                    <span>Waiting for print platform clean up</span>
+                    <i  class="fa icon-black fa-info-circle .text-danger"></i> Waiting for print platform clean up
+                    <a href="#clearBedModal" class="clear-bed pull-right" data-toggle="modal"><button class="btn btn-warning">Mark platform as clean</button></a>
                 </h4>
-            </div>
-            <div class="column medium-12 large-3">
-            <a href="#clearBedModal" class="clear-bed" data-toggle="modal"><button class="right clear-bed small bold secondary radius">Mark platform as clean</button></a>
             </div>
         </div>
     </div>
@@ -512,6 +509,6 @@
     </div>
     <div class="modal-footer">
         <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-        <button class="btn btn-primary" data-bind="click: setbedclear"><i class="fa fa-spinner fa-spin" data-bind="visible: clearingBed"></i> Mark as cleaned</button>
+        <button class="btn btn-warning" data-bind="click: setbedclear"><i class="fa fa-spinner fa-spin" data-bind="visible: clearingBed"></i> Mark as cleaned</button>
     </div>
 </div>
