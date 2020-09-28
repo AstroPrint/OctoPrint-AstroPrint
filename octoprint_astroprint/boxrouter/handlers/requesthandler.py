@@ -137,7 +137,7 @@ class RequestHandler(object):
 		else :
 			print_job_data = None
 
-		if self.plugin.isBedClear
+		if self.plugin.isBedClear :
 			state = {
 					"type": "progress",
 					"id": print_file_id,
