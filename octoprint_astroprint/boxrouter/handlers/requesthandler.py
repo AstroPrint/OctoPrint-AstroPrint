@@ -44,12 +44,13 @@ class RequestHandler(object):
 			'printing': self._printer.is_printing() or self._printer.is_paused(),
 			'heatingUp': self.plugin.printerIsHeating(),
 			'operational': self._printer.is_operational(),
+			'ready_to_print': self.plugin.isBedClear and self._printer.is_operational() and not (self._printer.is_printing() or self._printer.is_paused()),
 			'paused': self._printer.is_paused(),
 			'camera': True, #self.cameraManager.cameraActive,
 			'filament' : self._settings.get(["filament"]),
 			'printCapture': self.cameraManager.timelapseInfo,
 			'profile': profile,
-			'capabilities': ['remotePrint', 'multiExtruders', 'allowPrintFile', 'acceptPrintJobId'],
+			'capabilities': self.plugin.capabilities,
 			'tool' : self.plugin.currentTool()
 		}
 
@@ -86,6 +87,7 @@ class RequestHandler(object):
 
 	def printerCommand(self, data, clientId, done):
 		self._handleCommandGroup(PrinterCommandHandler, data, clientId, done, self.plugin)
+
 
 	def printCapture(self, data, clientId, done):
 		freq = data['freq']
@@ -135,13 +137,23 @@ class RequestHandler(object):
 		else :
 			print_job_data = None
 
-		state = {
-				"type": "progress",
-				"id": print_file_id,
-				"progress": 0
-			}
-		done(state)
-		self.astroprintCloud.printFile(print_file_id, print_job_data, True)
+		if self.plugin.isBedClear
+			state = {
+					"type": "progress",
+					"id": print_file_id,
+					"progress": 0
+				}
+			done(state)
+			self.astroprintCloud.printFile(print_file_id, print_job_data, True)
+		else:
+			state = {
+					'id': print_file_id,
+					'progress': 100,
+					'error': True,
+					'message': 'Unable to start printing',
+					'selected': False
+				}
+			done(state)
 
 	def cancel_download(self, data, clientId, done):
 		print_file_id = data['printFileId']
@@ -229,3 +241,7 @@ class PrinterCommandHandler(object):
 				'success': False,
 				'image_data': ''
 			})
+
+	def set_bed_clear(self, clear, _, done):
+		self.plugin.set_bed_clear(clear)
+		done(None)

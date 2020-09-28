@@ -110,7 +110,8 @@ class PrinterListener(PrinterCallback):
 			'paused': flags['paused'],
 			'camera': True, #self.cameraManager.cameraActive if self.cameraManager else None,
 			'heatingUp': self._plugin.printerIsHeating(),
-			'state': data['state']['text'].lower()
+			'state': data['state']['text'].lower(),
+			'ready_to_print': self._plugin.isBedClear and flags['operational'] and not flags['printing'] and not flags['paused'],
 		}
 		if self._plugin.printerIsHeating():
 			self._last_time_send = 0

@@ -92,6 +92,10 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 		self.groupId = None
 		self.orgId = None
 		self._boxId = None
+		if self._settings.get(['clearBed']) == False:
+			self._bed_clear = self._settings.get(['clearBed'])
+		else :
+			self._bed_clear = True
 
 		def logOutHandler(sender, **kwargs):
 			self.onLogout()
@@ -125,6 +129,16 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 					f.write(self._boxId)
 
 		return self._boxId
+
+	@property
+	def capabilities(self):
+		capabilities = ['remotePrint',     	# Indicates whether this device supports starting a print job remotely
+						'multiExtruders',  	# Support for multiple extruders
+						'allowPrintFile',  	# Support for printing a printfile not belonging to any design
+						'acceptPrintJobId', # Accept created print job from cloud,
+						'cleanState'		# Support bed not clean state
+						]
+		return capabilities
 
 	def on_after_startup(self):
 		self.register_printer_listener()
@@ -163,6 +177,19 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 
 	def get_printer(self):
 		return self._printer
+
+	@property
+	def isBedClear(self):
+		return self._bed_clear
+
+	def set_bed_clear(self, clear, sendUpdate = False):
+		if clear != self._bed_clear:
+			self._bed_clear = clear
+			self._settings.set(['bedClear'], clear)
+			self._settings.save()
+			self.send_event("bedclear", clear)
+			if sendUpdate and self.astroprintCloud and self.astroprintCloud.bm:
+				self.astroprintCloud.sendCurrentData()
 
 	def get_printer_listener(self):
 		return self._printerListener
@@ -229,6 +256,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 			printerModel = {'id' : None, 'name' : None},
 			filament = {'name' : None, 'color' : None},
 			camera = False,
+			bedClear = True,
 			#Adittional printer settings
 			max_nozzle_temp = 280, #only for being set by AstroPrintCloud, it wont affect octoprint settings
 			max_bed_temp = 140,
@@ -241,6 +269,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 					appiHost = self._settings.get(["apiHost"]),
 					boxName = self._settings.get(["boxName"]),
 					boxId = self.boxId,
+					clearBed = self._bed_clear,
 					printerModel = json.dumps(self._settings.get(["printerModel"])) if self._settings.get(["printerModel"])['id'] else "null",
 					filament = json.dumps(self._settings.get(["filament"])) if self._settings.get(["filament"])['name'] else "null",
 					user = json.dumps({'name': self.user['name'], 'email': self.user['email']}, cls=JsonEncoder, indent=4) if self.user else None ,
@@ -351,6 +380,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 			self.send_event("canPrint", True)
 
 		elif event == Events.PRINT_STARTED:
+			self.set_bed_clear(False)
 			self.send_event("canPrint", False)
 			if self.user:
 				self.astroprintCloud.printStarted(payload['name'], payload['path'])
@@ -429,11 +459,19 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 	def downloadPrintFile(self):
 		printFileId = request.json['printFileId']
 		printNow = request.json['printNow']
+		if(printNow and not self.isBedClear):
+			return jsonify({"error" : "Bed is not clean"}), 500, {'ContentType':'application/json'}
 		if self.astroprintCloud.printFile(printFileId, printNow) == "print":
 			return jsonify({"state" : "printing"}), 200, {'ContentType':'application/json'}
 		if self.astroprintCloud.printFile(printFileId, printNow) == "download":
 			return jsonify({"state" : "downloading"}), 200, {'ContentType':'application/json'}
 		return jsonify({'error': "Internal server error"}), 500, {'ContentType':'application/json'}
+
+	@octoprint.plugin.BlueprintPlugin.route("/clearbed", methods=["POST"])
+	@admin_permission.require(403)
+	def clearBed(self):
+		self.set_bed_clear(True, True)
+		return jsonify({"clearBed" : "True"}), 200, {'ContentType':'application/json'}
 
 	@octoprint.plugin.BlueprintPlugin.route("/canceldownload", methods=["POST"])
 	@admin_permission.require(403)
@@ -602,16 +640,18 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 			json.dumps({
 				'id': self.boxId,
 				'name': self._settings.get(["boxName"]),
-				'printing': self._printer.is_printing(),
+				'printing': self._printer.is_printing() or self._printer.is_paused(),
 				'fileName': fileName,
 				'printerModel': self._settings.get(["printerModel"]) if self._settings.get(['printerModel'])['id']  else None,
 				'filament' : self._settings.get(["filament"]),
 				'material': None,
 				'operational': self._printer.is_operational(),
+				'ready_to_print': self.isBedClear and self._printer.is_operational() and not (self._printer.is_printing() or self._printer.is_paused()),
 				'paused': self._printer.is_paused(),
 				'camera': True, #self.cameraManager.cameraActive,
 				'remotePrint': True,
-				'capabilities': ['remotePrint', 'multiExtruders', 'allowPrintFile', 'acceptPrintJobId'] + self.cameraManager.capabilities
+				'capabilities': self.capabilities
+								+ self.cameraManager.capabilities
 			}),
 			mimetype= 'application/json'
 		)

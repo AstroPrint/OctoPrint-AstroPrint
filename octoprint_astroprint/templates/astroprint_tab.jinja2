@@ -5,7 +5,8 @@
     boxName : '{{plugin_astroprint_boxName|escape}}',
     boxId : '{{plugin_astroprint_boxId|escape}}',
     printerModel : {{plugin_astroprint_printerModel}},
-    filament : {{plugin_astroprint_filament}}
+    filament : {{plugin_astroprint_filament}},
+    clearBed : {% if plugin_astroprint_clearBed %} true {% else %} false {% endif %}
   }
 </script>
 <!-- View while octoprint views are being rendered -->
@@ -113,6 +114,16 @@
                     </ul>
                 </li>
                 </ul>
+            </div>
+        </div>
+    </div>
+    <div data-bind="if: (!clearBed())">
+        <div class="warn-box">
+            <div class="column medium-12 bold">
+                <h4>
+                    <i  class="fa icon-black fa-info-circle .text-danger"></i> Waiting for print platform clean up
+                    <a href="#clearBedModal" class="clear-bed pull-right" data-toggle="modal"><button class="btn btn-warning">Mark platform as clean</button></a>
+                </h4>
             </div>
         </div>
     </div>
@@ -488,3 +499,16 @@
     </div>
 </div>
 
+<div id="clearBedModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <h3 id="myModalLabel">Confirm that print platform is clean</h3>
+    </div>
+    <div class="modal-body">
+		<p>The controller can’t start a new print job until you confirm that the platform is clean.</p>
+    </div>
+    <div class="modal-footer">
+        <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+        <button class="btn btn-warning" data-bind="click: setbedclear"><i class="fa fa-spinner fa-spin" data-bind="visible: clearingBed"></i> Mark as cleaned</button>
+    </div>
+</div>
