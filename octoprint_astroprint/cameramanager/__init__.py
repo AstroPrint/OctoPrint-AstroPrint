@@ -12,7 +12,7 @@ import warnings
 
 ## Python2/3 compatibile import
 try:
-	from StringIO import StringIO 
+	from StringIO import StringIO
 except ImportError:
 	from io import StringIO
 
@@ -167,7 +167,8 @@ class CameraManager(object):
 				if not self.cameraActive:
 					self.cameraConnected()
 				return pic
-			except:
+			except Exception as e:
+				self._logger.error("Error getting pic: %s" % e)
 				self.cameraError()
 				return None
 
@@ -255,6 +256,7 @@ class CameraManager(object):
 				try:
 					freq = float(freq)
 				except ValueError:
+					self._logger.error("Error updating timelapse: %s" % ValueError)
 					return False
 
 				# if subscribed to layer change events, unsubscribe here
