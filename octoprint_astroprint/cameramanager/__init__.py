@@ -255,8 +255,8 @@ class CameraManager(object):
 			else:
 				try:
 					freq = float(freq)
-				except ValueError:
-					self._logger.error("Error updating timelapse.")
+				except ValueError as e:
+					self._logger.error("Error updating timelapse: %s" % e)
 					return False
 
 				# if subscribed to layer change events, unsubscribe here
