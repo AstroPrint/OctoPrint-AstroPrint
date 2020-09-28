@@ -137,13 +137,23 @@ class RequestHandler(object):
 		else :
 			print_job_data = None
 
-		state = {
-				"type": "progress",
-				"id": print_file_id,
-				"progress": 0
-			}
-		done(state)
-		self.astroprintCloud.printFile(print_file_id, print_job_data, True)
+		if self.plugin.isBedClear
+			state = {
+					"type": "progress",
+					"id": print_file_id,
+					"progress": 0
+				}
+			done(state)
+			self.astroprintCloud.printFile(print_file_id, print_job_data, True)
+		else:
+			state = {
+					'id': print_file_id,
+					'progress': 100,
+					'error': True,
+					'message': 'Unable to start printing',
+					'selected': False
+				}
+			done(state)
 
 	def cancel_download(self, data, clientId, done):
 		print_file_id = data['printFileId']

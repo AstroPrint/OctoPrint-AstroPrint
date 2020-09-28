@@ -330,6 +330,8 @@ class AstroprintCloud():
 	def printFile(self, printFileId, printJobData = None, printNow = False):
 		printFile = self.db.getPrintFileById(printFileId)
 		if printNow:
+			if not self.plugin.isBedClear:
+				return None
 			self.printJobData = printJobData
 		if printFile and printNow:
 			self.printFileIsDownloaded(printFile)

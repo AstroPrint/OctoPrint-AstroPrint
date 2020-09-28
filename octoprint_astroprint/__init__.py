@@ -459,6 +459,8 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 	def downloadPrintFile(self):
 		printFileId = request.json['printFileId']
 		printNow = request.json['printNow']
+		if(printNow and not self.isBedClear):
+			return jsonify({"error" : "Bed is not clean"}), 500, {'ContentType':'application/json'}
 		if self.astroprintCloud.printFile(printFileId, printNow) == "print":
 			return jsonify({"state" : "printing"}), 200, {'ContentType':'application/json'}
 		if self.astroprintCloud.printFile(printFileId, printNow) == "download":
