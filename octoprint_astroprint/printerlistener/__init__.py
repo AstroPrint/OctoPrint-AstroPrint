@@ -126,7 +126,7 @@ class PrinterListener(PrinterCallback):
 		if data['file']['name'] and data['file']['size']:
 			renderedImage = None
 			cloudId = None
-			if data['file']['origin'] == 'local':
+			if self.astroprintCloud and data['file']['origin'] == 'local':
 				cloudPrintFile = self.astroprintCloud.db.getPrintFileByOctoPrintPath(data['file']['path'])
 				if cloudPrintFile:
 					renderedImage = cloudPrintFile.renderedImage
