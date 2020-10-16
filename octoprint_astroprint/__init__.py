@@ -29,6 +29,7 @@ from octoprint.server import admin_permission
 #import octoprint.access.groups as groups
 #admin_permission = groups.GroupPermission(groups.ADMIN_GROUP)
 from octoprint.settings import valid_boolean_trues
+import octoprint_client
 
 from octoprint.users import SessionUser
 #When SessionUser from octoprint.users is completly deprecated in future verions, use instead:
@@ -140,7 +141,8 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 						]
 		return capabilities
 
-	def on_after_startup(self):
+	def on_startup(self, host, port, *args, **kwargs):
+		self._logger.info("Starting AstoPrint Plugin %" % self._plugin_version)
 		self.register_printer_listener()
 		self.db = AstroprintDB(self)
 
@@ -159,6 +161,8 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 			self.astroprintCloud.connectBoxrouter()
 		self.cameraManager.astroprintCloud = self.astroprintCloud
 		self.materialCounter = MaterialCounter(self)
+		baseurl = octoprint_client.build_base_url(host, port)
+		self._logger.info("AstoPrint Plugin started, avalible in %s" % baseurl )
 
 	def onLogout(self):
 		self.send_event("userLoggedOut", True)
