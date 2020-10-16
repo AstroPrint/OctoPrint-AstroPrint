@@ -142,7 +142,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 		return capabilities
 
 	def on_startup(self, host, port, *args, **kwargs):
-		self._logger.info("Starting AstoPrint Plugin %" % self._plugin_version)
+		self._logger.info("Starting AstoPrint Plugin")
 		self.register_printer_listener()
 		self.db = AstroprintDB(self)
 
