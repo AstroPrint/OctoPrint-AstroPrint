@@ -29,6 +29,7 @@ from octoprint.server import admin_permission
 #import octoprint.access.groups as groups
 #admin_permission = groups.GroupPermission(groups.ADMIN_GROUP)
 from octoprint.settings import valid_boolean_trues
+import octoprint_client
 
 from octoprint.users import SessionUser
 #When SessionUser from octoprint.users is completly deprecated in future verions, use instead:
@@ -140,7 +141,8 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 						]
 		return capabilities
 
-	def on_after_startup(self):
+	def on_startup(self, host, port, *args, **kwargs):
+		self._logger.info("Starting AstoPrint Plugin")
 		self.register_printer_listener()
 		self.db = AstroprintDB(self)
 
@@ -159,6 +161,8 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 			self.astroprintCloud.connectBoxrouter()
 		self.cameraManager.astroprintCloud = self.astroprintCloud
 		self.materialCounter = MaterialCounter(self)
+		baseurl = octoprint_client.build_base_url(host, port)
+		self._logger.info("AstoPrint Plugin started, avalible in %s" % baseurl )
 
 	def onLogout(self):
 		self.send_event("userLoggedOut", True)
@@ -366,6 +370,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 
 		elif event == Events.PRINT_CANCELLED or event == Events.PRINT_FAILED:
 			self.send_event("canPrint", True)
+			self.set_bed_clear(False)
 			if self.user and self.astroprintCloud.currentPrintingJob:
 				self.astroprintCloud.updatePrintJob("failed", self.materialCounter.totalConsumedFilament)
 			self.astroprintCloud.currentPrintingJob = None
@@ -373,6 +378,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 			self._analyzed_job_layers = None
 
 		elif event == Events.PRINT_DONE:
+			self.set_bed_clear(False)
 			if self.user and self.astroprintCloud.currentPrintingJob:
 				self.astroprintCloud.updatePrintJob("success", self.materialCounter.totalConsumedFilament)
 			self.astroprintCloud.currentPrintingJob = None
@@ -380,7 +386,6 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 			self.send_event("canPrint", True)
 
 		elif event == Events.PRINT_STARTED:
-			self.set_bed_clear(False)
 			self.send_event("canPrint", False)
 			if self.user:
 				self.astroprintCloud.printStarted(payload['name'], payload['path'])
