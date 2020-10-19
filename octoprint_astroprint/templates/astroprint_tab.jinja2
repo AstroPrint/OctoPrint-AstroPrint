@@ -6,7 +6,7 @@
     boxId : '{{plugin_astroprint_boxId|escape}}',
     printerModel : {{plugin_astroprint_printerModel}},
     filament : {{plugin_astroprint_filament}},
-    clearBed : {% if plugin_astroprint_clearBed %} true {% else %} false {% endif %}
+    clearBed : {% if plugin_astroprint_clearBed == true%} true {% else %} false {% endif %}
   }
 </script>
 <!-- View while octoprint views are being rendered -->

@@ -370,6 +370,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 
 		elif event == Events.PRINT_CANCELLED or event == Events.PRINT_FAILED:
 			self.send_event("canPrint", True)
+			self.set_bed_clear(False)
 			if self.user and self.astroprintCloud.currentPrintingJob:
 				self.astroprintCloud.updatePrintJob("failed", self.materialCounter.totalConsumedFilament)
 			self.astroprintCloud.currentPrintingJob = None
@@ -377,6 +378,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 			self._analyzed_job_layers = None
 
 		elif event == Events.PRINT_DONE:
+			self.set_bed_clear(False)
 			if self.user and self.astroprintCloud.currentPrintingJob:
 				self.astroprintCloud.updatePrintJob("success", self.materialCounter.totalConsumedFilament)
 			self.astroprintCloud.currentPrintingJob = None
@@ -384,7 +386,6 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 			self.send_event("canPrint", True)
 
 		elif event == Events.PRINT_STARTED:
-			self.set_bed_clear(False)
 			self.send_event("canPrint", False)
 			if self.user:
 				self.astroprintCloud.printStarted(payload['name'], payload['path'])
