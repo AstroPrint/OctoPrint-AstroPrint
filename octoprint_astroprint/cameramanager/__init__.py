@@ -168,7 +168,7 @@ class CameraManager(object):
 					self.cameraConnected()
 				return pic
 			except Exception as e:
-				self._logger.error("Error getting pic: %s" % e)
+				self._logger.exception("Error getting pic: %s" % e)
 				self.cameraError()
 				return None
 
