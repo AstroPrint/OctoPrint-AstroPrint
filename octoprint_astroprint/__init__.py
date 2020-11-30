@@ -136,15 +136,18 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 		capabilities = ['remotePrint',     	# Indicates whether this device supports starting a print job remotely
 						'multiExtruders',  	# Support for multiple extruders
 						'allowPrintFile',  	# Support for printing a printfile not belonging to any design
-						'acceptPrintJobId', # Accept created print job from cloud,
-						'cleanState'		# Support bed not clean state
+						'acceptPrintJobId' # Accept created print job from cloud,
 						]
+		if self._settings.get(["check_clear_bed"]) :
+			capabilities.append('cleanState') # Support bed not clean state
 		return capabilities
 
 	def on_startup(self, host, port, *args, **kwargs):
 		self._logger.info("Starting AstoPrint Plugin")
 		self.register_printer_listener()
 		self.db = AstroprintDB(self)
+		if not self._settings.get(['check_clear_bed']):
+				self.set_bed_clear(True)
 
 		## Move old mysql database data to new yaml file for logged users
 		oldDbFile = os.path.join(self.get_plugin_data_folder(),"octoprint_astroprint.db")
@@ -184,7 +187,10 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 
 	@property
 	def isBedClear(self):
-		return self._bed_clear
+		if self._settings.get(['check_clear_bed']):
+			return self._bed_clear
+		else:
+			return True
 
 	def set_bed_clear(self, clear, sendUpdate = False):
 		if clear != self._bed_clear:
@@ -261,6 +267,7 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 			filament = {'name' : None, 'color' : None},
 			camera = False,
 			bedClear = True,
+			check_clear_bed = True,
 			#Adittional printer settings
 			max_nozzle_temp = 280, #only for being set by AstroPrintCloud, it wont affect octoprint settings
 			max_bed_temp = 140,
@@ -370,7 +377,8 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 
 		elif event == Events.PRINT_CANCELLED or event == Events.PRINT_FAILED:
 			self.send_event("canPrint", True)
-			self.set_bed_clear(False)
+			if self._settings.get(['check_clear_bed']):
+				self.set_bed_clear(False)
 			if self.user and self.astroprintCloud.currentPrintingJob:
 				self.astroprintCloud.updatePrintJob("failed", self.materialCounter.totalConsumedFilament)
 			self.astroprintCloud.currentPrintingJob = None
@@ -378,7 +386,8 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 			self._analyzed_job_layers = None
 
 		elif event == Events.PRINT_DONE:
-			self.set_bed_clear(False)
+			if self._settings.get(['check_clear_bed']):
+				self.set_bed_clear(False)
 			if self.user and self.astroprintCloud.currentPrintingJob:
 				self.astroprintCloud.updatePrintJob("success", self.materialCounter.totalConsumedFilament)
 			self.astroprintCloud.currentPrintingJob = None

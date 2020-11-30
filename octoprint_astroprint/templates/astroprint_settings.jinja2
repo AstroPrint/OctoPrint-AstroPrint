@@ -75,6 +75,13 @@
                     <span class="add-on">°C</span>
                 </div>
             </div>
+            <div>
+                <label>Confirm bed clear: </label>
+                <label class="switch">
+                    <input type="checkbox"  data-bind="checked: settings.settings.plugins.astroprint.check_clear_bed">
+                    <span class="slider round"></span>
+                </label>
+            </div>
         </div>
         <div data-bind="ifnot: settings.settings.api.allowCrossOrigin">
             <h3>Remote Control Options</h3>

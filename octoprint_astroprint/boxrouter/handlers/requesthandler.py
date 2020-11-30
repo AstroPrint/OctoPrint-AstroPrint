@@ -243,5 +243,6 @@ class PrinterCommandHandler(object):
 			})
 
 	def set_bed_clear(self, clear, _, done):
-		self.plugin.set_bed_clear(clear)
+		if self._settings.get(['check_clear_bed']):
+			self.plugin.set_bed_clear(clear)
 		done(None)
