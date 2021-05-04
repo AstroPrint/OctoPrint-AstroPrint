@@ -75,6 +75,7 @@ class RequestHandler(object):
 			}
 			state['progress'] =  self._printerListener.get_progress()
 
+		self.astroprintCloud.sendCurrentData()
 
 		done(state)
 
@@ -132,7 +133,7 @@ class RequestHandler(object):
 	def print_file(self, data, clientId, done):
 		print_file_id = data['printFileId']
 
-		if 'printJobId' in data :
+		if 'printJobId' in data and data['printJobId']:
 			print_job_data = {'print_job_id' : data['printJobId'], 'print_file' : print_file_id}
 		else :
 			print_job_data = None
