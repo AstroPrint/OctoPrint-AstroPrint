@@ -476,7 +476,7 @@ class AstroprintCloud():
 			else:
 				isBeingPrinted = False
 				self.printJobData = None
-		self.bm.triggerEvent('onDownloadComplete', {"id": printFile.printFileId, "isBeingPrinted": isBeingPrinted})
+		self.bm.triggerEvent('onDownloadComplete', {"id": printFile.printFileId, "isBeingPrinted": isBeingPrinted, 'printjob_id' : self.printJobData})
 
 	def getDesigns(self):
 		try:
