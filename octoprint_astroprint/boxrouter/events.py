@@ -56,6 +56,8 @@ class EventSender(object):
 				'progress': 100,
 				'selected': True
 			}
+			if data['printjob_id']:
+				payload['printjob_id'] = data['printjob_id']
 		else :
 			payload = {
 				'id': data['id'],
