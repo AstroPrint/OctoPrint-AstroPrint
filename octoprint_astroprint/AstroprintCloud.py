@@ -277,7 +277,7 @@ class AstroprintCloud():
 		finally:
 			if self.sendJobInfo:
 				self.sendJobInfo = False
-				self.bm.triggerEvent('onDownloadComplete', {"id": print_file_id, "isBeingPrinted": True, 'printjob_id' : self.printJobData})
+				self.bm.triggerEvent('onDownloadComplete', {"id": print_file_id, "isBeingPrinted": True, 'printjob_id' : self.currentPrintingJob})
 
 	def updatePrintJob(self, status, totalConsumedFilament = None):
 		try:
