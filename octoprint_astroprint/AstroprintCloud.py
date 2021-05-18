@@ -45,6 +45,7 @@ class AstroprintCloud():
 		self.plugin.get_printer_listener().astroprintCloud = self
 		self.statePayload = None
 		self.printJobData = None
+		self.sendJobInfo = False
 		self._logger.info("CLEANBED: [%s]" % self.plugin.isBedClear)
 		if self.plugin.user:
 			self._logger.info("Found stored AstroPrint User [%s]" % self.plugin.user['name'])
@@ -274,7 +275,8 @@ class AstroprintCloud():
 		except requests.exceptions.RequestException as e:
 			self._logger.error("Failed to send print_job request: %s" % e)
 		finally:
-			if self.printFileDownloaded:
+			if self.sendJobInfo:
+				self.sendJobInfo = False
 				self.bm.triggerEvent('onDownloadComplete', {"id": print_file_id, "isBeingPrinted": True, 'printjob_id' : self.printJobData})
 
 	def updatePrintJob(self, status, totalConsumedFilament = None):
@@ -336,6 +338,7 @@ class AstroprintCloud():
 				return None
 			self.printJobData = printJobData
 		if printFile and printNow:
+			self.sendJobInfo = True
 			self.printFileIsDownloaded(printFile)
 			return "print"
 		else:
@@ -475,7 +478,7 @@ class AstroprintCloud():
 		else:
 			self._printer.select_file(self._file_manager.path_on_disk(FileDestinations.LOCAL, printFile.printFileName), False, True)
 			if self._printer.is_printing():
-				self.printFileDownloaded = True
+				self.sendJobInfo = True
 			else:
 				isBeingPrinted = False
 				self.printJobData = None
