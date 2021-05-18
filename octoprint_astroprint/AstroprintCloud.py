@@ -230,7 +230,6 @@ class AstroprintCloud():
 		self.plugin.astroPrintUserLoggedOut()
 
 	def printStarted(self, name, path):
-
 		print_file = self.db.getPrintFileByOctoPrintPath(path)
 		print_file_id = print_file.printFileId if print_file else None
 		print_file_name = print_file.printFileName if print_file else name
@@ -274,6 +273,9 @@ class AstroprintCloud():
 			self._logger.error("Failed to send print_job request: %s" % err.response.text)
 		except requests.exceptions.RequestException as e:
 			self._logger.error("Failed to send print_job request: %s" % e)
+		finally:
+			if self.printFileDownloaded:
+				self.printFileIsDownloaded({"id": print_file_id, "isBeingPrinted": True, 'printjob_id' : self.printJobData})
 
 	def updatePrintJob(self, status, totalConsumedFilament = None):
 		try:
@@ -469,14 +471,15 @@ class AstroprintCloud():
 		if self._printer.is_printing():
 			isBeingPrinted = False
 			self.printJobData = None
+			self.bm.triggerEvent('onDownloadComplete', {"id": printFile.printFileId, "isBeingPrinted": isBeingPrinted, 'printjob_id' : self.printJobData})
 		else:
 			self._printer.select_file(self._file_manager.path_on_disk(FileDestinations.LOCAL, printFile.printFileName), False, True)
 			if self._printer.is_printing():
-				isBeingPrinted = True
+				self.printFileDownloaded = True
 			else:
 				isBeingPrinted = False
 				self.printJobData = None
-		self.bm.triggerEvent('onDownloadComplete', {"id": printFile.printFileId, "isBeingPrinted": isBeingPrinted, 'printjob_id' : self.printJobData})
+				self.bm.triggerEvent('onDownloadComplete', {"id": printFile.printFileId, "isBeingPrinted": isBeingPrinted, 'printjob_id' : self.printJobData})
 
 	def getDesigns(self):
 		try:
