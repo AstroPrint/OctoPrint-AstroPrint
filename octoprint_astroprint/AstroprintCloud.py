@@ -275,7 +275,7 @@ class AstroprintCloud():
 			self._logger.error("Failed to send print_job request: %s" % e)
 		finally:
 			if self.printFileDownloaded:
-				self.printFileIsDownloaded({"id": print_file_id, "isBeingPrinted": True, 'printjob_id' : self.printJobData})
+				self.bm.triggerEvent('onDownloadComplete', {"id": print_file_id, "isBeingPrinted": True, 'printjob_id' : self.printJobData})
 
 	def updatePrintJob(self, status, totalConsumedFilament = None):
 		try:
