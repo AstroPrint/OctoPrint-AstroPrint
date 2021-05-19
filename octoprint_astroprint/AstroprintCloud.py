@@ -45,6 +45,7 @@ class AstroprintCloud():
 		self.plugin.get_printer_listener().astroprintCloud = self
 		self.statePayload = None
 		self.printJobData = None
+		self.sendJobInfo = False
 		self._logger.info("CLEANBED: [%s]" % self.plugin.isBedClear)
 		if self.plugin.user:
 			self._logger.info("Found stored AstroPrint User [%s]" % self.plugin.user['name'])
@@ -230,7 +231,6 @@ class AstroprintCloud():
 		self.plugin.astroPrintUserLoggedOut()
 
 	def printStarted(self, name, path):
-
 		print_file = self.db.getPrintFileByOctoPrintPath(path)
 		print_file_id = print_file.printFileId if print_file else None
 		print_file_name = print_file.printFileName if print_file else name
@@ -274,6 +274,10 @@ class AstroprintCloud():
 			self._logger.error("Failed to send print_job request: %s" % err.response.text)
 		except requests.exceptions.RequestException as e:
 			self._logger.error("Failed to send print_job request: %s" % e)
+		finally:
+			if self.sendJobInfo:
+				self.sendJobInfo = False
+				self.bm.triggerEvent('onDownloadComplete', {"id": print_file_id, "isBeingPrinted": True, 'printjob_id' : self.currentPrintingJob})
 
 	def updatePrintJob(self, status, totalConsumedFilament = None):
 		try:
@@ -334,6 +338,7 @@ class AstroprintCloud():
 				return None
 			self.printJobData = printJobData
 		if printFile and printNow:
+			self.sendJobInfo = True
 			self.printFileIsDownloaded(printFile)
 			return "print"
 		else:
@@ -469,14 +474,15 @@ class AstroprintCloud():
 		if self._printer.is_printing():
 			isBeingPrinted = False
 			self.printJobData = None
+			self.bm.triggerEvent('onDownloadComplete', {"id": printFile.printFileId, "isBeingPrinted": isBeingPrinted, 'printjob_id' : self.printJobData})
 		else:
 			self._printer.select_file(self._file_manager.path_on_disk(FileDestinations.LOCAL, printFile.printFileName), False, True)
 			if self._printer.is_printing():
-				isBeingPrinted = True
+				self.sendJobInfo = True
 			else:
 				isBeingPrinted = False
 				self.printJobData = None
-		self.bm.triggerEvent('onDownloadComplete', {"id": printFile.printFileId, "isBeingPrinted": isBeingPrinted})
+				self.bm.triggerEvent('onDownloadComplete', {"id": printFile.printFileId, "isBeingPrinted": isBeingPrinted, 'printjob_id' : self.printJobData})
 
 	def getDesigns(self):
 		try:

@@ -392,6 +392,7 @@ class AstroprintBoxRouter(object):
 				self._retryTimer = None
 				self.status = self.STATUS_CONNECTED
 				self.plugin.send_event("boxrouterStatus", self.STATUS_CONNECTED)
+				self.plugin.astroprintCloud.sendCurrentData()
 
 			return None
 

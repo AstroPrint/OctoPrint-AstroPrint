@@ -7,6 +7,33 @@
 #tab_plugin_astroprint {
     width: 100%;
 
+    .cloud-title{
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #515151;
+        margin-left: 25px;
+        font-size: 14px;
+        margin-top: 10px;
+        padding: 0 5px;
+        box-shadow: 0 3px #5e88de;
+    }
+
+
+    .edit-name{
+        border-bottom: 3px solid rgba(0, 135, 205, 0.25);
+            &:hover{
+                text-decoration: none;
+
+                i{opacity: 0.7;}
+            }
+
+            i.icon-edit{
+                font-size: 26px;
+                margin-left: 10px;
+                color: rgba(0, 135, 205, 1);
+            }
+        }
+
     .astroPrintView {
         width: 100%;
 
@@ -308,6 +335,22 @@
 }
 
 #settings_dialog{
+
+    .edit-name{
+        border-bottom: 3px solid rgba(0, 135, 205, 0.25);
+            &:hover{
+                text-decoration: none;
+
+                i{opacity: 0.7;}
+            }
+
+            i.icon-edit{
+                font-size: 26px;
+                margin-left: 10px;
+                color: rgba(0, 135, 205, 1);
+            }
+        }
+
     .control-group{
         margin-bottom: 0;
         .blink {
@@ -408,28 +451,3 @@
     }
 }
 
-.cloud-title{
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: #515151;
-    margin-left: 25px;
-    font-size: 14px;
-    margin-top: 10px;
-    padding: 0 5px;
-    box-shadow: 0 3px #5e88de;
-}
-
-.edit-name{
-border-bottom: 3px solid rgba(0, 135, 205, 0.25);
-    &:hover{
-        text-decoration: none;
-
-        i{opacity: 0.7;}
-    }
-
-    i.icon-edit{
-        font-size: 26px;
-        margin-left: 10px;
-        color: rgba(0, 135, 205, 1);
-    }
-}
