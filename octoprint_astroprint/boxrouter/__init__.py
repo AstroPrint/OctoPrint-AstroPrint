@@ -209,6 +209,7 @@ class AstroprintBoxRouter(object):
 						self.ws = AstroprintBoxRouterClient(self._address, self, self.plugin)
 						self.ws.connect()
 						self.connected = True
+						self.plugin.
 						if not self._printerListener:
 							self._printerListener = self.plugin.get_printer_listener()
 						self._printerListener.addWatcher(self)
@@ -392,6 +393,7 @@ class AstroprintBoxRouter(object):
 				self._retryTimer = None
 				self.status = self.STATUS_CONNECTED
 				self.plugin.send_event("boxrouterStatus", self.STATUS_CONNECTED)
+				self.plugin.astroprintCloud.sendCurrentData()
 
 			return None
 
