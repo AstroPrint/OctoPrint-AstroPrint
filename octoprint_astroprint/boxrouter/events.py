@@ -3,7 +3,7 @@ from __future__ import absolute_import,   unicode_literals
 
 __author__ = "AstroPrint Product Team <product@astroprint.com>"
 __license__ = 'GNU Affero General Public License http://www.gnu.org/licenses/agpl.html'
-__copyright__ = "Copyright (C) 2017-2020 3DaGoGo, Inc - Released under terms of the AGPLv3 License"
+__copyright__ = "Copyright (C) 2018-2025 PRINTANDGO AM SOLUTIONS SL - Released under terms of the AGPLv3 License"
 
 import json
 
