@@ -3,7 +3,7 @@ from __future__ import absolute_import,   unicode_literals
 
 __author__ = "AstroPrint Product Team <product@astroprint.com>"
 __license__ = "GNU Affero General Public License http://www.gnu.org/licenses/agpl.html"
-__copyright__ = "Copyright (C) 2017-2020 3DaGoGo, Inc - Released under terms of the AGPLv3 License"
+__copyright__ = "Copyright (C) 2018-2025 PRINTANDGO AM SOLUTIONS SL - Released under terms of the AGPLv3 License"
 
 import octoprint.plugin
 import json
@@ -631,9 +631,13 @@ class AstroprintPlugin(octoprint.plugin.SettingsPlugin,
 		if self.user and self.user['email'] == email and self.user['accessKey'] == accessKey and self.user['id']:
 			# only respond positively if we have an AstroPrint user and their mail AND accessKey match AND
 			# they also have a valid id
-			apiKey = self._settings.global_get(["api", "key"])
-			return jsonify(api_key=apiKey,
-								ws_token=create_ws_token(self.user['id'], apiKey))
+			if hasattr(self, "plugin_apikey"):
+				api_key = self.plugin_apikey
+			else:  # Fallback for OctoPrint versions < 1.12.0
+				api_key = self._settings.global_get(["api", "key"])
+   
+			return jsonify(api_key=api_key,
+								ws_token=create_ws_token(self.user['id'], api_key))
 
 		if not self.user:
 			abort (401)
