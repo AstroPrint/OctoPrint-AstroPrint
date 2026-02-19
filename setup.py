@@ -38,6 +38,7 @@ plugin_requires = [
   "requests-toolbelt==0.10.1",
   "Pillow",
   "urllib3<2.0.0",
+  "pybind11>=2.10",
 ]
 ### --------------------------------------------------------------------------------------------------------------------
 ### More advanced options that you usually shouldn't have to touch follow after this point
