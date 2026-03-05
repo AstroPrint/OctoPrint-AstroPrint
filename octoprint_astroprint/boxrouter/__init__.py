@@ -5,6 +5,28 @@ __author__ = "AstroPrint Product Team <product@astroprint.com>"
 __license__ = 'GNU Affero General Public License http://www.gnu.org/licenses/agpl.html'
 __copyright__ = "Copyright (C) 2018-2025 PRINTANDGO AM SOLUTIONS SL - Released under terms of the AGPLv3 License"
 
+# --- Python 3.13 compatibility patch (ws4py expects ssl.wrap_socket) ---
+import ssl
+
+if not hasattr(ssl, "wrap_socket"):
+	def _wrap_socket(sock, *args, **kwargs):
+		"""
+		Backport ssl.wrap_socket using SSLContext.wrap_socket for Python 3.13+.
+
+		ws4py still calls ssl.wrap_socket. Python 3.13 removed it.
+		We also enforce server_hostname for SNI/hostname verification.
+		"""
+		ctx = ssl.create_default_context()
+
+		# ws4py often does NOT pass server_hostname; Python requires it if check_hostname=True.
+		server_hostname = kwargs.pop("server_hostname", None) or "boxrouter.astroprint.com"
+
+		return ctx.wrap_socket(sock, server_hostname=server_hostname)
+
+	ssl.wrap_socket = _wrap_socket
+# --- End patch ---
+
+
 # singleton
 _instance = None
 
