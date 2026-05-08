@@ -35,9 +35,9 @@ plugin_license = "AGPLv3"
 # Any additional requirements besides OctoPrint should be listed here
 plugin_requires = [
   "ws4py==0.3.4",
-  "requests-toolbelt==0.10.1",
+  "requests-toolbelt>=1.0.0",
   "Pillow",
-  "urllib3<2.0.0",
+  "urllib3>=1.26.0,<3.0.0",
   "pybind11>=2.10",
 ]
 ### --------------------------------------------------------------------------------------------------------------------

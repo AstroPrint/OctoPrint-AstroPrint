@@ -11,8 +11,11 @@ import json
 import octoprint.filemanager
 from .downloadmanager import DownloadManager
 from .boxrouter import boxrouterManager
-from requests_toolbelt import MultipartEncoder
-import requests
+try:
+    from requests_toolbelt import MultipartEncoder
+except ImportError:
+    import requests_toolbelt
+    MultipartEncoder = requests_toolbelt.MultipartEncoderimport requests
 import os
 import octoprint.filemanager.util
 from octoprint.filemanager.destinations import FileDestinations
